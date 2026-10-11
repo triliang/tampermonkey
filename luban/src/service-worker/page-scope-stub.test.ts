@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PageContext } from '../shared/types';
-import { lubanRunScript } from '../shared/injected-runner';
+import { compileRunnerSource, lubanRunScript } from '../shared/injected-runner';
+import { injectScript } from './injection-dispatcher';
 import { scanCode } from './safety-scanner';
 import { generateWithFallback } from './prompt-builder';
 import {
@@ -84,11 +85,42 @@ describe('generateWithFallback · 整页暗色 stub', () => {
     expect(data.code).toBe(PAGE_DARK_MODE_STUB_CODE);
   });
 
-  it('生成阶段不触发 userScripts.execute', async () => {
-    const execute = vi.fn();
-    (globalThis as unknown as { chrome: unknown }).chrome = { userScripts: { execute } };
-    await generateWithFallback(callerStub(), pageContext(), PAGE_DARK_MODE_INTENT, 'f', 'p', () => {});
+});
+
+describe('整页暗色 · 注入时机', () => {
+  let execute: ReturnType<typeof vi.fn>;
+  let local: { get: ReturnType<typeof vi.fn>; set: ReturnType<typeof vi.fn>; _data: Record<string, unknown> };
+
+  beforeEach(() => {
+    local = {
+      _data: {},
+      get: vi.fn(async (key: string) => ({ [key]: local._data[key] })),
+      set: vi.fn(async (items: Record<string, unknown>) => Object.assign(local._data, items)),
+    };
+    execute = vi.fn().mockResolvedValue([{ result: { ok: true, timedOut: false, dirty: {} } }]);
+    (globalThis as unknown as { chrome: unknown }).chrome = {
+      storage: { local },
+      userScripts: { execute },
+    };
+  });
+
+  it('生成完成（stub + 安全扫描）不调用 userScripts.execute', async () => {
+    const data = await generateWithFallback(callerStub(), pageContext(), PAGE_DARK_MODE_INTENT, 'f', 'p', () => {});
+    const scan = scanCode(data.code, data.gmGrants);
+    expect(scan.passed).toBe(true);
     expect(execute).not.toHaveBeenCalled();
+  });
+
+  it('经 injectScript 确认运行才调用 userScripts.execute', async () => {
+    const stub = tryPageScopeStub(pageContext(), PAGE_DARK_MODE_INTENT)!;
+    await injectScript(1, 'example.com', stub.code, stub.gmGrants, {}, vi.fn());
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(execute).toHaveBeenCalledWith({
+      target: { tabId: 1 },
+      world: 'MAIN',
+      injectImmediately: true,
+      js: [{ code: compileRunnerSource(stub.code, stub.gmGrants, {}) }],
+    });
   });
 });
 
