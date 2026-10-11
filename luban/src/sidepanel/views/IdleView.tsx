@@ -7,6 +7,7 @@ interface IdleViewProps {
   picking: boolean;
   recent: ScriptMeta[];
   onStartPick: () => void;
+  onDescribePage: () => void;
   onCancelPick: () => void;
   onSelfTest: () => void;
   onRunSaved: (script: ScriptMeta) => void;
@@ -25,7 +26,7 @@ function Badge({ label, res }: { label: string; res?: LubanResponse }) {
   );
 }
 
-export function IdleView({ picking, recent, onStartPick, onCancelPick, onSelfTest, onRunSaved, diag }: IdleViewProps) {
+export function IdleView({ picking, recent, onStartPick, onDescribePage, onCancelPick, onSelfTest, onRunSaved, diag }: IdleViewProps) {
   const s = STRINGS.panel.idle;
   if (picking) {
     return (
@@ -40,6 +41,7 @@ export function IdleView({ picking, recent, onStartPick, onCancelPick, onSelfTes
       <h2>{s.heading}</h2>
       <p class="hint">{s.hint}</p>
       <Button label={s.startPick} onClick={onStartPick} variant="primary" />
+      <Button label={s.describePage} onClick={onDescribePage} />
       <h3>{s.recent}</h3>
       {recent.length === 0 ? <p class="hint">{s.recentEmpty}</p> : (
         <ul class="script-list">

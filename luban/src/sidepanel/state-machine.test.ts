@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { uiReducer, initialState, type UIState } from './state-machine';
+import { EMPTY_TARGET_ELEMENT, uiReducer, initialState, type UIState } from './state-machine';
 import type { GenerationResult, TargetElement } from '../shared/types';
 
 const element: TargetElement = {
@@ -45,6 +45,33 @@ describe('uiReducer 主链路', () => {
     s = uiReducer(s, { type: 'RUN_DONE', outcome: 'success', detail: null }); path.push(s);
     expect(s.type).toBe('RESULT');
     expect(types(path)).toEqual(['IDLE', 'PICKING', 'INTENT_INPUT', 'GENERATING', 'PREVIEW', 'RESULT']);
+  });
+});
+
+describe('整页入口', () => {
+  it('IDLE 点「描述这个页面」直达 INTENT_INPUT，不经过 PICKING', () => {
+    const s = uiReducer(initialState, { type: 'START_PAGE_DESCRIBE' });
+    expect(s.type).toBe('INTENT_INPUT');
+    if (s.type === 'INTENT_INPUT') {
+      expect(s.element).toEqual(EMPTY_TARGET_ELEMENT);
+      expect(s.intent).toBe('');
+    }
+  });
+
+  it('START_PAGE_DESCRIBE 不发送 START_PICK 等价迁移：非 IDLE 无效', () => {
+    let s = uiReducer(initialState, { type: 'START_PICK' });
+    expect(s.type).toBe('PICKING');
+    s = uiReducer(s, { type: 'START_PAGE_DESCRIBE' });
+    expect(s.type).toBe('PICKING');
+  });
+
+  it('从整页意图页仍可进入点选', () => {
+    let s = uiReducer(initialState, { type: 'START_PAGE_DESCRIBE' });
+    s = uiReducer(s, { type: 'START_PICK' });
+    expect(s.type).toBe('PICKING');
+    s = uiReducer(s, { type: 'ELEMENT_PICKED', element });
+    expect(s.type).toBe('INTENT_INPUT');
+    if (s.type === 'INTENT_INPUT') expect(s.element.tag).toBe('button');
   });
 });
 

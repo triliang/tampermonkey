@@ -2,7 +2,7 @@ import { useState } from 'preact/hooks';
 import type { ErrorAction } from '../../shared/errors';
 import type { PageContext, TargetElement } from '../../shared/types';
 import { STRINGS } from '../../shared/i18n-strings';
-import { describeOutgoingContext } from '../../service-worker/prompt-builder';
+import { describeOutgoingContext, shouldShowOutgoingElementFields } from '../../service-worker/prompt-builder';
 import { Button } from '../components/Button';
 
 interface IntentViewProps {
@@ -26,14 +26,18 @@ export function IntentView({ element, intent, error, errorActions, offline, page
   const o = s.outgoing;
   const [draft, setDraft] = useState(intent);
   const outgoing = pageContext ? describeOutgoingContext(pageContext) : null;
+  const showElementFields = outgoing ? shouldShowOutgoingElementFields(outgoing.scope) : element.tag.length > 0;
+  const scopeLabel = outgoing?.scope === 'page' ? o.scopePage : o.scopeElement;
 
   return (
     <section class="view">
       <h2>{s.heading}</h2>
-      <div class="target-summary">
-        <code>{element.tag}</code>
-        {element.selectorCandidates[0] ? <code class="sel">{element.selectorCandidates[0]}</code> : null}
-      </div>
+      {showElementFields ? (
+        <div class="target-summary">
+          <code>{element.tag}</code>
+          {element.selectorCandidates[0] ? <code class="sel">{element.selectorCandidates[0]}</code> : null}
+        </div>
+      ) : null}
       {outgoing ? (
         <div class="outgoing-context">
           <h3>{o.heading}</h3>
@@ -48,18 +52,22 @@ export function IntentView({ element, intent, error, errorActions, offline, page
             </div>
             <div class="field">
               <dt>{o.scope}</dt>
-              <dd>{o.scopeElement}</dd>
+              <dd>{scopeLabel}</dd>
             </div>
-            <div class="field">
-              <dt>{o.elementTag}</dt>
-              <dd>
-                <code>{outgoing.element.tag}</code>
-              </dd>
-            </div>
-            <div class="field">
-              <dt>{o.elementText}</dt>
-              <dd>{outgoing.element.text || '—'}</dd>
-            </div>
+            {showElementFields ? (
+              <>
+                <div class="field">
+                  <dt>{o.elementTag}</dt>
+                  <dd>
+                    <code>{outgoing.element.tag}</code>
+                  </dd>
+                </div>
+                <div class="field">
+                  <dt>{o.elementText}</dt>
+                  <dd>{outgoing.element.text || '—'}</dd>
+                </div>
+              </>
+            ) : null}
             <div class="field">
               <dt>{o.counts}</dt>
               <dd>{formatSummaryCounts(outgoing.summaryCounts)}</dd>

@@ -1,5 +1,5 @@
 import { useEffect, useReducer, useRef, useState } from 'preact/hooks';
-import { initialState, uiReducer, type RunOutcome, type UIAction, type UIState } from './state-machine';
+import { EMPTY_TARGET_ELEMENT, initialState, uiReducer, type RunOutcome, type UIAction, type UIState } from './state-machine';
 import { IdleView } from './views/IdleView';
 import { IntentView } from './views/IntentView';
 import { GeneratingView } from './views/GeneratingView';
@@ -9,7 +9,7 @@ import { sendToSW, selfTest } from './comms';
 import { makeRequestId } from '../shared/messages';
 import type { LubanMessage, LubanResponse, RegenerateContext } from '../shared/messages';
 import { PORT_NAMES, TIMING } from '../shared/constants';
-import type { InjectionResult, PageContext, ScriptMeta, TargetElement, UiSnapshot, UserScript } from '../shared/types';
+import type { InjectionResult, PageContext, ScriptMeta, UiSnapshot, UserScript } from '../shared/types';
 import { STRINGS } from '../shared/i18n-strings';
 
 interface Diag {
@@ -26,15 +26,6 @@ interface LastRun {
   intent: string;
   model: string;
 }
-
-const EMPTY_ELEMENT: TargetElement = {
-  selectorCandidates: [],
-  tag: '',
-  text: '',
-  attributes: {},
-  contextPath: '',
-  siblings: [],
-};
 
 export default function App() {
   const [state, dispatch] = useReducer(uiReducer, initialState);
@@ -199,6 +190,17 @@ export default function App() {
     }
   }
 
+  async function onDescribePage() {
+    setNotice('');
+    const r = await sendToSW<{ context: PageContext }>({ type: 'COLLECT_PAGE_CONTEXT', requestId: makeRequestId() });
+    if (!r.ok) {
+      setNotice(r.error.message);
+      return;
+    }
+    setPageContext(r.data.context);
+    go({ type: 'START_PAGE_DESCRIBE' });
+  }
+
   async function onCancelPick() {
     go({ type: 'CANCEL_PICK' });
     await sendToSW({ type: 'CANCEL_PICKER', requestId: makeRequestId() });
@@ -289,7 +291,7 @@ export default function App() {
       intent: meta.name,
       model: '',
     });
-    go({ type: 'SHOW_RESULT', outcome: shown.outcome, detail: shown.detail, element: EMPTY_ELEMENT, intent: meta.name });
+    go({ type: 'SHOW_RESULT', outcome: shown.outcome, detail: shown.detail, element: EMPTY_TARGET_ELEMENT, intent: meta.name });
   }
 
   async function onSave() {
@@ -350,6 +352,7 @@ export default function App() {
             picking={s.type === 'PICKING'}
             recent={recent}
             onStartPick={onStartPick}
+            onDescribePage={() => void onDescribePage()}
             onCancelPick={onCancelPick}
             onSelfTest={onSelfTest}
             onRunSaved={(meta) => void onRunSaved(meta)}

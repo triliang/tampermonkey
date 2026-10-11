@@ -16,7 +16,7 @@ import { getApiKey, getSettings, toProviderConfig } from '../shared/settings-sto
 import { MIMO, PORT_NAMES } from '../shared/constants';
 import { makeRequestId } from '../shared/messages';
 import { StreamKeepAlive } from './keepalive';
-import type { GenerationResult, InjectionResult } from '../shared/types';
+import type { GenerationResult, InjectionResult, PageContext } from '../shared/types';
 import contentScriptPath from '../content/index.ts?script&iife';
 
 /** 记录最近一次点击图标时授予 activeTab 的标签页（存 session，随浏览器关闭清除）。 */
@@ -81,6 +81,7 @@ async function route(msg: LubanMessage, sender: chrome.runtime.MessageSender, re
 const HANDLERS: Partial<Record<LubanMessage['type'], Handler>> = {
   PING: handlePing,
   START_PICKER: handleStartPicker,
+  COLLECT_PAGE_CONTEXT: handleCollectPageContext,
   CANCEL_PICKER: handleCancelPicker,
   ELEMENT_PICKED: handleElementPicked,
   PICK_CANCELLED: handlePickCancelled,
@@ -324,6 +325,18 @@ async function handleStartPicker(_msg: LubanMessage, _sender: chrome.runtime.Mes
   try {
     const ack = (await chrome.tabs.sendMessage(tabId, { ..._msg })) as unknown;
     respond({ ok: true, data: ack });
+  } catch (e) {
+    throw toActiveTabError(e);
+  }
+}
+
+async function handleCollectPageContext(msg: LubanMessage, _sender: chrome.runtime.MessageSender, respond: Responder): Promise<void> {
+  if (msg.type !== 'COLLECT_PAGE_CONTEXT') return;
+  const tabId = await resolveActiveTabId();
+  await ensureContentInjected(tabId);
+  try {
+    const data = (await chrome.tabs.sendMessage(tabId, msg)) as { context: PageContext };
+    respond({ ok: true, data });
   } catch (e) {
     throw toActiveTabError(e);
   }

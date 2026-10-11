@@ -11,6 +11,7 @@ export const STRINGS = {
     idle: {
       heading: '准备好帮你自动化这个页面了',
       startPick: '开始选择元素',
+      describePage: '描述这个页面',
       hint: '先在页面上点选一个你想操作的目标元素',
       restricted: '当前页面无法使用（浏览器限制）',
       recent: '最近脚本',
@@ -33,6 +34,7 @@ export const STRINGS = {
         title: '页面标题',
         scope: '范围',
         scopeElement: '选中的元素',
+        scopePage: '整个页面',
         elementTag: '元素标签',
         elementText: '元素文本',
         counts: '页面摘要数量',

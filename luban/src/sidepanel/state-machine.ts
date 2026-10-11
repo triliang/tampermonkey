@@ -14,8 +14,18 @@ export type UIState =
   | { type: 'PREVIEW'; result: GenerationResult; element: TargetElement; intent: string }
   | { type: 'RESULT'; outcome: RunOutcome; detail: unknown; element: TargetElement; intent: string };
 
+export const EMPTY_TARGET_ELEMENT: TargetElement = {
+  selectorCandidates: [],
+  tag: '',
+  text: '',
+  attributes: {},
+  contextPath: '',
+  siblings: [],
+};
+
 export type UIAction =
   | { type: 'START_PICK' }
+  | { type: 'START_PAGE_DESCRIBE' }
   | { type: 'CANCEL_PICK' }
   | { type: 'ELEMENT_PICKED'; element: TargetElement }
   | { type: 'SUBMIT_INTENT'; intent: string }
@@ -38,6 +48,11 @@ export function uiReducer(state: UIState, action: UIAction): UIState {
   switch (action.type) {
     case 'START_PICK':
       return state.type === 'IDLE' || state.type === 'INTENT_INPUT' ? { type: 'PICKING' } : state;
+
+    case 'START_PAGE_DESCRIBE':
+      return state.type === 'IDLE'
+        ? { type: 'INTENT_INPUT', element: EMPTY_TARGET_ELEMENT, intent: '' }
+        : state;
 
     case 'CANCEL_PICK':
       return state.type === 'PICKING' ? { type: 'IDLE' } : state;

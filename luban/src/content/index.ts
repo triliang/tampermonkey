@@ -5,7 +5,7 @@
 import type { ElementPickedMsg, LubanMessage, PickCancelledMsg, PongMsg } from '../shared/messages';
 import { makeRequestId } from '../shared/messages';
 import { collectPageContext } from './context-engine';
-import { startElementPicker, type PickerHandle } from './element-picker';
+import { createPickerSession } from './picker-session';
 import { runViaScriptTag } from './event-bridge';
 import { showResultToast } from './toast';
 import { ErrorLayer, makeError } from '../shared/errors';
@@ -21,12 +21,7 @@ function boot(): void {
   if (g[LOADED_FLAG]) return; // 已注入，避免重复注册
   g[LOADED_FLAG] = true;
 
-  let activePicker: PickerHandle | null = null;
-
-  function cancelActivePicker(): void {
-    activePicker?.stop();
-    activePicker = null;
-  }
+  const pickerSession = createPickerSession();
 
   chrome.runtime.onMessage.addListener((msg: LubanMessage, _sender, sendResponse) => {
     switch (msg.type) {
@@ -39,27 +34,27 @@ function boot(): void {
       case 'START_PICKER': {
         // 先回执「已就绪」证明 SP→SW→CS 通路；真正的采集结果经 ELEMENT_PICKED 单独广播。
         sendResponse({ ok: true, started: true });
-        cancelActivePicker();
-        activePicker = startElementPicker(
+        pickerSession.cancel();
+        pickerSession.start(
           (el) => {
-            activePicker = null;
             const context = collectPageContext(el);
             const picked: ElementPickedMsg = { type: 'ELEMENT_PICKED', requestId: makeRequestId(), context };
             void chrome.runtime.sendMessage(picked);
           },
           () => {
-            activePicker = null;
-            // 页面内 Esc 退出，广播让侧栏同步状态（侧栏按钮取消走 CANCEL_PICKER，这里是反向路径）。
             const cancelled: PickCancelledMsg = { type: 'PICK_CANCELLED', requestId: makeRequestId() };
             void chrome.runtime.sendMessage(cancelled);
           },
         );
         return;
       }
+      case 'COLLECT_PAGE_CONTEXT': {
+        sendResponse({ context: collectPageContext() });
+        return;
+      }
       case 'CANCEL_PICKER': {
-        // 侧栏「取消选择」按钮：之前只改侧栏自身状态，页面里的高亮/点击拦截其实还在跑，这里补上真正停止。
         sendResponse({ ok: true });
-        cancelActivePicker();
+        pickerSession.cancel();
         return;
       }
       case 'SHOW_TOAST': {

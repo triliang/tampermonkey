@@ -7,6 +7,7 @@ import type { SerializedError } from './errors';
 /** 消息类型（§3.1 全量 + PING/PONG 内部链路自检）。 */
 export type MessageType =
   | 'START_PICKER' // SidePanel → SW → Content: 启动元素选择
+  | 'COLLECT_PAGE_CONTEXT' // SidePanel → SW → Content: 整页上下文采集（不启动选择器）
   | 'CANCEL_PICKER' // SidePanel → SW → Content: 主动取消元素选择（停止监听与高亮）
   | 'ELEMENT_PICKED' // Content → SW → SidePanel: 元素已选中 + 上下文
   | 'PICK_CANCELLED' // Content → SidePanel: 页面内 Esc 取消选择，广播同步 UI 状态
@@ -37,6 +38,9 @@ interface BaseMessage {
 
 export interface StartPickerMsg extends BaseMessage {
   type: 'START_PICKER';
+}
+export interface CollectPageContextMsg extends BaseMessage {
+  type: 'COLLECT_PAGE_CONTEXT';
 }
 export interface CancelPickerMsg extends BaseMessage {
   type: 'CANCEL_PICKER';
@@ -148,6 +152,7 @@ export interface PongMsg extends BaseMessage {
 /** 全消息判别联合（发送端使用）。 */
 export type LubanMessage =
   | StartPickerMsg
+  | CollectPageContextMsg
   | CancelPickerMsg
   | ElementPickedMsg
   | PickCancelledMsg

@@ -49,6 +49,10 @@ export interface PickerHandle {
   stop: () => void;
 }
 
+export function isElementPickerActive(): boolean {
+  return document.getElementById(OVERLAY_ID) != null;
+}
+
 /**
  * 进入元素选择模式。`onPick` 在用户点击目标元素时触发；`onCancel` 在 Esc 退出时触发。
  * 返回的 `stop()` 可用于主动结束选择（幂等，可重复调用）。

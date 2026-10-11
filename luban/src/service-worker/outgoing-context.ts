@@ -1,5 +1,5 @@
 import { SENSITIVE_URL_PARAMS } from '../shared/constants';
-import type { PageContext } from '../shared/types';
+import type { PageContext, PageContextScope } from '../shared/types';
 
 function redactMetaUrl(url: string): string {
   try {
@@ -20,6 +20,11 @@ export interface OutgoingContextDescription {
   meta: PageContext['meta'];
   element: { tag: string; text: string };
   summaryCounts: PageContext['domSummary']['counts'];
+}
+
+/** 整页范围时不展示元素标签/文本字段。 */
+export function shouldShowOutgoingElementFields(scope: PageContextScope): boolean {
+  return scope === 'element';
 }
 
 /** 侧栏展示与 buildPayload 共用：避免两份字段清单漂移。 */
