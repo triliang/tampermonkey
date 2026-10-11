@@ -135,11 +135,20 @@ export function sanitizeUrl(url: string): string {
   }
 }
 
-/** 完整采集入口：元素 + 页面摘要 + 脱敏，供 content/index.ts 在拾取元素后调用。 */
-export function collectPageContext(el: Element): PageContext {
+function buildPageContextBase(): Pick<PageContext, 'meta' | 'domSummary'> {
   return {
     meta: { url: sanitizeUrl(location.href), title: document.title, siteType: 'unknown' },
-    target: captureTargetElement(el),
     domSummary: summarizeDom(document),
   };
+}
+
+/** 点选元素后采集（scope=element）；无参调用为整页采集（scope=page，target=null）。 */
+export function collectPageContext(el: Element): PageContext;
+export function collectPageContext(): PageContext;
+export function collectPageContext(el?: Element): PageContext {
+  const base = buildPageContextBase();
+  if (el) {
+    return { ...base, scope: 'element', target: captureTargetElement(el) };
+  }
+  return { ...base, scope: 'page', target: null };
 }

@@ -53,10 +53,14 @@ export interface DOMSummary {
   truncated: boolean;
 }
 
+/** 上下文采集范围：点选元素 vs 整页摘要。 */
+export type PageContextScope = 'element' | 'page';
+
 /** 完整页面上下文（发送给 AI 前已脱敏，§3.2 Phase 3）。 */
 export interface PageContext {
+  scope: PageContextScope;
   meta: { url: string; title: string; siteType: string };
-  target: TargetElement;
+  target: TargetElement | null;
   domSummary: DOMSummary;
 }
 

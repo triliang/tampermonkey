@@ -3,7 +3,7 @@
 
 import { TOKEN_BUDGET } from '../shared/constants';
 import { ErrorFactory } from '../shared/errors';
-import type { GenerationResult, PageContext } from '../shared/types';
+import type { GenerationResult, PageContext, TargetElement } from '../shared/types';
 import type { RegenerateContext } from '../shared/messages';
 import type { ChatMessage } from './ai-providers/base';
 import { describeOutgoingContext } from './outgoing-context';
@@ -66,7 +66,7 @@ export function estimateTokens(text: string): number {
 
 interface ContextPayload {
   meta: PageContext['meta'];
-  target: PageContext['target'];
+  target?: TargetElement;
   domSummary: Partial<PageContext['domSummary']>;
   intent: { raw: string };
   capabilities: { gmApis: readonly string[]; runAt: string; world: string };
@@ -80,13 +80,8 @@ const GM_CAPABILITIES = {
 
 function buildPayload(context: PageContext, intent: string): ContextPayload {
   const outgoing = describeOutgoingContext(context);
-  return {
+  const payload: ContextPayload = {
     meta: outgoing.meta,
-    target: {
-      ...context.target,
-      tag: outgoing.element.tag,
-      text: outgoing.element.text,
-    },
     domSummary: {
       ...context.domSummary,
       counts: outgoing.summaryCounts,
@@ -94,6 +89,14 @@ function buildPayload(context: PageContext, intent: string): ContextPayload {
     intent: { raw: intent },
     capabilities: GM_CAPABILITIES,
   };
+  if (context.target !== null) {
+    payload.target = {
+      ...context.target,
+      tag: outgoing.element.tag,
+      text: outgoing.element.text,
+    };
+  }
+  return payload;
 }
 
 /**
@@ -120,7 +123,7 @@ export function buildUserContent(
   }
   if (estimateTokens(render()) <= budget) return render();
 
-  while (estimateTokens(render()) > budget && payload.target.siblings.length > 0) {
+  while (estimateTokens(render()) > budget && payload.target && payload.target.siblings.length > 0) {
     payload.target.siblings = payload.target.siblings.slice(0, -1);
   }
   return render();

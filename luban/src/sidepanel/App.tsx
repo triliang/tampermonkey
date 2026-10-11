@@ -73,7 +73,8 @@ export default function App() {
     function onMessage(msg: LubanMessage): void {
       if (msg.type === 'ELEMENT_PICKED') {
         setPageContext(msg.context);
-        dispatch({ type: 'ELEMENT_PICKED', element: msg.context.target });
+        const picked = msg.context.target;
+        if (picked) dispatch({ type: 'ELEMENT_PICKED', element: picked });
       } else if (msg.type === 'PICK_CANCELLED') {
         dispatch({ type: 'CANCEL_PICK' });
       }
@@ -452,6 +453,7 @@ function presentRun(r: LubanResponse<InjectionResult>): { outcome: RunOutcome; d
 
 function stubContext(selector: string): PageContext {
   return {
+    scope: 'element',
     meta: { url: location.href, title: document.title, siteType: 'unknown' },
     target: { selectorCandidates: [selector], tag: '', text: '', attributes: {}, contextPath: '', siblings: [] },
     domSummary: { counts: { inputs: 0, buttons: 0, forms: 0, links: 0, images: 0 }, inputs: [], buttons: [], title: '', truncated: false },

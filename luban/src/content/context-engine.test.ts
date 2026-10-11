@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { describe, expect, it } from 'vitest';
-import { captureTargetElement, sanitizeUrl, summarizeDom } from './context-engine';
+import { describe, expect, it, vi } from 'vitest';
+import { captureTargetElement, collectPageContext, sanitizeUrl, summarizeDom } from './context-engine';
 import { CONTEXT_LIMITS } from '../shared/constants';
 
 describe('sanitizeUrl 脱敏（§3.2 Phase 3）', () => {
@@ -80,5 +80,55 @@ describe('captureTargetElement', () => {
     expect(target.text).toBe('立即购买');
     expect(target.selectorCandidates[0]).toBe('#buy');
     expect(target.contextPath).toContain('button#buy');
+  });
+});
+
+describe('collectPageContext 两种 scope', () => {
+  function withLocationHref(href: string, fn: () => void) {
+    const prev = location.href;
+    vi.stubGlobal('location', { ...window.location, href, assign: vi.fn(), replace: vi.fn() });
+    try {
+      fn();
+    } finally {
+      vi.stubGlobal('location', { ...window.location, href: prev, assign: vi.fn(), replace: vi.fn() });
+    }
+  }
+
+  it('点选元素时 scope 为 element，target.tag 与元素一致', () => {
+    document.body.innerHTML = '<input id="email" type="email" placeholder="邮箱" />';
+    const el = document.getElementById('email')!;
+    const ctx = collectPageContext(el);
+    expect(ctx.scope).toBe('element');
+    expect(ctx.target).not.toBeNull();
+    expect(ctx.target!.tag).toBe('input');
+  });
+
+  it('不点选直接采集时 scope 为 page，target 为 null，摘要仍受限流', () => {
+    const nIn = CONTEXT_LIMITS.maxInputs + 4;
+    const nBtn = CONTEXT_LIMITS.maxButtons + 2;
+    document.body.innerHTML =
+      Array.from({ length: nIn }, (_, i) => `<input id="i${i}" />`).join('') +
+      Array.from({ length: nBtn }, (_, i) => `<button>b${i}</button>`).join('');
+    const ctx = collectPageContext();
+    expect(ctx.scope).toBe('page');
+    expect(ctx.target).toBeNull();
+    expect(ctx.domSummary.inputs.length).toBe(CONTEXT_LIMITS.maxInputs);
+    expect(ctx.domSummary.buttons.length).toBe(CONTEXT_LIMITS.maxButtons);
+    expect(ctx.domSummary.counts.inputs).toBe(nIn);
+    expect(ctx.domSummary.counts.buttons).toBe(nBtn);
+  });
+
+  it('element 与 page 两种 scope 下 meta.url 均去掉 token 与 session', () => {
+    document.body.innerHTML = '<button id="b">x</button>';
+    const el = document.getElementById('b')!;
+    withLocationHref('https://example.com/path?token=secret&session=sid&keep=1', () => {
+      const elementCtx = collectPageContext(el);
+      const pageCtx = collectPageContext();
+      for (const ctx of [elementCtx, pageCtx]) {
+        expect(ctx.meta.url).not.toContain('token');
+        expect(ctx.meta.url).not.toContain('session');
+        expect(ctx.meta.url).toContain('keep=1');
+      }
+    });
   });
 });

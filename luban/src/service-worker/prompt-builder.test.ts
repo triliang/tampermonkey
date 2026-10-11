@@ -13,6 +13,7 @@ import type { PageContext } from '../shared/types';
 
 function makeContext(overrides: Partial<PageContext> = {}): PageContext {
   return {
+    scope: 'element',
     meta: { url: 'https://example.com/item?id=1', title: '商品详情页', siteType: 'ecommerce' },
     target: {
       selectorCandidates: ['#price', '.item-price'],
@@ -80,6 +81,13 @@ describe('describeOutgoingContext / buildPayload 同源', () => {
     expect(described.summaryCounts).toEqual({ inputs: 2, buttons: 3, forms: 1, links: 4, images: 5 });
   });
 
+  it('scope 为 page 时 payload 不含 target 字段', () => {
+    const context = makeContext({ scope: 'page', target: null });
+    const payload = payloadFromUserContent(context, '整页意图');
+    expect(payload).not.toHaveProperty('target');
+    expect(describeOutgoingContext(context).scope).toBe('page');
+  });
+
   it('改 describeOutgoingContext 输出会同步改变 payload 对应字段', () => {
     const context = makeContext();
     const overridden = {
@@ -91,8 +99,8 @@ describe('describeOutgoingContext / buildPayload 同源', () => {
     vi.spyOn(outgoingContext, 'describeOutgoingContext').mockReturnValue(overridden);
     const payload = payloadFromUserContent(context, '意图');
     expect(payload.meta).toEqual(overridden.meta);
-    expect(payload.target.tag).toBe(overridden.element.tag);
-    expect(payload.target.text).toBe(overridden.element.text);
+    expect(payload.target!.tag).toBe(overridden.element.tag);
+    expect(payload.target!.text).toBe(overridden.element.text);
     expect(payload.domSummary.counts).toEqual(overridden.summaryCounts);
     vi.restoreAllMocks();
   });

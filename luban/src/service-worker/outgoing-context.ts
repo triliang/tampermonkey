@@ -13,7 +13,7 @@ function redactMetaUrl(url: string): string {
   }
 }
 
-export type OutgoingScope = 'element';
+export type OutgoingScope = PageContext['scope'];
 
 export interface OutgoingContextDescription {
   scope: OutgoingScope;
@@ -25,15 +25,14 @@ export interface OutgoingContextDescription {
 /** 侧栏展示与 buildPayload 共用：避免两份字段清单漂移。 */
 export function describeOutgoingContext(context: PageContext): OutgoingContextDescription {
   return {
-    scope: 'element',
+    scope: context.scope,
     meta: {
       ...context.meta,
       url: redactMetaUrl(context.meta.url),
     },
-    element: {
-      tag: context.target.tag,
-      text: context.target.text,
-    },
+    element: context.target
+      ? { tag: context.target.tag, text: context.target.text }
+      : { tag: '', text: '' },
     summaryCounts: { ...context.domSummary.counts },
   };
 }
