@@ -200,32 +200,135 @@
 
 > 无 webpack、npm、Make 等现代构建工具，完全依赖浏览器原生打包能力。
 
-### 功能架构图
+### 系统架构
+
+Tampermonkey 遵循 Chrome Extension **Manifest V2** 的多上下文（multi-context）模型。运行时可划分为三大隔离上下文——**后台常驻层**、**扩展 UI 层**、**网页内容层**——它们之间只能通过消息通信协作；所有功能模块则统一由**模块注册中心** `registry.js`（`register` / `require` / `get`）动态加载与组织。
+
+其中网页内容层又分为两个 JavaScript 世界：
+
+- **隔离世界（Isolated World）**：`content.js` 运行于此，可访问 `chrome.*` 扩展 API，但不能触碰页面变量。
+- **主世界（Main World）**：用户脚本被注入到此处，能访问真实 `window` / `unsafeWindow`，但无法直接调用扩展 API。
+
+两个世界之间通过 `content.js` 的 **`Eventing`（DOM 自定义事件桥）** 双向通信，`GM_*` API 调用正是经此桥转发到后台执行。
+
+#### 分层架构图
+
+```mermaid
+graph TB
+    subgraph HOST["Chrome / Chromium 宿主 · Manifest V2"]
+        subgraph BG["① 后台常驻层 · background.html / background.js"]
+            RH["requestHandling 消息路由中心<br/>prepare · xhr · saveScript · buttonPress · setOption"]
+            LIFE["脚本生命周期<br/>安装 / 存储 / 启停 / 更新 / 导入导出"]
+            STORE["TM_storage 存储<br/>localStorage + chrome.storage.sync"]
+            CHAPI["Chrome API 适配<br/>tabs · webRequest · contextMenus · notifications"]
+            TFIRE["TamperFire 数据库"]
+        end
+        subgraph UI["② 扩展 UI 层 · Extension Pages"]
+            OPT["options.html/js<br/>脚本管理 + 编辑器"]
+            ACT["action.html/js · 工具栏弹窗"]
+            NOTI["notification.html/js · 通知"]
+            ASK["ask.html/js · 权限询问"]
+            FIRE["fire.html/js · 脚本搜索"]
+        end
+        subgraph PAGE["③ 网页内容层 · Target Web Page"]
+            CS["content.js 内容脚本<br/>隔离世界 Isolated World"]
+            EV["Eventing<br/>DOM 自定义事件桥"]
+            subgraph SBX["注入沙箱 · 页面主世界 Main World"]
+                ENV["environment.js<br/>运行环境 / 安全沙箱构建"]
+                EMU["emulation.js · chromeEmu<br/>GM_* API 桥接"]
+                USR["用户脚本 + @require + @resource"]
+            end
+        end
+    end
+
+    REG["registry.js · 模块注册中心<br/>register / require / get"]
+    SUP["支撑模块<br/>parser · xmlhttprequest · syncinfo · helper<br/>convert · i18n · compat · curtain · htmlutil"]
+    CM["cm/ · CodeMirror 编辑器 + keymap"]
+    SVR["server/update.php · 脚本更新服务"]
+
+    RH --- LIFE
+    LIFE --> STORE
+    LIFE --> CHAPI
+    LIFE --> TFIRE
+    LIFE <-->|检查更新| SVR
+
+    OPT --> CM
+    OPT -->|sendMessage| RH
+    ACT -->|sendMessage| RH
+    FIRE -->|查询| TFIRE
+    NOTI -.-> RH
+    ASK -.-> RH
+
+    CS <-->|prepare / unLoad / scriptBlockerDetected| RH
+    CS -->|注入 environment + emulation + 脚本| ENV
+    ENV --> EMU
+    EMU --> USR
+    EMU <-->|GM_* 调用与回调| EV
+    EV <--> CS
+
+    REG -.->|统一注册 / 按需加载| RH
+    REG -.-> CS
+    SUP -.->|被依赖| LIFE
+    SUP -.-> CS
+```
+
+#### 脚本执行与 GM_* 调用数据流
+
+```mermaid
+sequenceDiagram
+    participant USR as 用户脚本 (Main World)
+    participant EMU as emulation.js
+    participant CS as content.js (Isolated)
+    participant BG as background.js
+    participant ST as TM_storage
+
+    Note over CS: 页面加载，Chrome 按 @match 注入 content.js
+    CS->>BG: sendMessage { method: "prepare", id, url }
+    BG->>ST: 匹配已启用脚本 (@match / @include / @exclude)
+    ST-->>BG: 脚本源码 + 元数据 + @require / @resource
+    BG-->>CS: 返回待执行脚本列表 + @run-at 时机
+    CS->>USR: 注入 environment.js + emulation.js + 用户脚本<br/>(script 标签 / window.eval)
+    Note over USR: 用户脚本在安全沙箱中执行
+    USR->>EMU: 调用 GM_* (如 GM_setValue / GM_xmlhttpRequest)
+    EMU->>CS: 经 Eventing DOM 事件桥转发
+    CS->>BG: 转为 extension 消息 (xhr / saveStorageKey …)
+    BG->>ST: 读写数据 / 调用 Chrome API
+    BG-->>CS: 返回执行结果
+    CS-->>EMU: 经 Eventing 回传
+    EMU-->>USR: 触发 GM_* 回调
+```
+
+#### 功能模块视图
 
 ```mermaid
 graph TD
-    A[Tampermonkey] --> B[Script Lifecycle]
-    A --> C[Editor & IDE]
-    A --> D[Execution Engine]
-    A --> E[UI & UX]
-    A --> F[Infrastructure]
-    B --> B1[Install & Metadata]
-    B --> B2[Edit & Save]
-    B --> B3[Enable / Disable]
-    B --> B4[Sync Across Devices]
-    C --> C1[CodeMirror Integration]
-    C --> C2[Keymap Support]
-    C --> C3[Formatting & Search]
-    D --> D1[Script Injection]
-    D --> D2[GM_API Implementation]
-    D --> D3[unsafeWindow Access]
-    E --> E1[Options Panel]
-    E --> E2[Notification System]
-    E --> E3[Action Popup]
-    E --> E4[Tab View]
-    F --> F1[Localization i18n]
-    F --> F2[Auto-Update Service]
-    F --> F3[Storage Registry]
+    A[Tampermonkey] --> B[脚本生命周期]
+    A --> C[编辑器 & IDE]
+    A --> D[执行引擎]
+    A --> E[UI & 交互]
+    A --> F[基础设施]
+    B --> B1[安装 & 元数据解析]
+    B --> B2[编辑 & 保存]
+    B --> B3[启用 / 禁用]
+    B --> B4[跨设备同步]
+    B --> B5[自动 / 手动更新]
+    C --> C1[CodeMirror 集成]
+    C --> C2[Vim / Emacs / Windows 键位]
+    C --> C3[格式化 & 搜索]
+    C --> C4[JSLint 语法检查]
+    D --> D1[脚本注入 & @run-at 时机]
+    D --> D2[GM_* API 实现]
+    D --> D3[unsafeWindow / 安全沙箱]
+    D --> D4[跨域 GM_xmlhttpRequest]
+    E --> E1[选项 / 管理面板]
+    E --> E2[通知系统]
+    E --> E3[工具栏弹窗]
+    E --> E4[标签页视图]
+    E --> E5[TamperFire 搜索]
+    F --> F1[国际化 i18n]
+    F --> F2[更新服务]
+    F --> F3[存储层 TM_storage]
+    F --> F4[模块注册中心 registry.js]
 ```
 
 ---
