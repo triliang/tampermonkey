@@ -7,8 +7,8 @@ import type { BillingType, ProviderConfig, Settings, ValidationResult } from './
 
 export const DEFAULT_SETTINGS: Settings = {
   defaultModel: MIMO.models.flash,
-  endpoint: 'tokenPlanCn',
-  billing: 'tokenPlan',
+  endpoint: 'onDemand',
+  billing: 'onDemand',
   redactContext: true,
 };
 

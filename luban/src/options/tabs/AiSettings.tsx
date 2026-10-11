@@ -94,12 +94,12 @@ export function AiSettings() {
         <h3>计费方式</h3>
         <div class="radio-row">
           <label>
-            <input type="radio" checked={isTokenPlan} onChange={() => onBillingChange('tokenPlan')} />
-            Token Plan 订阅（<code>tp-</code> / <code>ttp-</code>）
-          </label>
-          <label>
             <input type="radio" checked={!isTokenPlan} onChange={() => onBillingChange('onDemand')} />
             按量付费（<code>sk-</code>）
+          </label>
+          <label>
+            <input type="radio" checked={isTokenPlan} onChange={() => onBillingChange('tokenPlan')} />
+            Token Plan 订阅（<code>tp-</code> / <code>ttp-</code>）
           </label>
         </div>
         {isTokenPlan ? (

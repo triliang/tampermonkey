@@ -35,9 +35,24 @@ beforeEach(() => {
 });
 
 describe('settings-store', () => {
-  it('getSettings 在未保存时返回默认值', async () => {
+  it('getSettings 在未保存时返回默认值（新安装默认按量付费）', async () => {
     const settings = await getSettings();
     expect(settings).toEqual(DEFAULT_SETTINGS);
+    expect(settings.billing).toBe('onDemand');
+    expect(settings.endpoint).toBe('onDemand');
+    expect(resolveBaseUrl(settings)).toBe('https://api.xiaomimimo.com/v1');
+  });
+
+  it('getSettings 已保存 tokenPlan 时读回仍为 tokenPlan，不被默认值覆盖', async () => {
+    const tokenPlan: Settings = {
+      ...DEFAULT_SETTINGS,
+      billing: 'tokenPlan',
+      endpoint: 'tokenPlanSgp',
+    };
+    await saveSettings(tokenPlan);
+    const read = await getSettings();
+    expect(read.billing).toBe('tokenPlan');
+    expect(read.endpoint).toBe('tokenPlanSgp');
   });
 
   it('saveSettings 写入 sync，getSettings 读回合并后的值', async () => {
@@ -97,7 +112,12 @@ describe('settings-store', () => {
   });
 
   it('toProviderConfig 组装出 ai-client 可直接使用的配置', () => {
-    const config = toProviderConfig(DEFAULT_SETTINGS, 'tp-abc');
-    expect(config).toMatchObject({ apiKey: 'tp-abc', model: DEFAULT_SETTINGS.defaultModel, billing: 'tokenPlan' });
+    const config = toProviderConfig(DEFAULT_SETTINGS, 'sk-abc');
+    expect(config).toMatchObject({
+      apiKey: 'sk-abc',
+      model: DEFAULT_SETTINGS.defaultModel,
+      billing: 'onDemand',
+      baseUrl: 'https://api.xiaomimimo.com/v1',
+    });
   });
 });
