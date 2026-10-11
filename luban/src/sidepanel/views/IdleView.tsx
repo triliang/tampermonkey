@@ -50,13 +50,17 @@ export function IdleView({ picking, recent, onStartPick, onCancelPick, onSelfTes
           ))}
         </ul>
       )}
-      <hr />
-      <h3>通信链路自检</h3>
-      <Button label="SP → SW → CS / MAIN" onClick={onSelfTest} disabled={diag.running} />
-      <ul class="diag">
-        <Badge label="Content (ISOLATED)" res={diag.content} />
-        <Badge label="Main (页面上下文)" res={diag.main} />
-      </ul>
+      {import.meta.env.DEV && (
+        <>
+          <hr />
+          <h3>通信链路自检</h3>
+          <Button label="SP → SW → CS / MAIN" onClick={onSelfTest} disabled={diag.running} />
+          <ul class="diag">
+            <Badge label="Content (ISOLATED)" res={diag.content} />
+            <Badge label="Main (页面上下文)" res={diag.main} />
+          </ul>
+        </>
+      )}
     </section>
   );
 }
