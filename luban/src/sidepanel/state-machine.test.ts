@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { EMPTY_TARGET_ELEMENT, uiReducer, initialState, type UIState } from './state-machine';
+import { uiReducer, initialState, type UIState } from './state-machine';
 import type { GenerationResult, TargetElement } from '../shared/types';
 
 const element: TargetElement = {
@@ -53,8 +53,18 @@ describe('整页入口', () => {
     const s = uiReducer(initialState, { type: 'START_PAGE_DESCRIBE' });
     expect(s.type).toBe('INTENT_INPUT');
     if (s.type === 'INTENT_INPUT') {
-      expect(s.element).toEqual(EMPTY_TARGET_ELEMENT);
+      expect(s.element).toBeNull();
       expect(s.intent).toBe('');
+    }
+  });
+
+  it('整页 INTENT_INPUT 无元素时 SUBMIT_INTENT 进入 GENERATING', () => {
+    let s = uiReducer(initialState, { type: 'START_PAGE_DESCRIBE' });
+    s = uiReducer(s, { type: 'SUBMIT_INTENT', intent: '整页自动化' });
+    expect(s.type).toBe('GENERATING');
+    if (s.type === 'GENERATING') {
+      expect(s.element).toBeNull();
+      expect(s.intent).toBe('整页自动化');
     }
   });
 
@@ -71,7 +81,7 @@ describe('整页入口', () => {
     expect(s.type).toBe('PICKING');
     s = uiReducer(s, { type: 'ELEMENT_PICKED', element });
     expect(s.type).toBe('INTENT_INPUT');
-    if (s.type === 'INTENT_INPUT') expect(s.element.tag).toBe('button');
+    if (s.type === 'INTENT_INPUT') expect(s.element?.tag).toBe('button');
   });
 });
 

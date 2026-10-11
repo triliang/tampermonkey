@@ -6,7 +6,7 @@ import { describeOutgoingContext, shouldShowOutgoingElementFields } from '../../
 import { Button } from '../components/Button';
 
 interface IntentViewProps {
-  element: TargetElement;
+  element: TargetElement | null;
   intent: string;
   error?: string;
   errorActions?: ErrorAction[];
@@ -26,7 +26,7 @@ export function IntentView({ element, intent, error, errorActions, offline, page
   const o = s.outgoing;
   const [draft, setDraft] = useState(intent);
   const outgoing = pageContext ? describeOutgoingContext(pageContext) : null;
-  const showElementFields = outgoing ? shouldShowOutgoingElementFields(outgoing.scope) : element.tag.length > 0;
+  const showElementFields = outgoing ? shouldShowOutgoingElementFields(outgoing.scope) : Boolean(element?.tag.length);
   const scopeLabel = outgoing?.scope === 'page' ? o.scopePage : o.scopeElement;
 
   return (
@@ -34,8 +34,8 @@ export function IntentView({ element, intent, error, errorActions, offline, page
       <h2>{s.heading}</h2>
       {showElementFields ? (
         <div class="target-summary">
-          <code>{element.tag}</code>
-          {element.selectorCandidates[0] ? <code class="sel">{element.selectorCandidates[0]}</code> : null}
+          <code>{element?.tag}</code>
+          {element?.selectorCandidates[0] ? <code class="sel">{element.selectorCandidates[0]}</code> : null}
         </div>
       ) : null}
       {outgoing ? (

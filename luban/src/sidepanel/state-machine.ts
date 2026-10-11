@@ -9,10 +9,10 @@ export type RunOutcome = 'success' | 'injection_fail' | 'runtime_error';
 export type UIState =
   | { type: 'IDLE' }
   | { type: 'PICKING' }
-  | { type: 'INTENT_INPUT'; element: TargetElement; intent: string; error?: string; errorActions?: ErrorAction[] }
-  | { type: 'GENERATING'; startTime: number; streamContent: string; element: TargetElement; intent: string }
-  | { type: 'PREVIEW'; result: GenerationResult; element: TargetElement; intent: string }
-  | { type: 'RESULT'; outcome: RunOutcome; detail: unknown; element: TargetElement; intent: string };
+  | { type: 'INTENT_INPUT'; element: TargetElement | null; intent: string; error?: string; errorActions?: ErrorAction[] }
+  | { type: 'GENERATING'; startTime: number; streamContent: string; element: TargetElement | null; intent: string }
+  | { type: 'PREVIEW'; result: GenerationResult; element: TargetElement | null; intent: string }
+  | { type: 'RESULT'; outcome: RunOutcome; detail: unknown; element: TargetElement | null; intent: string };
 
 export const EMPTY_TARGET_ELEMENT: TargetElement = {
   selectorCandidates: [],
@@ -34,7 +34,7 @@ export type UIAction =
   | { type: 'GEN_FAILED'; error: string; actions?: ErrorAction[] }
   | { type: 'CANCEL_GEN' }
   | { type: 'RUN_DONE'; outcome: RunOutcome; detail: unknown }
-  | { type: 'SHOW_RESULT'; outcome: RunOutcome; detail: unknown; element: TargetElement; intent: string }
+  | { type: 'SHOW_RESULT'; outcome: RunOutcome; detail: unknown; element: TargetElement | null; intent: string }
   | { type: 'EDIT_INTENT' }
   | { type: 'FEEDBACK' }
   | { type: 'REGENERATE' }
@@ -51,7 +51,7 @@ export function uiReducer(state: UIState, action: UIAction): UIState {
 
     case 'START_PAGE_DESCRIBE':
       return state.type === 'IDLE'
-        ? { type: 'INTENT_INPUT', element: EMPTY_TARGET_ELEMENT, intent: '' }
+        ? { type: 'INTENT_INPUT', element: null, intent: '' }
         : state;
 
     case 'CANCEL_PICK':

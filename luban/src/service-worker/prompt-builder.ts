@@ -42,6 +42,9 @@ export const SYSTEM_PROMPT = `你是「鲁班」——一个为用户生成可�
 6. 性能：批量 DOM 操作合并执行，避免全文档 MutationObserver 轮询。`;
 
 /** AI 返回 Schema 说明 + 极简示例（随 user message 一并下发）。 */
+/** 整页 scope 时在 user 消息中注明未点选元素（§2.3，仅 page scope）。 */
+export const PAGE_SCOPE_USER_NOTE = '没有点选元素，只根据页面摘要完成意图。';
+
 const SCHEMA_HINT = `请严格按以下 JSON Schema 返回（仅返回 JSON，不要任何其他文字）：
 {
   "code": "string，可运行的 JavaScript 脚本",
@@ -112,7 +115,8 @@ export function buildUserContent(
 ): string {
   const payload = buildPayload(context, intent);
   const regenSuffix = regenerateContext ? renderRegenerateSuffix(regenerateContext) : '';
-  const render = (): string => `${JSON.stringify(payload)}\n\n用户意图：${intent}\n\n${SCHEMA_HINT}${regenSuffix}`;
+  const pageNote = context.scope === 'page' ? `\n\n${PAGE_SCOPE_USER_NOTE}` : '';
+  const render = (): string => `${JSON.stringify(payload)}${pageNote}\n\n用户意图：${intent}\n\n${SCHEMA_HINT}${regenSuffix}`;
 
   if (estimateTokens(render()) <= budget) return render();
 

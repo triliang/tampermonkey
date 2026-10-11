@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import * as outgoingContext from './outgoing-context';
 import {
+  SYSTEM_PROMPT,
   buildMessages,
   buildUserContent,
   describeOutgoingContext,
@@ -121,6 +122,27 @@ describe('buildUserContent / buildMessages', () => {
     const messages = buildMessages(context, '每次打开自动标红降价商品');
     const total = messages.reduce((sum, m) => sum + estimateTokens(m.content), 0);
     expect(total).toBeLessThanOrEqual(8000);
+  });
+
+  it('scope 为 page 时 user 消息不含 target 且含「没有点选元素」', () => {
+    const context = makeContext({ scope: 'page', target: null });
+    const content = buildUserContent(context, '整页意图');
+    const payloadLine = content.split('\n')[0];
+    expect(payloadLine).not.toContain('"target"');
+    expect(content).toContain('没有点选元素');
+  });
+
+  it('scope 为 element 时 user 消息含选择器候选且不含「没有点选元素」', () => {
+    const content = buildUserContent(makeContext(), '点选意图');
+    expect(content).toContain('#price');
+    expect(content).not.toContain('没有点选元素');
+  });
+
+  it('System Prompt 安全约束与六个返回字段说明不变', () => {
+    const messages = buildMessages(makeContext(), '意图');
+    expect(messages[0].content).toBe(SYSTEM_PROMPT);
+    expect(SYSTEM_PROMPT).toContain('【安全约束】');
+    expect(SYSTEM_PROMPT).toContain('code、explanation、selectors、gmGrants、confidence、warnings');
   });
 
   it('800 输入框的极端 DOM 被裁剪至预算内，且 target 完整保留', () => {

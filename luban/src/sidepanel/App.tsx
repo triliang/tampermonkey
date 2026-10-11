@@ -9,7 +9,7 @@ import { sendToSW, selfTest } from './comms';
 import { makeRequestId } from '../shared/messages';
 import type { LubanMessage, LubanResponse, RegenerateContext } from '../shared/messages';
 import { PORT_NAMES, TIMING } from '../shared/constants';
-import type { InjectionResult, PageContext, ScriptMeta, UiSnapshot, UserScript } from '../shared/types';
+import type { InjectionResult, PageContext, ScriptMeta, TargetElement, UiSnapshot, UserScript } from '../shared/types';
 import { STRINGS } from '../shared/i18n-strings';
 
 interface Diag {
@@ -110,7 +110,7 @@ export default function App() {
               intent: snap.intent,
             },
           });
-          void connectGeneration(snap.intent, snap.pageContext ?? stubContext(''));
+          void connectGeneration(snap.intent, snap.pageContext ?? resolveStubContext(snap.element));
         }
       }
       setBooted(true);
@@ -238,7 +238,7 @@ export default function App() {
     if (state.type !== 'INTENT_INPUT' && state.type !== 'PREVIEW' && state.type !== 'RESULT') return;
     const element = state.element;
     go({ type: 'SUBMIT_INTENT', intent });
-    const context = pageContext ?? stubContext(element.selectorCandidates[0] ?? '');
+    const context = pageContext ?? resolveStubContext(element);
     connectGeneration(intent, context, regenerateContext);
   }
 
@@ -454,11 +454,27 @@ function presentRun(r: LubanResponse<InjectionResult>): { outcome: RunOutcome; d
   return { outcome: 'success', detail: `Method ${r.data.method} · ${r.data.timingMs}ms` };
 }
 
-function stubContext(selector: string): PageContext {
+function resolveStubContext(element: TargetElement | null): PageContext {
+  if (element && (element.selectorCandidates.length > 0 || element.tag)) {
+    return stubElementContext(element.selectorCandidates[0] ?? '');
+  }
+  return stubPageContext();
+}
+
+function stubElementContext(selector: string): PageContext {
   return {
     scope: 'element',
     meta: { url: location.href, title: document.title, siteType: 'unknown' },
     target: { selectorCandidates: [selector], tag: '', text: '', attributes: {}, contextPath: '', siblings: [] },
+    domSummary: { counts: { inputs: 0, buttons: 0, forms: 0, links: 0, images: 0 }, inputs: [], buttons: [], title: '', truncated: false },
+  };
+}
+
+function stubPageContext(): PageContext {
+  return {
+    scope: 'page',
+    meta: { url: location.href, title: document.title, siteType: 'unknown' },
+    target: null,
     domSummary: { counts: { inputs: 0, buttons: 0, forms: 0, links: 0, images: 0 }, inputs: [], buttons: [], title: '', truncated: false },
   };
 }

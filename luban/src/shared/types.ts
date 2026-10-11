@@ -163,7 +163,7 @@ export interface UiSnapshot {
   startedAt: number;
   updatedAt: number;
   intent: string;
-  element: TargetElement;
+  element: TargetElement | null;
   pageContext: PageContext | null;
   streamContent?: string;
   result?: GenerationResult;
