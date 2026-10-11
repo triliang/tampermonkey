@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>鲁班 Luban · AI 网页自动化扩展 · 交互原型 v0.4</title>
+<style>
+  :root{
+    --accent:#6d5efc; --accent-d:#5a49e6; --accent-soft:#eee cff;
+    --ok:#00c48c; --warn:#f59e0b; --danger:#e11d48;
+    --bg:#eceef4; --panel:#fff; --nav:#161726; --nav2:#1f2136;
+    --text:#1e2130; --muted:#6b7280; --border:#e6e8ef; --code:#1b1d2b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+  .app{display:flex;min-height:100vh}
+  /* ---------- 左侧导航 ---------- */
+  .nav{width:230px;background:var(--nav);color:#c9cbe0;display:flex;flex-direction:column;
+    position:sticky;top:0;height:100vh;flex-shrink:0}
+  .brand{padding:20px 18px;border-bottom:1px solid #2a2c44}
+  .brand .logo{font-size:19px;font-weight:800;color:#fff;letter-spacing:.5px}
+  .brand .logo span{color:var(--accent)}
+  .brand .sub{font-size:11px;color:#8a8db0;margin-top:4px}
+  .nav nav{padding:12px 10px;flex:1}
+  .nav button{display:flex;align-items:center;gap:9px;width:100%;text-align:left;
+    background:none;border:0;color:#b6b9d6;padding:11px 12px;border-radius:9px;cursor:pointer;
+    font-size:13.5px;margin-bottom:3px;transition:.15s}
+  .nav button:hover{background:var(--nav2);color:#fff}
+  .nav button.active{background:linear-gradient(90deg,var(--accent),#7c6bff);color:#fff;font-weight:600}
+  .nav button .ic{width:20px;text-align:center;font-size:15px}
+  .nav .tag{font-size:10px;background:#33355a;color:#a9acdb;padding:1px 6px;border-radius:6px;margin-left:auto}
+  .nav-foot{padding:14px 18px;border-top:1px solid #2a2c44;font-size:11px;color:#6f7299;line-height:1.7}
+  /* ---------- 舞台 ---------- */
+  .stage{flex:1;padding:26px 30px;overflow:auto}
+  .screen{display:none;animation:fade .25s}
+  .screen.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+  .stitle{font-size:20px;font-weight:800;margin-bottom:4px}
+  .sdesc{color:var(--muted);margin-bottom:20px;font-size:13px}
+  /* ---------- 概览 ---------- */
+  .hero{background:linear-gradient(120deg,#6d5efc,#9d7bff 60%,#00c48c);border-radius:18px;
+    padding:30px 32px;color:#fff;margin-bottom:22px;box-shadow:0 12px 30px rgba(109,94,252,.28)}
+  .hero h1{font-size:26px;font-weight:800;margin-bottom:8px}
+  .hero p{opacity:.94;max-width:660px;font-size:14px}
+  .hero .pills{margin-top:16px;display:flex;gap:9px;flex-wrap:wrap}
+  .pill{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);
+    padding:5px 13px;border-radius:20px;font-size:12px;backdrop-filter:blur(4px)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:15px;margin-bottom:22px}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px;
+    cursor:pointer;transition:.16s}
+  .card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(30,33,48,.1);border-color:#d5d0ff}
+  .card .cic{font-size:24px;margin-bottom:9px}
+  .card h3{font-size:15px;margin-bottom:5px}
+  .card p{font-size:12.5px;color:var(--muted)}
+  .flowbox{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:22px}
+  .flowbox h3{font-size:14px;margin-bottom:16px;color:var(--muted);font-weight:600}
+  .flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+  .fstep{flex:1;min-width:120px;background:#f7f7fd;border:1px solid #e7e5ff;border-radius:11px;
+    padding:13px;text-align:center;position:relative}
+  .fstep .n{width:22px;height:22px;line-height:22px;border-radius:50%;background:var(--accent);
+    color:#fff;font-size:12px;font-weight:700;margin:0 auto 7px}
+  .fstep b{display:block;font-size:13px;margin-bottom:3px}
+  .fstep small{color:var(--muted);font-size:11px}
+  .farrow{display:flex;align-items:center;color:#c3c0ee;font-size:20px;padding:0 6px}
+  /* ---------- 浏览器模型 ---------- */
+  .browser{background:#fff;border-radius:13px;overflow:hidden;box-shadow:0 16px 44px rgba(20,22,40,.16);
+    border:1px solid #dfe1ea;max-width:1120px;margin:0 auto}
+  .bbar{background:#e9ebf2;padding:9px 13px;display:flex;align-items:center;gap:9px;border-bottom:1px solid #dcdfea}
+  .dots{display:flex;gap:6px}.dots i{width:11px;height:11px;border-radius:50%;display:block}
+  .urlbar{flex:1;background:#fff;border-radius:7px;padding:5px 12px;font-size:12px;color:#5a5f73;
+    display:flex;align-items:center;gap:7px;border:1px solid #e2e4ee}
+  .ext-icon{width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,var(--accent),#00c48c);
+    display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;cursor:pointer}
+  .bbody{display:flex;height:600px}
+  /* 假网页 */
+  .page{flex:1;overflow:auto;padding:0;background:#fbfbfd;position:relative}
+  .shop-top{background:#fff;border-bottom:1px solid #eee;padding:11px 18px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:5}
+  .shop-logo{font-weight:800;color:#ff5a5f;font-size:16px}
+  .shop-search{flex:1;max-width:320px;background:#f3f4f8;border-radius:20px;padding:6px 14px;color:#9aa;font-size:12px}
+  .shop-body{padding:18px}
+  .ad-banner{background:linear-gradient(90deg,#ffe3a3,#ffd0d0);border-radius:10px;padding:14px 18px;
+    margin-bottom:18px;font-weight:600;color:#8a5a00;display:flex;justify-content:space-between;align-items:center}
+  .prod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+  .prod{background:#fff;border:1px solid #eee;border-radius:11px;overflow:hidden}
+  .prod .thumb{height:96px;display:flex;align-items:center;justify-content:center;font-size:34px}
+  .prod .pinfo{padding:10px 12px}
+  .prod .pname{font-size:13px;margin-bottom:6px;color:#333}
+  .price{color:#ff4d4f;font-weight:800;font-size:17px}
+  .price small{font-size:11px;font-weight:400;color:#999;text-decoration:line-through;margin-left:5px}
+  .buy{margin-top:9px;width:100%;background:#ff5a5f;color:#fff;border:0;border-radius:7px;padding:6px;font-size:12px;cursor:pointer}
+  .login-box{background:#fff;border:1px solid #eee;border-radius:11px;padding:16px;max-width:330px}
+  .login-box h4{font-size:14px;margin-bottom:12px}
+  .login-box input{width:100%;padding:8px 10px;border:1px solid #e2e4ee;border-radius:7px;margin-bottom:9px;font-size:12.5px}
+  .login-box button{width:100%;background:#333;color:#fff;border:0;border-radius:7px;padding:8px;cursor:pointer;font-size:13px}
+  /* 点选高亮 */
+  .page.picking .pickable{cursor:crosshair}
+  .page.picking .pickable:hover{outline:2px dashed var(--accent)!important;outline-offset:2px;background:rgba(109,94,252,.06)!important}
+  .pick-tip{position:fixed;z-index:999;background:var(--accent);color:#fff;font-size:11px;padding:3px 8px;
+    border-radius:5px;pointer-events:none;display:none;font-family:monospace;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sel-flash{animation:flash .6s}
+  @keyframes flash{0%,100%{box-shadow:0 0 0 0 rgba(109,94,252,0)}50%{box-shadow:0 0 0 4px rgba(109,94,252,.4)}}
+  /* ---------- Side Panel ---------- */
+  .sidepanel{width:344px;flex-shrink:0;border-left:1px solid #e3e5ee;background:#fff;display:flex;flex-direction:column}
+  .sp-head{padding:12px 15px;border-bottom:1px solid #eef0f6;display:flex;align-items:center;gap:9px;background:linear-gradient(90deg,#f7f6ff,#fff)}
+  .sp-head .sp-logo{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--accent),#00c48c);
+    display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px}
+  .sp-head b{font-size:13.5px}
+  .sp-head .model{margin-left:auto;font-size:10.5px;background:#eeeaff;color:var(--accent-d);padding:2px 8px;border-radius:20px;font-weight:600}
+  .sp-body{flex:1;overflow:auto;padding:15px}
+  .sp-step{display:none}.sp-step.active{display:block;animation:fade .2s}
+  .sp-hint{font-size:12.5px;color:var(--muted);margin-bottom:13px}
+  .big-btn{display:flex;align-items:center;gap:10px;width:100%;padding:13px;border-radius:11px;border:1px solid var(--border);
+    background:#fff;cursor:pointer;margin-bottom:10px;text-align:left;transition:.15s;font-size:13px}
+  .big-btn:hover{border-color:var(--accent);background:#f8f7ff;transform:translateX(2px)}
+  .big-btn .bi{font-size:19px}
+  .big-btn b{display:block;font-size:13.5px}.big-btn small{color:var(--muted);font-size:11.5px}
+  .btn{border:0;border-radius:8px;padding:9px 14px;font-size:13px;cursor:pointer;font-weight:600;transition:.15s}
+  .btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent-d)}
+  .btn-ok{background:var(--ok);color:#fff}.btn-ok:hover{filter:brightness(.95)}
+  .btn-ghost{background:#f1f2f8;color:#444}.btn-ghost:hover{background:#e6e8f2}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn-row{display:flex;gap:8px;margin-top:12px}
+  .btn-row .btn{flex:1}
+  .selcard{background:#f7f7fd;border:1px solid #e7e5ff;border-radius:10px;padding:11px;margin-bottom:13px;font-size:12px}
+  .selcard .row{display:flex;gap:7px;margin-bottom:5px}.selcard .row:last-child{margin-bottom:0}
+  .selcard .k{color:var(--muted);width:46px;flex-shrink:0}
+  .selcard code{background:#fff;border:1px solid #e6e8f2;border-radius:5px;padding:1px 6px;color:var(--accent-d);font-size:11px;word-break:break-all}
+  .field-label{font-size:12px;font-weight:600;margin-bottom:6px;display:block}
+  textarea.inp,.inp{width:100%;border:1px solid #e2e4ee;border-radius:9px;padding:9px 11px;font-size:13px;font-family:inherit;resize:vertical}
+  textarea.inp:focus,.inp:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px rgba(109,94,252,.12)}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 4px}
+  .chip{background:#f1f2f8;border:1px solid transparent;border-radius:16px;padding:5px 11px;font-size:12px;cursor:pointer;transition:.14s}
+  .chip:hover{background:#e9e6ff}
+  .chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .thinking{display:flex;align-items:center;gap:9px;color:var(--accent-d);font-size:13px;margin:16px 0}
+  .spin{width:16px;height:16px;border:2px solid #dcd8ff;border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .stream{font-size:12.5px;color:#444;background:#f7f7fd;border-radius:9px;padding:11px;margin-bottom:12px;min-height:40px}
+  .tabs{display:flex;gap:5px;margin-bottom:10px}
+  .tabs button{background:#f1f2f8;border:0;border-radius:7px 7px 0 0;padding:7px 13px;font-size:12.5px;cursor:pointer;color:#666}
+  .tabs button.on{background:var(--code);color:#fff}
+  pre.code{background:var(--code);color:#e6e6f0;border-radius:0 9px 9px 9px;padding:14px;font-size:11.5px;
+    overflow:auto;font-family:"SF Mono",Menlo,Consolas,monospace;line-height:1.6;max-height:280px}
+  pre.code .c{color:#7f88b3}pre.code .k{color:#c792ea}pre.code .s{color:#a5e075}pre.code .f{color:#82aaff}
+  .explain{font-size:12.5px;color:#444;background:#f7f7fd;border-radius:0 9px 9px 9px;padding:14px;line-height:1.75}
+  .explain li{margin-left:16px;margin-bottom:5px}
+  /* 推荐卡片 */
+  .sugg{border:1px solid var(--border);border-radius:11px;padding:12px;margin-bottom:10px;background:#fff;transition:.15s}
+  .sugg:hover{border-color:var(--accent);box-shadow:0 4px 14px rgba(109,94,252,.1)}
+  .sugg .sh{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+  .sugg .sic{font-size:17px}
+  .sugg b{font-size:13px}
+  .sugg .conf{margin-left:auto;font-size:10.5px;background:#e6fff5;color:#00916a;padding:2px 7px;border-radius:12px;font-weight:600}
+  .sugg p{font-size:11.5px;color:var(--muted);margin-bottom:9px}
+  .sugg .sbtn{width:100%;background:#f3f1ff;color:var(--accent-d);border:0;border-radius:7px;padding:7px;font-size:12px;cursor:pointer;font-weight:600}
+  .sugg .sbtn:hover{background:var(--accent);color:#fff}
+  /* ---------- 管理/设置页 ---------- */
+  .optwrap{max-width:920px;margin:0 auto;background:#fff;border-radius:14px;border:1px solid var(--border);overflow:hidden;box-shadow:0 10px 30px rgba(20,22,40,.08)}
+  .opt-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:linear-gradient(90deg,#f7f6ff,#fff)}
+  .opt-head h2{font-size:17px}
+  .opt-head .sp{margin-left:auto;display:flex;gap:9px}
+  .toolbar{padding:13px 22px;display:flex;gap:10px;align-items:center;border-bottom:1px solid #f0f1f7;background:#fcfcfe}
+  .toolbar input{flex:1;max-width:280px}
+  table.list{width:100%;border-collapse:collapse}
+  table.list th{text-align:left;font-size:11.5px;color:var(--muted);font-weight:600;padding:11px 22px;border-bottom:1px solid var(--border);background:#fafbfe}
+  table.list td{padding:13px 22px;border-bottom:1px solid #f2f3f8;font-size:13px;vertical-align:middle}
+  table.list tr:hover td{background:#faf9ff}
+  .sname{font-weight:600}.smeta{font-size:11px;color:var(--muted);margin-top:2px}
+  .badge{font-size:10.5px;padding:2px 8px;border-radius:12px;font-weight:600}
+  .badge.ai{background:#eeeaff;color:var(--accent-d)}.badge.manual{background:#eef1f6;color:#667}
+  .badge.p1{background:#fff4e0;color:#a86b00}
+  .switch{width:40px;height:22px;border-radius:12px;background:#d7d9e4;position:relative;cursor:pointer;transition:.2s;flex-shrink:0}
+  .switch.on{background:var(--ok)}
+  .switch i{position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:2px;left:2px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .switch.on i{left:20px}
+  .ico-btn{background:none;border:0;cursor:pointer;font-size:15px;padding:4px 6px;border-radius:6px;color:#888}
+  .ico-btn:hover{background:#f0f0f7;color:var(--accent)}
+  .settings{padding:22px}
+  .setgroup{margin-bottom:22px}
+  .setgroup h3{font-size:13.5px;margin-bottom:4px;display:flex;align-items:center;gap:7px}
+  .setgroup .gdesc{font-size:11.5px;color:var(--muted);margin-bottom:13px}
+  .setrow{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .setrow label{width:130px;flex-shrink:0;font-size:12.5px;color:#444}
+  .setrow .inp,.setrow select{flex:1}
+  select.inp{padding:8px 10px}
+  .keywrap{flex:1;display:flex;gap:8px}
+  .note{background:#f7f7fd;border-left:3px solid var(--accent);padding:10px 13px;border-radius:0 8px 8px 0;font-size:11.5px;color:#555;margin-top:6px}
+  .note.warn{background:#fff8ec;border-color:var(--warn)}
+  .note.ok{background:#eafff6;border-color:var(--ok)}
+  .toggle-line{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f2f3f8;font-size:12.5px}
+  .toggle-line:last-child{border:0}
+  .conn-ok{color:var(--ok);font-size:12px;font-weight:600;display:none;align-items:center;gap:5px}
+  /* toast */
+  #toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);background:#1e2130;color:#fff;
+    padding:11px 20px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;transition:.28s;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  #toast .tk{margin-right:7px}
+  .foot-note{max-width:1120px;margin:14px auto 0;font-size:11.5px;color:#9aa;text-align:center}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ============ 左侧导航 ============ -->
+  <aside class="nav">
+    <div class="brand">
+      <div class="logo">🛠️ 鲁班<span> Luban</span></div>
+      <div class="sub">AI 网页自动化扩展 · 交互原型</div>
+    </div>
+    <nav>
+      <button data-screen="overview" class="active"><span class="ic">🏠</span>概览</button>
+      <button data-screen="flow"><span class="ic">🎯</span>核心流程演示<span class="tag">点选</span></button>
+      <button data-screen="flow" data-analyze="1"><span class="ic">✨</span>AI 主动推荐</button>
+      <button data-screen="manage"><span class="ic">📜</span>脚本管理</button>
+      <button data-screen="settings"><span class="ic">⚙️</span>设置 · MiMo</button>
+    </nav>
+    <div class="nav-foot">
+      原型版本 v0.4<br/>
+      Provider：小米 MiMo<br/>
+      界面：仅中文 · MV3<br/>
+      <span style="color:#565a80">纯前端演示，不发起真实请求</span>
+    </div>
+  </aside>
+
+  <!-- ============ 舞台 ============ -->
+  <main class="stage">
+
+    <!-- ---------- 概览 ---------- -->
+    <section class="screen active" id="screen-overview">
+      <div class="hero">
+        <h1>鲁班 · 看着网页说需求，AI 帮你写好并运行脚本</h1>
+        <p>鲁班是一个 Chrome MV3 扩展：点选页面元素并表达意图，或由 AI 主动分析页面推荐可自动化点，通过小米 MiMo（BYOK）生成用户脚本，在当前网页即时生效。</p>
+        <div class="pills">
+          <span class="pill">🧩 Manifest V3</span>
+          <span class="pill">🤖 小米 MiMo · OpenAI 兼容</span>
+          <span class="pill">🔑 BYOK 无后端</span>
+          <span class="pill">🇨🇳 仅中文</span>
+          <span class="pill">▶️ MVP：当前页运行</span>
+        </div>
+      </div>
+
+      <div class="flowbox" style="margin-bottom:22px">
+        <h3>核心链路（点选 → 生成 → 执行）</h3>
+        <div class="flow">
+          <div class="fstep"><div class="n">1</div><b>点选元素</b><small>高亮捕获 DOM</small></div>
+          <div class="farrow">→</div>
+          <div class="fstep"><div class="n">2</div><b>表达意图</b><small>文本 / 快捷项</small></div>
+          <div class="farrow">→</div>
+          <div class="fstep"><div class="n">3</div><b>采集+脱敏</b><small>页面上下文</small></div>
+          <div class="farrow">→</div>
+          <div class="fstep"><div class="n">4</div><b>MiMo 生成</b><small>结构化输出</small></div>
+          <div class="farrow">→</div>
+          <div class="fstep"><div class="n">5</div><b>预览确认</b><small>代码+解释</small></div>
+          <div class="farrow">→</div>
+          <div class="fstep"><div class="n">6</div><b>注入运行</b><small>MAIN world</small></div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card" data-goto="flow"><div class="cic">🎯</div><h3>核心流程演示</h3><p>可交互：点选商品页元素，输入意图，看 MiMo 生成脚本并当场运行生效。</p></div>
+        <div class="card" data-goto="flow" data-analyze="1"><div class="cic">✨</div><h3>AI 主动推荐</h3><p>AI 分析本页，主动列出"可自动化点"建议卡片，一键采纳生成。</p></div>
+        <div class="card" data-goto="manage"><div class="cic">📜</div><h3>脚本管理</h3><p>轻量列表：保存的脚本、来源标记、手动再运行、启停（自动注入为 P1）。</p></div>
+        <div class="card" data-goto="settings"><div class="cic">⚙️</div><h3>设置 · MiMo</h3><p>BYOK 配置小米 MiMo：API Key、模型、结构化输出、思考模式、脱敏。</p></div>
+      </div>
+    </section>
+
+    <!-- ---------- 核心流程（浏览器 + Side Panel） ---------- -->
+    <section class="screen" id="screen-flow">
+      <div class="stitle">核心流程演示</div>
+      <div class="sdesc">点击工具栏的扩展图标已展开右侧 <b>Side Panel</b>。试试：① 点「点选元素」→ 在左侧网页点一个商品/价格/广告；② 选个意图 → 生成脚本；③ 运行看效果。或点「分析此页」看 AI 主动推荐。</div>
+      <div class="browser">
+        <div class="bbar">
+          <div class="dots"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></div>
+          <div class="urlbar">🔒 <span>https://shop.example.com/deals</span></div>
+          <div class="ext-icon" title="鲁班 Luban" onclick="toast('🛠️','鲁班 Side Panel 已展开（原型中常驻右侧）')">🛠️</div>
+        </div>
+        <div class="bbody">
+          <!-- 假网页 -->
+          <div class="page" id="page">
+            <div class="shop-top">
+              <span class="shop-logo">🛍 ShopDemo</span>
+              <span class="shop-search">🔍 搜索商品…</span>
+              <span style="margin-left:auto;font-size:12px;color:#888">登录 | 购物车(3)</span>
+            </div>
+            <div class="shop-body">
+              <div class="ad-banner pickable" data-name="广告位"><span>🎉 限时促销广告位 — 点击了解详情</span><span style="font-size:11px">广告</span></div>
+              <div class="prod-grid">
+                <div class="prod">
+                  <div class="thumb pickable" data-name="商品图片" style="background:linear-gradient(135deg,#ffe0e6,#ffd0dc)">🎧</div>
+                  <div class="pinfo"><div class="pname pickable" data-name="商品标题">无线降噪耳机 Pro</div>
+                    <div class="price pickable" data-name="价格">¥899<small>¥1299</small></div>
+                    <button class="buy pickable" data-name="购买按钮">加入购物车</button></div>
+                </div>
+                <div class="prod">
+                  <div class="thumb pickable" data-name="商品图片" style="background:linear-gradient(135deg,#e0f0ff,#d0e6ff)">⌚</div>
+                  <div class="pinfo"><div class="pname pickable" data-name="商品标题">智能手表 S2</div>
+                    <div class="price pickable" data-name="价格">¥1599<small>¥1999</small></div>
+                    <button class="buy pickable" data-name="购买按钮">加入购物车</button></div>
+                </div>
+                <div class="prod">
+                  <div class="thumb pickable" data-name="商品图片" style="background:linear-gradient(135deg,#e6ffe9,#d3f7d8)">📷</div>
+                  <div class="pinfo"><div class="pname pickable" data-name="商品标题">便携相机 Mini</div>
+                    <div class="price pickable" data-name="价格">¥2399<small>¥2899</small></div>
+                    <button class="buy pickable" data-name="购买按钮">加入购物车</button></div>
+                </div>
+              </div>
+              <div class="login-box pickable" data-name="登录表单">
+                <h4>会员登录</h4>
+                <input name="username" placeholder="用户名" />
+                <input name="password" type="password" placeholder="密码" />
+                <button>登录</button>
+              </div>
+            </div>
+          </div>
+          <!-- Side Panel -->
+          <div class="sidepanel">
+            <div class="sp-head">
+              <div class="sp-logo">🛠️</div><b>鲁班 Luban</b>
+              <span class="model">MiMo v2.6-flash</span>
+            </div>
+            <div class="sp-body">
+              <!-- idle -->
+              <div class="sp-step active" id="sp-idle">
+                <div class="sp-hint">想对这个页面做点什么？选一种方式开始 👇</div>
+                <button class="big-btn" onclick="startPick()"><span class="bi">🎯</span><span><b>点选元素 + 意图</b><small>选中页面元素，告诉 AI 你想干嘛</small></span></button>
+                <button class="big-btn" onclick="analyze()"><span class="bi">✨</span><span><b>AI 分析此页</b><small>自动发现可自动化点并推荐</small></span></button>
+                <div class="note" style="margin-top:16px">🔒 仅采集脱敏后的页面结构用于生成；API Key 存本地不同步；运行前需你确认。</div>
+              </div>
+              <!-- picking -->
+              <div class="sp-step" id="sp-picking">
+                <div class="sp-hint">🎯 <b>选择模式已开启</b>：把鼠标移到左侧网页，点击一个目标元素。</div>
+                <div class="note">悬停会高亮元素并显示其选择器。再点一次此处可取消。</div>
+                <div class="btn-row"><button class="btn btn-ghost" onclick="cancelPick()">取消选择</button></div>
+              </div>
+              <!-- selected -->
+              <div class="sp-step" id="sp-selected">
+                <div class="sp-hint">已选中元素，描述你的意图：</div>
+                <div class="selcard">
+                  <div class="row"><span class="k">元素</span><span id="sel-name">—</span></div>
+                  <div class="row"><span class="k">标签</span><code id="sel-tag">—</code></div>
+                  <div class="row"><span class="k">选择器</span><code id="sel-path">—</code></div>
+                  <div class="row"><span class="k">文本</span><span id="sel-text" style="color:#555">—</span></div>
+                </div>
+                <label class="field-label">你的意图</label>
+                <textarea class="inp" id="intent" rows="2" placeholder="例如：把所有价格标红加粗"></textarea>
+                <div class="chips" id="chips">
+                  <span class="chip" data-intent="highlight">高亮/标红</span>
+                  <span class="chip" data-intent="hide">隐藏/移除</span>
+                  <span class="chip" data-intent="download">批量下载图片</span>
+                  <span class="chip" data-intent="fill">自动填充</span>
+                  <span class="chip" data-intent="monitor">监控变化</span>
+                </div>
+                <div class="btn-row">
+                  <button class="btn btn-ghost" onclick="startPick()">重选</button>
+                  <button class="btn btn-primary" onclick="generate()">✨ 生成脚本</button>
+                </div>
+              </div>
+              <!-- generating -->
+              <div class="sp-step" id="sp-generating">
+                <div class="thinking"><span class="spin"></span><span id="gen-status">MiMo 正在思考…</span></div>
+                <div class="stream" id="gen-stream"></div>
+              </div>
+              <!-- result -->
+              <div class="sp-step" id="sp-result">
+                <div class="tabs">
+                  <button class="on" data-tab="code" onclick="switchTab('code')">脚本</button>
+                  <button data-tab="explain" onclick="switchTab('explain')">解释</button>
+                  <span style="margin-left:auto;font-size:11px;color:#9aa;align-self:center" id="gen-meta"></span>
+                </div>
+                <div id="tab-code"><pre class="code" id="code-out"></pre></div>
+                <div id="tab-explain" style="display:none"><div class="explain" id="explain-out"></div></div>
+                <div class="btn-row">
+                  <button class="btn btn-ghost" onclick="backToSelected()">↩ 调整</button>
+                  <button class="btn btn-ghost" onclick="generate()">♻ 重生成</button>
+                </div>
+                <div class="btn-row">
+                  <button class="btn btn-ok" onclick="runScript()">▶ 在当前页运行</button>
+                  <button class="btn btn-primary" onclick="saveScript()">💾 保存</button>
+                </div>
+              </div>
+              <!-- suggest -->
+              <div class="sp-step" id="sp-suggest">
+                <div class="sp-hint">✨ AI 已分析本页，发现 <b>4</b> 个可自动化点：</div>
+                <div id="sugg-list"></div>
+                <div class="btn-row"><button class="btn btn-ghost" onclick="showStep('idle')">← 返回</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="foot-note">提示：这是纯前端原型，"生成"与"运行"均为本地模拟，用于验证交互与视觉效果；真实版本由 MiMo 生成、经 chrome.scripting 注入 MAIN world 执行。</div>
+    </section>
+
+    <!-- ---------- 脚本管理 ---------- -->
+    <section class="screen" id="screen-manage">
+      <div class="stitle">脚本管理</div>
+      <div class="sdesc">轻量管理已保存的脚本（对应 Options 页）。MVP 仅支持"在当前页运行"，域名自动注入 / 持久运行为 <b>P1</b>。</div>
+      <div class="optwrap">
+        <div class="opt-head">
+          <span style="font-size:22px">⚡</span><h2>我的脚本</h2>
+          <div class="sp"><button class="btn btn-ghost" onclick="toast('📥','导入（P2）')">导入</button><button class="btn btn-primary" onclick="toast('✏️','新建脚本（编辑器为 P1）')">+ 新建</button></div>
+        </div>
+        <div class="toolbar">
+          <input class="inp" placeholder="🔍 搜索脚本名称 / 域名…" oninput="filterList(this.value)" />
+          <span style="font-size:12px;color:#9aa">共 <b id="cnt">4</b> 个脚本</span>
+        </div>
+        <table class="list" id="script-table">
+          <thead><tr><th style="width:38%">名称</th><th>匹配域名</th><th>来源</th><th>更新时间</th><th style="width:70px">启用</th><th style="width:110px">操作</th></tr></thead>
+          <tbody>
+            <tr data-n="高亮商品价格"><td><div class="sname">高亮商品价格</div><div class="smeta">@grant GM_addStyle · 由「价格」元素生成</div></td><td><code>shop.example.com</code></td><td><span class="badge ai">AI</span></td><td>刚刚</td><td><div class="switch on" onclick="tg(this)"><i></i></div></td><td><button class="ico-btn" title="当前页运行" onclick="toast('▶','已在当前页运行：高亮商品价格')">▶</button><button class="ico-btn" title="编辑" onclick="toast('✏️','编辑器为 P1 能力')">✏️</button><button class="ico-btn" title="删除" onclick="delRow(this)">🗑</button></td></tr>
+            <tr data-n="移除促销广告"><td><div class="sname">移除促销广告</div><div class="smeta">@grant GM_addStyle · 由「广告位」生成</div></td><td><code>shop.example.com</code></td><td><span class="badge ai">AI</span></td><td>2 分钟前</td><td><div class="switch on" onclick="tg(this)"><i></i></div></td><td><button class="ico-btn" onclick="toast('▶','已在当前页运行：移除促销广告')">▶</button><button class="ico-btn" onclick="toast('✏️','编辑器为 P1 能力')">✏️</button><button class="ico-btn" onclick="delRow(this)">🗑</button></td></tr>
+            <tr data-n="自动填充会员登录"><td><div class="sname">自动填充会员登录</div><div class="smeta">@grant none · 由「登录表单」生成</div></td><td><code>shop.example.com</code></td><td><span class="badge ai">AI</span></td><td>昨天</td><td><div class="switch" onclick="tg(this)"><i></i></div></td><td><button class="ico-btn" onclick="toast('▶','已在当前页运行：自动填充')">▶</button><button class="ico-btn" onclick="toast('✏️','编辑器为 P1 能力')">✏️</button><button class="ico-btn" onclick="delRow(this)">🗑</button></td></tr>
+            <tr data-n="夜间模式"><td><div class="sname">夜间模式（手动）</div><div class="smeta">@grant GM_addStyle · 手动编写</div></td><td><code>*://*/*</code></td><td><span class="badge manual">手动</span></td><td>3 天前</td><td><div class="switch on" onclick="tg(this)"><i></i></div></td><td><button class="ico-btn" onclick="toast('▶','已在当前页运行：夜间模式')">▶</button><button class="ico-btn" onclick="toast('✏️','编辑器为 P1 能力')">✏️</button><button class="ico-btn" onclick="delRow(this)">🗑</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note" style="max-width:920px;margin:14px auto 0">💡 「启用」开关在 MVP 仅表示保存状态；<b>按域名自动注入运行</b>属于 P1（需 MV3 持久注入方案验证）。</div>
+    </section>
+
+    <!-- ---------- 设置 ---------- -->
+    <section class="screen" id="screen-settings">
+      <div class="stitle">设置 · 小米 MiMo（BYOK）</div>
+      <div class="sdesc">填入你自己的 MiMo API Key，扩展直连官方 OpenAI 兼容端点，无自建后端。Key 仅存本地、不同步。</div>
+      <div class="optwrap"><div class="settings">
+
+        <div class="setgroup">
+          <h3>🤖 AI Provider</h3>
+          <div class="gdesc">首个 Provider 为小米 MiMo；多 Provider（Claude/OpenAI/Gemini）为 P1。</div>
+          <div class="setrow"><label>Provider</label><select class="inp"><option>小米 MiMo（OpenAI 兼容）</option><option disabled>P1：Anthropic Claude</option><option disabled>P1：OpenAI</option><option disabled>P1：自定义端点</option></select></div>
+          <div class="setrow"><label>BASE_URL</label><input class="inp" value="https://api.xiaomimimo.com/v1" /></div>
+          <div class="setrow"><label>API Key</label>
+            <div class="keywrap">
+              <input class="inp" id="apikey" type="password" placeholder="sk-xxxxxxxxxxxxxxxx" style="flex:1" />
+              <button class="btn btn-ghost" onclick="toggleKey()">👁</button>
+              <button class="btn btn-primary" onclick="testConn()">测试连接</button>
+            </div>
+          </div>
+          <div class="setrow"><label></label><span class="conn-ok" id="conn-ok">✅ 连接成功 · MiMo 可用（耗时 480ms）</span></div>
+          <div class="setrow"><label>模型</label><select class="inp"><option>mimo-v2.6-flash（默认 · 快/省）</option><option>mimo-v2.6-pro（复杂脚本/主动推荐）</option><option>mimo-v2.6-pro-ultraspeed</option><option>mimo-v2.5-pro</option></select></div>
+          <div class="note">🔑 前往 <b>mimo.mi.com</b> 控制台 → API Keys 创建（小米账号登录）。Key 存 <code>chrome.storage.local</code> 并混淆，<b>绝不写入 sync</b>、绝不随页面上下文外发。</div>
+        </div>
+
+        <div class="setgroup">
+          <h3>⚙️ 生成参数</h3>
+          <div class="gdesc">善用 MiMo 能力提升生成稳定性与质量。</div>
+          <div class="toggle-line"><span><b>结构化输出</b> <code>response_format: json_object</code><br/><small style="color:#9aa">直接返回「代码+解释+选择器」，避免解析自然语言</small></span><div class="switch on" onclick="tg(this)"><i></i></div></div>
+          <div class="toggle-line"><span><b>思考模式</b> <code>thinking</code><br/><small style="color:#9aa">复杂脚本开启以提升质量（会强制默认 temperature/top_p）</small></span><div class="switch" onclick="tg(this)"><i></i></div></div>
+          <div class="toggle-line"><span><b>流式输出</b> <code>stream</code><br/><small style="color:#9aa">在 Side Panel 实时展示生成过程</small></span><div class="switch on" onclick="tg(this)"><i></i></div></div>
+        </div>
+
+        <div class="setgroup">
+          <h3>🔒 安全与隐私</h3>
+          <div class="gdesc">页面上下文脱敏与执行确认策略。</div>
+          <div class="toggle-line"><span><b>上下文脱敏</b><br/><small style="color:#9aa">URL 去除 token/session/auth；不采集密码、cookie</small></span><div class="switch on" onclick="tg(this)"><i></i></div></div>
+          <div class="toggle-line"><span><b>敏感站点禁止采集</b><br/><small style="color:#9aa">银行 / 邮箱等默认不采集或强提示</small></span><div class="switch on" onclick="tg(this)"><i></i></div></div>
+          <div class="toggle-line"><span><b>运行前必须确认</b>（不可关闭）<br/><small style="color:#9aa">任何生成代码执行前需用户点击确认</small></span><div class="switch on" style="opacity:.6;pointer-events:none"><i></i></div></div>
+          <div class="toggle-line"><span><b>摘要限流</b><br/><small style="color:#9aa">≤20 输入框 / ≤15 按钮，控制 token 成本</small></span><div class="switch on" onclick="tg(this)"><i></i></div></div>
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;border-top:1px solid var(--border);padding-top:16px">
+          <button class="btn btn-ghost" onclick="toast('↺','已恢复默认设置')">恢复默认</button>
+          <button class="btn btn-primary" onclick="toast('✅','设置已保存到本地')">保存设置</button>
+        </div>
+      </div></div>
+    </section>
+
+  </main>
+</div>
+
+<div class="pick-tip" id="pick-tip"></div>
+<div id="toast"></div>
+
+<!-- ===== 生成脚本模板（text/plain，避免转义问题） ===== -->
+<script type="text/plain" id="tpl-highlight">// ==UserScript==
+// @name         高亮选中元素
+// @match        *://shop.example.com/*
+// @run-at       document-end
+// @grant        GM_addStyle
+// ==/UserScript==
+(function () {
+  'use strict';
+  var sel = '__SEL__';                 // AI 生成的稳健选择器
+  var css = sel + ' { color:#e11d48 !important; font-weight:700; '
+          + 'background:#fff1f2; border-radius:4px; }';
+  GM_addStyle(css);
+  var n = document.querySelectorAll(sel).length;
+  console.log('[AI脚本] 已高亮 ' + n + ' 个元素');
+})();</script>
+<script type="text/plain" id="tpl-hide">// ==UserScript==
+// @name         隐藏选中元素
+// @match        *://shop.example.com/*
+// @grant        GM_addStyle
+// ==/UserScript==
+(function () {
+  'use strict';
+  var sel = '__SEL__';
+  GM_addStyle(sel + ' { display:none !important; }');
+  console.log('[AI脚本] 已隐藏 ' + sel);
+})();</script>
+<script type="text/plain" id="tpl-download">// ==UserScript==
+// @name         批量下载本页图片
+// @match        *://shop.example.com/*
+// @grant        GM_xmlhttpRequest
+// ==/UserScript==
+(function () {
+  'use strict';
+  var imgs = Array.from(document.querySelectorAll('img, .thumb'))
+                 .map(function (i) { return i.src || i.dataset.src; });
+  imgs.forEach(function (url, idx) {
+    // P1 能力：GM_xmlhttpRequest 拉取后触发下载
+    console.log('[AI脚本] 下载 ' + (idx + 1) + '/' + imgs.length + ': ' + url);
+  });
+})();</script>
+<script type="text/plain" id="tpl-fill">// ==UserScript==
+// @name         自动填充登录表单
+// @match        *://shop.example.com/*
+// @grant        none
+// ==/UserScript==
+(function () {
+  'use strict';
+  var user = document.querySelector('input[name="username"]');
+  var pass = document.querySelector('input[name="password"]');
+  if (user) user.value = 'demo_user';
+  if (pass) pass.value = '********';   // 密码不建议由脚本明文写入
+  console.log('[AI脚本] 已填充登录表单');
+})();</script>
+<script type="text/plain" id="tpl-monitor">// ==UserScript==
+// @name         监控元素变化
+// @match        *://shop.example.com/*
+// @grant        GM_setValue
+// @grant        GM_getValue
+// ==/UserScript==
+(function () {
+  'use strict';
+  var sel = '__SEL__';
+  var el = document.querySelector(sel);
+  if (!el) return;
+  var last = GM_getValue('last', '');
+  var now = el.textContent.trim();
+  if (last && last !== now) {
+    el.style.outline = '2px solid #f59e0b';
+    console.log('[AI脚本] 变化: ' + last + ' -> ' + now);
+  }
+  GM_setValue('last', now);
+})();</script>
+
+<script>
+/* ================= 导航 ================= */
+var navBtns=[].slice.call(document.querySelectorAll('.nav button'));
+function showScreen(id,analyze){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+  document.getElementById('screen-'+id).classList.add('active');
+  navBtns.forEach(function(b){b.classList.toggle('active',b.dataset.screen===id && (!!b.dataset.analyze===!!analyze))});
+  document.querySelector('.stage').scrollTop=0;
+  if(id==='flow'&&analyze){setTimeout(analyze,260)}
+  if(id==='flow'&&!analyze){showStep('idle')}
+}
+navBtns.forEach(function(b){b.onclick=function(){showScreen(b.dataset.screen,b.dataset.analyze)}});
+document.querySelectorAll('[data-goto]').forEach(function(c){c.onclick=function(){showScreen(c.dataset.goto,c.dataset.analyze)}});
+
+/* ================= Side Panel 状态机 ================= */
+function showStep(name){
+  ['idle','picking','selected','generating','result','suggest'].forEach(function(s){
+    document.getElementById('sp-'+s).classList.toggle('active',s===name)});
+}
+var picked=null,curSel='',curIntent='highlight';
+
+/* ---- 点选模式 ---- */
+var page=document.getElementById('page'),tip=document.getElementById('pick-tip');
+function startPick(){page.classList.add('picking');showStep('picking')}
+function cancelPick(){page.classList.remove('picking');tip.style.display='none';showStep(picked?'selected':'idle')}
+function selOf(el){
+  if(el.id)return '#'+el.id;
+  var own=el.classList.length?'.'+el.classList[0]:el.tagName.toLowerCase();
+  var p=el.closest('.prod,.login-box,.ad-banner');
+  if(p&&p!==el&&p.classList.length)return '.'+p.classList[0]+' '+own;
+  return own;
+}
+page.addEventListener('mouseover',function(e){
+  if(!page.classList.contains('picking'))return;
+  var el=e.target.closest('.pickable');if(!el)return;
+  tip.textContent=(el.dataset.name||'')+'  '+selOf(el);tip.style.display='block';
+});
+page.addEventListener('mousemove',function(e){if(tip.style.display==='block'){tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY+14)+'px'}});
+page.addEventListener('click',function(e){
+  if(!page.classList.contains('picking'))return;
+  var el=e.target.closest('.pickable');if(!el)return;
+  e.preventDefault();e.stopPropagation();
+  picked=el;curSel=selOf(el);
+  page.classList.remove('picking');tip.style.display='none';
+  document.getElementById('sel-name').textContent=el.dataset.name||'元素';
+  document.getElementById('sel-tag').textContent=el.tagName.toLowerCase();
+  document.getElementById('sel-path').textContent=curSel;
+  var t=(el.textContent||'').trim().replace(/\s+/g,' ');
+  document.getElementById('sel-text').textContent=(t.slice(0,28)||'（无文本）')+(t.length>28?'…':'');
+  el.classList.add('sel-flash');setTimeout(function(){el.classList.remove('sel-flash')},650);
+  showStep('selected');
+},true);
+
+/* ---- 意图 chips ---- */
+document.querySelectorAll('#chips .chip').forEach(function(c){
+  c.onclick=function(){
+    document.querySelectorAll('#chips .chip').forEach(function(x){x.classList.remove('on')});
+    c.classList.add('on');curIntent=c.dataset.intent;
+    var map={highlight:'把选中元素标红加粗高亮',hide:'隐藏/移除这个元素',download:'批量下载本页图片',fill:'自动填充这个表单',monitor:'监控这个元素的内容变化'};
+    document.getElementById('intent').value=map[curIntent];
+  };
+});
+function guessIntent(txt){
+  if(/隐藏|移除|去掉|删除|广告/.test(txt))return 'hide';
+  if(/下载|图片|保存图/.test(txt))return 'download';
+  if(/填充|填写|登录|账号/.test(txt))return 'fill';
+  if(/监控|变化|降价|变动/.test(txt))return 'monitor';
+  return 'highlight';
+}
+
+/* ---- 生成（模拟 MiMo 流式） ---- */
+var explainMap={
+  highlight:'这段脚本会：<ul><li>用 <b>GM_addStyle</b> 注入一段 CSS，把匹配 <code>'+ '选择器' +'</code> 的元素标红加粗；</li><li>只作用于当前站点，<b>不读取任何隐私数据</b>；</li><li>需要权限：<code>GM_addStyle</code>。</li></ul>',
+  hide:'这段脚本会：<ul><li>用 <b>GM_addStyle</b> 把目标元素设为 <code>display:none</code>，从视觉上移除；</li><li>不修改服务器数据，仅本地隐藏；</li><li>需要权限：<code>GM_addStyle</code>。</li></ul>',
+  download:'这段脚本会：<ul><li>收集本页所有图片地址；</li><li>逐个触发下载（依赖 <b>GM_xmlhttpRequest</b>，属 P1 能力）；</li><li>不上传任何图片到外部。</li></ul>',
+  fill:'这段脚本会：<ul><li>定位登录表单的用户名/密码框并填入示例值；</li><li><b>密码不会明文保存</b>在脚本里；</li><li>无需特殊权限（<code>@grant none</code>）。</li></ul>',
+  monitor:'这段脚本会：<ul><li>用 <b>GM_setValue/getValue</b> 记住上次内容；</li><li>下次访问发现变化时高亮提醒；</li><li>数据仅存本地。</li></ul>'
+};
+function generate(){
+  var txt=document.getElementById('intent').value.trim();
+  if(txt)curIntent=guessIntent(txt);
+  else if(!document.querySelector('#chips .chip.on'))curIntent='highlight';
+  showStep('generating');
+  var stream=document.getElementById('gen-stream'),st=document.getElementById('gen-status');
+  var steps=['读取脱敏后的页面上下文…','定位选中元素，生成稳健选择器…','调用 MiMo（response_format=json_object）…','组装用户脚本 + 元数据…'];
+  stream.innerHTML='';st.textContent='MiMo 正在思考…';var i=0;
+  var tm=setInterval(function(){
+    stream.innerHTML+='▸ '+steps[i]+'<br/>';i++;
+    if(i>=steps.length){clearInterval(tm);st.textContent='生成完成 ✅';setTimeout(showResult,360)}
+  },300);
+}
+function showResult(){
+  var tpl=document.getElementById('tpl-'+curIntent).textContent.replace(/__SEL__/g,curSel||'.price');
+  document.getElementById('code-out').textContent=tpl;
+  document.getElementById('explain-out').innerHTML=(explainMap[curIntent]||'').replace('选择器','<code>'+(curSel||'.price')+'</code>');
+  var tokens=320+Math.floor(Math.random()*180);
+  document.getElementById('gen-meta').textContent='MiMo · '+tokens+' tokens';
+  showStep('result');switchTab('code');
+}
+function switchTab(t){
+  document.querySelectorAll('.tabs button[data-tab]').forEach(function(b){b.classList.toggle('on',b.dataset.tab===t)});
+  document.getElementById('tab-code').style.display=t==='code'?'block':'none';
+  document.getElementById('tab-explain').style.display=t==='explain'?'block':'none';
+}
+function backToSelected(){showStep('selected')}
+
+/* ---- 运行（真实视觉反馈） ---- */
+function runScript(){
+  var sel=curSel||'.price';
+  try{
+    if(curIntent==='highlight'){document.querySelectorAll(sel).forEach(function(e){e.style.cssText+=';color:#e11d48!important;font-weight:800;background:#fff1f2;border-radius:4px'});toast('✅','脚本已运行：已高亮 '+document.querySelectorAll(sel).length+' 个元素')}
+    else if(curIntent==='hide'){var n=document.querySelectorAll(sel).length;document.querySelectorAll(sel).forEach(function(e){e.style.display='none'});toast('✅','脚本已运行：已隐藏 '+n+' 个元素')}
+    else if(curIntent==='download'){toast('📥','（示例）已开始下载本页 3 张图片')}
+    else if(curIntent==='fill'){var u=document.querySelector('input[name="username"]'),p=document.querySelector('input[name="password"]');if(u)u.value='demo_user';if(p)p.value='password123';toast('✅','脚本已运行：已填充登录表单')}
+    else if(curIntent==='monitor'){document.querySelectorAll(sel).forEach(function(e){e.style.outline='2px solid #f59e0b'});toast('✅','脚本已运行：已标记监控元素')}
+  }catch(e){toast('⚠️','运行失败：'+e.message)}
+}
+function saveScript(){toast('💾','已保存到「脚本管理」（当前页可再次运行）')}
+
+/* ---- AI 主动推荐 ---- */
+var suggestions=[
+  {ic:'💰',t:'监控价格并标红降价商品',d:'检测到 3 处价格元素，可高亮并监控变化',conf:'高',intent:'highlight',sel:'.prod .price'},
+  {ic:'🖼️',t:'一键批量下载商品图',d:'检测到 3 张商品图片，可打包下载',conf:'高',intent:'download',sel:'.thumb'},
+  {ic:'🚫',t:'移除顶部促销广告',d:'检测到 1 处广告位，可隐藏以获得清爽浏览',conf:'中',intent:'hide',sel:'.ad-banner'},
+  {ic:'📝',t:'自动填充会员登录',d:'检测到登录表单，可自动填入账号（密码不保存）',conf:'中',intent:'fill',sel:'.login-box'}
+];
+function analyze(){
+  showStep('generating');
+  var stream=document.getElementById('gen-stream'),st=document.getElementById('gen-status');
+  stream.innerHTML='';st.textContent='MiMo 正在分析本页结构…';
+  var steps=['采集并脱敏 DOM 摘要…','识别可交互元素（表单/价格/图片/广告）…','评估可自动化点与置信度…'];
+  var i=0;var tm=setInterval(function(){stream.innerHTML+='▸ '+steps[i]+'<br/>';i++;
+    if(i>=steps.length){clearInterval(tm);st.textContent='分析完成 ✅';setTimeout(renderSugg,340)}},340);
+}
+function renderSugg(){
+  var box=document.getElementById('sugg-list');box.innerHTML='';
+  suggestions.forEach(function(s){
+    var d=document.createElement('div');d.className='sugg';
+    d.innerHTML='<div class="sh"><span class="sic">'+s.ic+'</span><b>'+s.t+'</b><span class="conf">置信度 '+s.conf+'</span></div><p>'+s.d+'</p><button class="sbtn">采纳并生成脚本</button>';
+    d.querySelector('.sbtn').onclick=function(){curIntent=s.intent;curSel=s.sel;picked=document.querySelector(s.sel);
+      document.getElementById('intent').value=s.t;showResult()};
+    box.appendChild(d);
+  });
+  showStep('suggest');
+}
+
+/* ================= 管理页 ================= */
+function tg(el){el.classList.toggle('on')}
+function delRow(btn){var tr=btn.closest('tr');tr.style.opacity='0';tr.style.transform='translateX(20px)';tr.style.transition='.25s';
+  setTimeout(function(){tr.remove();updCnt()},250);toast('🗑','脚本已删除')}
+function filterList(v){var rows=document.querySelectorAll('#script-table tbody tr');var n=0;
+  rows.forEach(function(r){var ok=(r.dataset.n||'').indexOf(v)>=0;r.style.display=ok?'':'none';if(ok)n++});
+  document.getElementById('cnt').textContent=n}
+function updCnt(){document.getElementById('cnt').textContent=document.querySelectorAll('#script-table tbody tr').length}
+
+/* ================= 设置页 ================= */
+function toggleKey(){var i=document.getElementById('apikey');i.type=i.type==='password'?'text':'password'}
+function testConn(){
+  var k=document.getElementById('apikey').value.trim();
+  if(!k){toast('⚠️','请先填入 MiMo API Key（sk-…）');return}
+  toast('⏳','正在测试连接 api.xiaomimimo.com …');
+  setTimeout(function(){document.getElementById('conn-ok').style.display='flex';toast('✅','连接成功，MiMo 可用')},900);
+}
+
+/* ================= Toast ================= */
+var toastTm=null;
+function toast(ic,msg){var t=document.getElementById('toast');t.innerHTML='<span class="tk">'+ic+'</span>'+msg;
+  t.classList.add('show');clearTimeout(toastTm);toastTm=setTimeout(function(){t.classList.remove('show')},2400)}
+</script>
+</body>
+</html>

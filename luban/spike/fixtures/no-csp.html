@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <!--
+      基线页：不含任何 CSP。
+      预期：Method 1 / 2 / 3 全部 ✓ 成功。
+      同时作为 fixtures 导航入口。必须经 HTTP 同源服务打开（见 spike-injection-results.md 操作步骤）。
+    -->
+    <title>CSP 测试页 · 无 CSP（基线）</title>
+    <style>
+      body { font: 14px/1.6 -apple-system, system-ui, 'PingFang SC', sans-serif; margin: 24px; color: #222; }
+      .tag { display: inline-block; background: #6b7280; color: #fff; padding: 2px 10px; border-radius: 6px; font-size: 12px; }
+      #csp-log { margin-top: 16px; padding: 12px; background: #f6f7f9; border: 1px solid #e2e5ea; border-radius: 8px; font-family: ui-monospace, Menlo, monospace; font-size: 12px; min-height: 40px; }
+      a { margin-right: 12px; }
+      h2 { margin-top: 28px; }
+      ul { line-height: 2; }
+      code { background: #f0f1f3; padding: 1px 6px; border-radius: 4px; }
+    </style>
+  </head>
+  <body>
+    <span class="tag">无 CSP（基线）</span>
+    <h1>基线测试页 &amp; fixtures 导航</h1>
+    <p>本页无任何 CSP，三种注入方法都应成功。可用它先确认扩展与 PoC 本身工作正常，再逐个测试严格 CSP 页。</p>
+
+    <h2>链接（注入成功后应变红）</h2>
+    <p>
+      <a href="#a1">链接 A</a>
+      <a href="#a2">链接 B</a>
+      <a href="#a3">链接 C</a>
+    </p>
+
+    <h2>其它 CSP fixtures</h2>
+    <ul>
+      <li><a href="csp-strict.html">csp-strict.html</a> — <code>script-src 'self'</code>：M1 ✓ / M2 ✗ / M3 ✗</li>
+      <li><a href="csp-allow-inline.html">csp-allow-inline.html</a> — <code>script-src 'self' 'unsafe-inline'</code>：M1 ✓ / M2 ✓ / M3 ✗</li>
+      <li><a href="csp-allow-blob.html">csp-allow-blob.html</a> — <code>script-src 'self' blob:</code>：M1 ✓ / M2 ✗ / M3 ✓</li>
+    </ul>
+
+    <h2>CSP violation 日志</h2>
+    <div id="csp-log"></div>
+
+    <script src="csp-reporter.js"></script>
+  </body>
+</html>

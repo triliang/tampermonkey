@@ -1,0 +1,33 @@
+{
+  "name": "luban",
+  "private": true,
+  "version": "0.1.0",
+  "description": "鲁班 Luban · AI 网页自动化 Chrome 扩展（MV3）",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "zip": "npm run build && cd dist && zip -rq ../luban.zip ."
+  },
+  "dependencies": {
+    "htm": "^3.1.1",
+    "microlighter": "^2.2.0",
+    "preact": "^11.0.1"
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^3.0.0",
+    "@types/chrome": "^0.0.287",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "jsdom": "^25.0.0",
+    "typescript": "^5.9.0",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.3"
+  }
+}

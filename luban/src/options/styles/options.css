@@ -1,0 +1,186 @@
+:root {
+  --brand: #2f6fed;
+  --danger: #e0402b;
+  --ok: #17a673;
+  --text: #1c1f24;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --bg: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: var(--text);
+  background: #f6f7f9;
+}
+
+.options-app {
+  max-width: 640px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.options-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--line);
+}
+.options-header .brand {
+  font-weight: 700;
+  color: var(--brand);
+}
+.options-header .title {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.options-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--line);
+}
+.options-tabs button {
+  padding: 10px 14px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+}
+.options-tabs button.active {
+  color: var(--brand);
+  border-bottom-color: var(--brand);
+  font-weight: 600;
+}
+
+.options-body {
+  padding: 20px 24px 32px;
+}
+
+.ai-settings section {
+  margin-bottom: 20px;
+}
+.ai-settings h3 {
+  font-size: 13px;
+  margin: 0 0 8px;
+  color: var(--text);
+}
+.ai-settings input[type="text"],
+.ai-settings input[type="password"],
+.ai-settings input[type="number"],
+.ai-settings select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 13px;
+}
+.ai-settings .base-url {
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0;
+}
+.ai-settings .radio-row {
+  display: flex;
+  gap: 20px;
+  font-size: 13px;
+}
+.ai-settings .hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 6px 0 0;
+}
+.ai-settings .hint.warning {
+  color: #b45309;
+}
+.ai-settings .hint.error {
+  color: var(--danger);
+}
+.ai-settings .hint.ok {
+  color: var(--ok);
+}
+.ai-settings .link {
+  margin-top: 6px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  text-decoration: underline;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+}
+.ai-settings .actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ai-settings .actions button {
+  padding: 8px 16px;
+  border: 1px solid var(--brand);
+  background: var(--brand);
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.ai-settings .actions button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.ai-settings .actions button:nth-child(2) {
+  background: #fff;
+  color: var(--brand);
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.script-manager .script-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.script-manager .script-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+.script-manager .badge {
+  margin-left: 8px;
+  font-size: 11px;
+  color: var(--brand);
+}
+.script-manager .hint {
+  margin-left: 8px;
+}
+.script-manager button {
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.hint {
+  color: var(--muted);
+  font-size: 13px;
+}
+.error {
+  color: var(--danger);
+  font-size: 13px;
+}

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <!--
+      允许 blob：script-src 'self' blob:（无 unsafe-inline）。
+      预期：
+        Method 1 → ✓ 成功
+        Method 2 (<script> textContent 内联) → ✗ 拦截（无 unsafe-inline）
+        Method 3 (Blob URL <script src>) → ✓ 成功（blob: 被放行）
+      这是 P0-T2 验收 ③「Method 3 在允许 blob: 的页面生效」的测试页。
+      必须经 HTTP 同源服务打开。
+    -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' blob:" />
+    <title>CSP 测试页 · script-src 'self' blob:</title>
+    <style>
+      body { font: 14px/1.6 -apple-system, system-ui, 'PingFang SC', sans-serif; margin: 24px; color: #222; }
+      .tag { display: inline-block; background: #16a34a; color: #fff; padding: 2px 10px; border-radius: 6px; font-size: 12px; }
+      #csp-log { margin-top: 16px; padding: 12px; background: #f6f7f9; border: 1px solid #e2e5ea; border-radius: 8px; font-family: ui-monospace, Menlo, monospace; font-size: 12px; min-height: 40px; }
+      a { margin-right: 12px; }
+      h2 { margin-top: 28px; }
+      table { border-collapse: collapse; margin-top: 8px; }
+      td, th { border: 1px solid #ddd; padding: 4px 10px; font-size: 13px; text-align: left; }
+    </style>
+  </head>
+  <body>
+    <span class="tag">CSP: script-src 'self' blob:</span>
+    <h1>允许 Blob CSP 测试页</h1>
+    <p>本页放行 blob: 但不放行内联，用于验证 Method 3 成功、Method 2 失败的分界。</p>
+
+    <h2>链接（注入成功后应变红）</h2>
+    <p>
+      <a href="#a1">链接 A</a>
+      <a href="#a2">链接 B</a>
+      <a href="#a3">链接 C</a>
+    </p>
+
+    <h2>预期结果</h2>
+    <table>
+      <tr><th>方法</th><th>预期</th><th>原因</th></tr>
+      <tr><td>Method 1</td><td>✓ 成功</td><td>浏览器级注入，绕过 CSP</td></tr>
+      <tr><td>Method 2</td><td>✗ 拦截</td><td>内联脚本违反 script-src（无 unsafe-inline）</td></tr>
+      <tr><td>Method 3</td><td>✓ 成功</td><td>blob: 在 script-src 允许列表</td></tr>
+    </table>
+
+    <h2>CSP violation 日志</h2>
+    <div id="csp-log"></div>
+
+    <script src="csp-reporter.js"></script>
+  </body>
+</html>

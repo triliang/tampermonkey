@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.local
+luban.zip
+.DS_Store
+.vite/
+coverage/
+*.log

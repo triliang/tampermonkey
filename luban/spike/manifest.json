@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "鲁班 Luban · 注入验证 Spike (Phase 0)",
+  "version": "0.0.1",
+  "description": "PoC only —— 验证 chrome.scripting MAIN world 注入可行性与三级降级链的 CSP 行为。验证后归档，不进入正式产物。权限严格对齐 P0-T1：storage/activeTab/scripting/sidePanel，无 content_scripts（content.js 经 executeScript 按需注入），不声明 host_permissions（依赖点击图标授予的 activeTab 临时授权）。",
+  "permissions": ["storage", "activeTab", "scripting", "sidePanel"],
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "action": {
+    "default_title": "鲁班 Spike · 点击注入（方法见侧栏）"
+  },
+
+  "side_panel": {
+    "default_path": "panel.html"
+  }
+}
