@@ -27,6 +27,17 @@ export const STRINGS = {
       repick: '重新选择',
       openSettings: '打开设置',
       empty: '请先描述你的意图',
+      outgoing: {
+        heading: '将发送给 AI 的信息',
+        url: '页面地址',
+        title: '页面标题',
+        scope: '范围',
+        scopeElement: '选中的元素',
+        elementTag: '元素标签',
+        elementText: '元素文本',
+        counts: '页面摘要数量',
+        privacy: '不会发送：密码、Cookie、localStorage',
+      },
     },
     generating: {
       heading: '正在生成脚本…',

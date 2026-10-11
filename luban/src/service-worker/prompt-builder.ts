@@ -6,6 +6,10 @@ import { ErrorFactory } from '../shared/errors';
 import type { GenerationResult, PageContext } from '../shared/types';
 import type { RegenerateContext } from '../shared/messages';
 import type { ChatMessage } from './ai-providers/base';
+import { describeOutgoingContext } from './outgoing-context';
+
+export type { OutgoingContextDescription, OutgoingScope } from './outgoing-context';
+export { describeOutgoingContext } from './outgoing-context';
 
 /** System Prompt（§I.1 四类硬约束，固定随每次生成请求下发）。 */
 export const SYSTEM_PROMPT = `你是「鲁班」——一个为用户生成可在浏览器用户脚本环境运行的网页自动化 JavaScript 脚本的助手。严格遵守以下约束：
@@ -75,10 +79,18 @@ const GM_CAPABILITIES = {
 };
 
 function buildPayload(context: PageContext, intent: string): ContextPayload {
+  const outgoing = describeOutgoingContext(context);
   return {
-    meta: context.meta,
-    target: context.target,
-    domSummary: context.domSummary,
+    meta: outgoing.meta,
+    target: {
+      ...context.target,
+      tag: outgoing.element.tag,
+      text: outgoing.element.text,
+    },
+    domSummary: {
+      ...context.domSummary,
+      counts: outgoing.summaryCounts,
+    },
     intent: { raw: intent },
     capabilities: GM_CAPABILITIES,
   };

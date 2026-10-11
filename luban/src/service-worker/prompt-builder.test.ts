@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
+import * as outgoingContext from './outgoing-context';
 import {
   buildMessages,
   buildUserContent,
+  describeOutgoingContext,
   estimateTokens,
   generateWithFallback,
   parseAiResponse,
@@ -39,6 +41,62 @@ const VALID_JSON_RESULT = {
   confidence: 0.9,
   warnings: [],
 };
+
+function payloadFromUserContent(context: PageContext, intent: string) {
+  const line = buildUserContent(context, intent).split('\n')[0];
+  return JSON.parse(line) as {
+    meta: PageContext['meta'];
+    target: PageContext['target'];
+    domSummary: PageContext['domSummary'];
+  };
+}
+
+describe('describeOutgoingContext / buildPayload 同源', () => {
+  it('URL 含 token 时展示与 payload 的 meta.url 均不含 token', () => {
+    const context = makeContext({
+      meta: { url: 'https://shop.example/item?token=secret&x=1', title: '商品详情页', siteType: 'ecommerce' },
+    });
+    const described = describeOutgoingContext(context);
+    const payload = payloadFromUserContent(context, '意图');
+    expect(described.meta.url).not.toContain('token');
+    expect(payload.meta.url).toBe(described.meta.url);
+    expect(payload.meta.url).not.toContain('token');
+  });
+
+  it('展示含标题、元素范围、标签文本与摘要数量', () => {
+    const context = makeContext({
+      domSummary: {
+        counts: { inputs: 2, buttons: 3, forms: 1, links: 4, images: 5 },
+        inputs: [],
+        buttons: [],
+        title: '商品详情页',
+        truncated: false,
+      },
+    });
+    const described = describeOutgoingContext(context);
+    expect(described.scope).toBe('element');
+    expect(described.meta.title).toBe('商品详情页');
+    expect(described.element).toEqual({ tag: 'span', text: '¥129.00' });
+    expect(described.summaryCounts).toEqual({ inputs: 2, buttons: 3, forms: 1, links: 4, images: 5 });
+  });
+
+  it('改 describeOutgoingContext 输出会同步改变 payload 对应字段', () => {
+    const context = makeContext();
+    const overridden = {
+      scope: 'element' as const,
+      meta: { url: 'https://example.com/clean', title: '覆盖标题', siteType: 'ecommerce' },
+      element: { tag: 'button', text: '立即购买' },
+      summaryCounts: { inputs: 9, buttons: 8, forms: 7, links: 6, images: 5 },
+    };
+    vi.spyOn(outgoingContext, 'describeOutgoingContext').mockReturnValue(overridden);
+    const payload = payloadFromUserContent(context, '意图');
+    expect(payload.meta).toEqual(overridden.meta);
+    expect(payload.target.tag).toBe(overridden.element.tag);
+    expect(payload.target.text).toBe(overridden.element.text);
+    expect(payload.domSummary.counts).toEqual(overridden.summaryCounts);
+    vi.restoreAllMocks();
+  });
+});
 
 describe('estimateTokens', () => {
   it('纯中文按 1.5 token/字估算', () => {

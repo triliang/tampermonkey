@@ -122,6 +122,35 @@
   color: var(--brand);
 }
 
+.outgoing-context {
+  margin: 10px 0 12px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f9fafb;
+}
+.outgoing-context h3 {
+  margin: 0 0 8px;
+}
+.outgoing-fields {
+  margin: 0;
+}
+.outgoing-fields .field {
+  margin: 6px 0;
+}
+.outgoing-fields dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+.outgoing-fields dd {
+  margin: 2px 0 0;
+  font-size: 13px;
+  word-break: break-all;
+}
+.outgoing-privacy {
+  margin: 8px 0 0;
+}
+
 .stream,
 .code,
 .detail {
