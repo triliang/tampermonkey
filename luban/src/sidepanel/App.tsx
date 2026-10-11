@@ -405,6 +405,7 @@ export default function App() {
             outcome={s.outcome}
             detail={s.detail}
             explanation={lastRun?.explanation ?? ''}
+            intent={s.intent}
             saved={Boolean(lastRun?.scriptId)}
             onRunAgain={() => void onRunAgain()}
             onSave={() => void onSave()}

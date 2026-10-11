@@ -91,6 +91,17 @@ describe('uiReducer 分支与回退', () => {
     const idle = uiReducer(initialState, { type: 'BACK_TO_IDLE' });
     expect(idle.type).toBe('IDLE');
   });
+
+  it('失败结果 FEEDBACK 回意图页并预填错误', () => {
+    const s = uiReducer(
+      { type: 'RESULT', outcome: 'runtime_error', detail: 'TypeError: x', element, intent: '点击按钮' },
+      { type: 'FEEDBACK' },
+    );
+    expect(s.type).toBe('INTENT_INPUT');
+    if (s.type === 'INTENT_INPUT') {
+      expect(s.intent).toBe('点击按钮\nTypeError: x');
+    }
+  });
 });
 
 describe('uiReducer 非法迁移幂等', () => {

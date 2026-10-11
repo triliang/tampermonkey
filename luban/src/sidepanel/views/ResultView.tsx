@@ -1,11 +1,13 @@
 import { STRINGS } from '../../shared/i18n-strings';
 import { Button } from '../components/Button';
 import type { RunOutcome } from '../state-machine';
+import { resolveSuccessMainCopy } from './result-success-copy';
 
 interface ResultViewProps {
   outcome: RunOutcome;
   detail: unknown;
   explanation: string;
+  intent: string;
   saved: boolean;
   onRunAgain: () => void;
   onSave: () => void;
@@ -15,13 +17,17 @@ interface ResultViewProps {
   offline?: boolean;
 }
 
-export function ResultView({ outcome, detail, explanation, saved, onRunAgain, onSave, onOnce, onFeedback, onBack, offline }: ResultViewProps) {
+export function ResultView({ outcome, detail, explanation, intent, saved, onRunAgain, onSave, onOnce, onFeedback, onBack, offline }: ResultViewProps) {
   const s = STRINGS.panel.result;
-  const heading = outcome === 'success' ? s.success : outcome === 'injection_fail' ? s.injectionFail : s.runtimeError;
+  const heading =
+    outcome === 'success'
+      ? resolveSuccessMainCopy(explanation, intent) || s.success
+      : outcome === 'injection_fail'
+        ? s.injectionFail
+        : s.runtimeError;
   return (
     <section class={`view result-${outcome}`}>
       <h2>{heading}</h2>
-      {outcome === 'success' && explanation ? <p>{explanation}</p> : null}
       {outcome !== 'success' ? <pre class="detail">{String(detail ?? '')}</pre> : null}
       <div class="row">
         {outcome === 'success' ? (
