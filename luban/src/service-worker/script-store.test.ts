@@ -53,6 +53,16 @@ beforeEach(() => {
 });
 
 describe('ScriptStore', () => {
+  it('保存脚本不含 autoRun 字段（阶段 2 不注册自动运行）', async () => {
+    const store = new ScriptStore(new StorageManager());
+    const saved = script('s-auto');
+    await store.save(saved);
+    const roundTrip = await store.get('s-auto');
+    expect(roundTrip).not.toBeNull();
+    expect('autoRun' in (roundTrip as object)).toBe(false);
+    expect((globalThis as unknown as { chrome: { userScripts?: { register?: unknown } } }).chrome.userScripts?.register).toBeUndefined();
+  });
+
   it('保存后索引与单条一致，删除时同步清掉 GM 存储和索引', async () => {
     const store = new ScriptStore(new StorageManager());
     const saved = script('s1');

@@ -75,6 +75,24 @@ describe('整页入口', () => {
     expect(s.type).toBe('PICKING');
   });
 
+  it('整页暗色：无元素时 PREVIEW → RESULT 仍保留 element 为 null', () => {
+    const intent = '把页面改成暗色';
+    let s = uiReducer(initialState, { type: 'START_PAGE_DESCRIBE' });
+    s = uiReducer(s, { type: 'SUBMIT_INTENT', intent });
+    const pageResult: GenerationResult = {
+      ...genResult,
+      code: 'GM_addStyle("html, body { background-color: #1a1a1a !important; }");',
+      gmGrants: ['GM_addStyle'],
+      explanation: '整页暗色',
+    };
+    s = uiReducer(s, { type: 'GENERATED', result: pageResult });
+    expect(s.type).toBe('PREVIEW');
+    if (s.type === 'PREVIEW') expect(s.element).toBeNull();
+    s = uiReducer(s, { type: 'RUN_DONE', outcome: 'success', detail: 'Method 1 · 1ms' });
+    expect(s.type).toBe('RESULT');
+    if (s.type === 'RESULT') expect(s.element).toBeNull();
+  });
+
   it('从整页意图页仍可进入点选', () => {
     let s = uiReducer(initialState, { type: 'START_PAGE_DESCRIBE' });
     s = uiReducer(s, { type: 'START_PICK' });
