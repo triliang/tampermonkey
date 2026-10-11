@@ -1,8 +1,10 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { STORAGE_KEYS } from '../shared/constants';
 import type { UserScript } from '../shared/types';
 import { ScriptStore } from './script-store';
 import { StorageManager } from './storage-manager';
+
+vi.mock('../content/index.ts?script&iife', () => ({ default: 'mock-content.js' }));
 
 function makeLocal() {
   const data: Record<string, unknown> = {};
@@ -47,25 +49,10 @@ function script(id: string, name = '标红'): UserScript {
 
 let local: ReturnType<typeof makeLocal>;
 
-beforeEach(() => {
-  local = makeLocal();
-  (globalThis as unknown as { chrome: unknown }).chrome = { storage: { local } };
-});
-
 describe('ScriptStore', () => {
-  it('保存脚本不含 autoRun 字段（阶段 2 不注册自动运行）', async () => {
-    const register = vi.fn();
-    (globalThis as unknown as { chrome: unknown }).chrome = {
-      storage: { local },
-      userScripts: { register },
-    };
-    const store = new ScriptStore(new StorageManager());
-    const saved = script('s-auto');
-    await store.save(saved);
-    const roundTrip = await store.get('s-auto');
-    expect(roundTrip).not.toBeNull();
-    expect('autoRun' in (roundTrip as object)).toBe(false);
-    expect(register).not.toHaveBeenCalled();
+  beforeEach(() => {
+    local = makeLocal();
+    (globalThis as unknown as { chrome: unknown }).chrome = { storage: { local } };
   });
 
   it('保存后索引与单条一致，删除时同步清掉 GM 存储和索引', async () => {
@@ -84,7 +71,72 @@ describe('ScriptStore', () => {
   });
 });
 
+describe('SAVE_SCRIPT · handleSaveScript', () => {
+  let saveLocal: ReturnType<typeof makeLocal>;
+  let register: ReturnType<typeof vi.fn>;
+  let onMessage: (
+    msg: unknown,
+    sender: chrome.runtime.MessageSender,
+    respond: (r: unknown) => void,
+  ) => boolean | void;
+
+  beforeAll(async () => {
+    saveLocal = makeLocal();
+    register = vi.fn();
+    const session = {
+      _data: {} as Record<string, unknown>,
+      get: vi.fn(async (key: string | string[]) => {
+        const keys = Array.isArray(key) ? key : [key];
+        const out: Record<string, unknown> = {};
+        for (const k of keys) if (k in session._data) out[k] = session._data[k];
+        return out;
+      }),
+      set: vi.fn(async (items: Record<string, unknown>) => Object.assign(session._data, items)),
+    };
+    (globalThis as unknown as { chrome: unknown }).chrome = {
+      storage: { local: saveLocal, session },
+      userScripts: { register },
+      runtime: {
+        onInstalled: { addListener: vi.fn() },
+        onMessage: {
+          addListener: (fn: typeof onMessage) => {
+            onMessage = fn;
+          },
+        },
+        onConnect: { addListener: vi.fn() },
+      },
+      action: { onClicked: { addListener: vi.fn() } },
+      tabs: { get: vi.fn().mockRejectedValue(new Error('no tab')), sendMessage: vi.fn() },
+      scripting: { executeScript: vi.fn() },
+      sidePanel: { open: vi.fn() },
+    };
+    await import('./index');
+  });
+
+  it('经 SAVE_SCRIPT 落库不含 autoRun，且不调用 userScripts.register', async () => {
+    register.mockClear();
+    const saved = script('s-save-handler');
+    const respond = vi.fn();
+    await new Promise<void>((resolve) => {
+      onMessage({ type: 'SAVE_SCRIPT', requestId: 'req-save', script: saved }, {}, (r) => {
+        respond(r);
+        resolve();
+      });
+    });
+    expect(respond).toHaveBeenCalledWith({ ok: true, data: { id: 's-save-handler' } });
+    const stored = saveLocal._data[STORAGE_KEYS.script('s-save-handler')] as UserScript;
+    expect(stored).toBeDefined();
+    expect('autoRun' in stored).toBe(false);
+    expect(register).not.toHaveBeenCalled();
+  });
+});
+
 describe('StorageManager', () => {
+  beforeEach(() => {
+    local = makeLocal();
+    (globalThis as unknown as { chrome: unknown }).chrome = { storage: { local } };
+  });
+
   it('一次 set 写入 100 个 key，只调用一次 storage.local.set', async () => {
     const storage = new StorageManager();
     const items: Record<string, unknown> = {};

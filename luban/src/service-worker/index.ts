@@ -8,7 +8,6 @@ import './ai-providers/openai-compatible';
 import { AiClient } from './ai-client';
 import type { AiCaller } from './prompt-builder';
 import { generateWithFallback } from './prompt-builder';
-import { tryPageScopeStub } from './page-scope-stub';
 import { scanCode } from './safety-scanner';
 import { injectScript } from './injection-dispatcher';
 import { getScriptStore, pageMatchesScript } from './script-store';
@@ -112,46 +111,38 @@ async function handleGenerateScript(
   try {
     let lastModel: string = MIMO.models.flash;
     let lastTokens = 0;
-    let data;
+    const [settings, apiKey] = await Promise.all([getSettings(), getApiKey()]);
+    if (!apiKey) throw ErrorFactory.keyInvalid();
 
-    const pageStub = tryPageScopeStub(msg.context, msg.intent);
-    if (pageStub) {
-      data = pageStub;
-      lastModel = 'page-scope-stub';
-    } else {
-      const [settings, apiKey] = await Promise.all([getSettings(), getApiKey()]);
-      if (!apiKey) throw ErrorFactory.keyInvalid();
+    lastModel = settings.defaultModel || MIMO.models.flash;
+    const caller: AiCaller = {
+      async generate(messages, model, onDelta) {
+        lastModel = model;
+        const client = new AiClient();
+        activeClient = client;
+        const outcome = await client.generate(
+          { ...toProviderConfig(settings, apiKey), model },
+          messages,
+          { jsonMode: true, thinking: false },
+          { onDelta },
+        );
+        lastTokens = outcome.usage?.total_tokens ?? lastTokens;
+        return outcome.text;
+      },
+    };
 
-      lastModel = settings.defaultModel || MIMO.models.flash;
-      const caller: AiCaller = {
-        async generate(messages, model, onDelta) {
-          lastModel = model;
-          const client = new AiClient();
-          activeClient = client;
-          const outcome = await client.generate(
-            { ...toProviderConfig(settings, apiKey), model },
-            messages,
-            { jsonMode: true, thinking: false },
-            { onDelta },
-          );
-          lastTokens = outcome.usage?.total_tokens ?? lastTokens;
-          return outcome.text;
-        },
-      };
-
-      data = await generateWithFallback(
-        caller,
-        msg.context,
-        msg.intent,
-        MIMO.models.flash,
-        MIMO.models.pro,
-        (acc) => {
-          const progress: GenerationProgressMsg = { type: 'GENERATION_PROGRESS', requestId: msg.requestId, content: acc, done: false };
-          port.postMessage(progress);
-        },
-        msg.regenerateContext,
-      );
-    }
+    const data = await generateWithFallback(
+      caller,
+      msg.context,
+      msg.intent,
+      MIMO.models.flash,
+      MIMO.models.pro,
+      (acc) => {
+        const progress: GenerationProgressMsg = { type: 'GENERATION_PROGRESS', requestId: msg.requestId, content: acc, done: false };
+        port.postMessage(progress);
+      },
+      msg.regenerateContext,
+    );
 
     const scan = scanCode(data.code, data.gmGrants);
     const result: GenerationResult = {

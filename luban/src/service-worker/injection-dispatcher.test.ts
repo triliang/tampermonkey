@@ -2,7 +2,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { compileRunnerSource } from '../shared/injected-runner';
 import { STORAGE_KEYS } from '../shared/constants';
 import { getSiteCompatibility, injectScript } from './injection-dispatcher';
-import { PAGE_DARK_MODE_STUB_CODE } from './page-scope-stub';
+
+const SAMPLE_DARK_STYLE_CODE =
+  'GM_addStyle("html, body { background-color: #1a1a1a !important; color: #e0e0e0 !important; }");';
 
 function makeLocalStorage() {
   const data: Record<string, unknown> = {};
@@ -25,18 +27,18 @@ beforeEach(() => {
   };
 });
 
-describe('injectScript · 整页暗色 stub', () => {
+describe('injectScript · 整页暗色样式脚本', () => {
   it('经 Method 1 注入暗色脚本时 userScripts.execute 使用 MAIN world 与 compileRunnerSource', async () => {
     execute.mockResolvedValue([{ result: { ok: true, timedOut: false, dirty: {} } }]);
     const gmGrants = ['GM_addStyle'];
-    await injectScript(1, 'example.com', PAGE_DARK_MODE_STUB_CODE, gmGrants, {}, vi.fn());
+    await injectScript(1, 'example.com', SAMPLE_DARK_STYLE_CODE, gmGrants, {}, vi.fn());
     expect(execute).toHaveBeenCalledWith({
       target: { tabId: 1 },
       world: 'MAIN',
       injectImmediately: true,
-      js: [{ code: compileRunnerSource(PAGE_DARK_MODE_STUB_CODE, gmGrants, {}) }],
+      js: [{ code: compileRunnerSource(SAMPLE_DARK_STYLE_CODE, gmGrants, {}) }],
     });
-    expect(compileRunnerSource(PAGE_DARK_MODE_STUB_CODE, gmGrants, {})).toContain('#1a1a1a');
+    expect(compileRunnerSource(SAMPLE_DARK_STYLE_CODE, gmGrants, {})).toContain('#1a1a1a');
   });
 });
 

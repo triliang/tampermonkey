@@ -7,7 +7,6 @@ import type { GenerationResult, PageContext, TargetElement } from '../shared/typ
 import type { RegenerateContext } from '../shared/messages';
 import type { ChatMessage } from './ai-providers/base';
 import { describeOutgoingContext } from './outgoing-context';
-import { tryPageScopeStub } from './page-scope-stub';
 
 export type { OutgoingContextDescription, OutgoingScope } from './outgoing-context';
 export { describeOutgoingContext, shouldShowOutgoingElementFields } from './outgoing-context';
@@ -227,9 +226,6 @@ export async function generateWithFallback(
   onDelta: (acc: string) => void,
   regenerateContext?: RegenerateContext,
 ): Promise<ParsedResponse> {
-  const stub = tryPageScopeStub(context, intent);
-  if (stub) return stub;
-
   const first = await caller.generate(buildMessages(context, intent, regenerateContext), flashModel, onDelta);
   const firstParsed = parseAiResponse(first);
   if (firstParsed.ok) return firstParsed.data;

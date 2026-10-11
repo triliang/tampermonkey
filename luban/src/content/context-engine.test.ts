@@ -104,11 +104,14 @@ describe('collectPageContext 两种 scope', () => {
   });
 
   it('不点选直接采集时 scope 为 page，target 为 null，摘要仍受限流', () => {
+    let deep = '<input id="deep-input" />';
+    for (let i = 0; i < CONTEXT_LIMITS.maxDepth + 2; i++) deep = `<div>${deep}</div>`;
     const nIn = CONTEXT_LIMITS.maxInputs + 4;
     const nBtn = CONTEXT_LIMITS.maxButtons + 2;
     document.body.innerHTML =
       Array.from({ length: nIn }, (_, i) => `<input id="i${i}" />`).join('') +
-      Array.from({ length: nBtn }, (_, i) => `<button>b${i}</button>`).join('');
+      Array.from({ length: nBtn }, (_, i) => `<button>b${i}</button>`).join('') +
+      deep;
     const ctx = collectPageContext();
     expect(ctx.scope).toBe('page');
     expect(ctx.target).toBeNull();
