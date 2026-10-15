@@ -9,11 +9,14 @@ export type BillingType = 'tokenPlan' | 'onDemand';
 
 /** AI Provider 配置（BYOK，存 local）。 */
 export interface ProviderConfig {
+  thinkingEnabled?:boolean;
+  thinkingProtocol?:import('./thinking').ThinkingProtocol;
   id: string;
   baseUrl: string;
   apiKey: string;
   model: string;
   billing: BillingType;
+  customEndpoint?: boolean;
   /** 可选：请求超时覆盖 */
   timeoutMs?: number;
 }
@@ -26,6 +29,7 @@ export interface ValidationResult {
 
 /** 目标元素信息（§3.2 Phase 1，同步采集）。 */
 export interface TargetElement {
+  targetContext?:import('./v21-types').TargetContext;
   /** 按稳健度降序的选择器候选链 */
   selectorCandidates: string[];
   tag: string;
@@ -51,6 +55,8 @@ export interface DOMSummary {
   buttons: string[];
   title: string;
   truncated: boolean;
+  /** 有限结构定位线索，非整页 HTML。 */
+  structure?: Array<{ tag: string; selectors: string[]; text: string; role?: string }>;
 }
 
 /** 上下文采集范围：点选元素 vs 整页摘要。 */
@@ -82,6 +88,7 @@ export interface SafetyReport {
 
 /** 生成结果（AI 解析 + 扫描后，§3.4 / PRD §I.3）。 */
 export interface GenerationResult {
+  needsClarification?:{reason:'constraint_conflict'|'target_ambiguous'|'trigger_ambiguous';question:string};
   requestId: string;
   /** 用户脚本代码 */
   code: string;
@@ -137,6 +144,12 @@ export interface ScriptMeta {
 
 /** 全局非敏感设置（sync，§五）。API Key 本身绝不进本结构，单独存 local（§B.5）。 */
 export interface Settings {
+  thinkingEnabled?:boolean;
+  customThinkingProtocol?:import('./thinking').ThinkingProtocol;
+  pageAnalysisEnabled?: boolean;
+  customEndpoint?: boolean;
+  customBaseUrl?: string;
+  customModel?: string;
   /** 默认模型（flash/pro） */
   defaultModel: string;
   /** 端点地区：cn/sgp/ams/onDemand */

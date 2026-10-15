@@ -1,0 +1,12 @@
+{
+  "scripts": [
+    {
+      "id": "a",
+      "versionId": "f86bd025-68f9-4a43-97d7-703b4328912e",
+      "hash": "d730c0345742596f710cdd5410ef565d95c5eb5026300c9f885a2f995c6de2eb"
+    }
+  ],
+  "bridgeHosts": [
+    "shop.example.com"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "recordedAt": "2026-10-15T07:56:32.757767+00:00",
+  "files": {
+    "src/content/element-picker.ts": "cde6bc0eaba73cb789f2fd8c73cf4bceb065a6db81dddae8db61b13f20702636",
+    "src/content/element-picker.test.ts": "02cef5d9d4de33f53140aceba6b878bde8d0f6fc0fbe941ec60952d79091a928",
+    "dist/assets/bridge.ts-DszPh4uo.js": "16b77d6eff3990dc6b17846693873a1ca7b0664a635cebd826157b6f17a5d5ee",
+    "dist/assets/errors-qQhLwch8.js": "9dfe3d48b4d8f7b62cf3bd661cff2da6287a9a2464d2a53db2db01c62e3b3582",
+    "dist/assets/grammars/javascript.js": "0169250bf080ffcc7f425ff940798fe4509c2ecbec33c2180d72a24fb90fb2f4",
+    "dist/assets/host-policy-CHBgTlJF.js": "ebbdbfbf7a61af98ad228698a021dfec1e163e3558c369291d9e7b99cd93b880",
+    "dist/assets/index-CxTi6fDG.css": "d5c8b6d715e787554831505ba94956fb1e735448f4c40a192bb8897695262499",
+    "dist/assets/index.html-BPmhwUQw.js": "6fdd3285733b71f1e80bfce28ea9724d374e9f39bed180d266ef42721208d3a4",
+    "dist/assets/index.html-VdLkpCBn.js": "ca78595ac9ff70828d0eeb7b8ca5779d97a284f5dcd4406ae7365e5d08b0be1e",
+    "dist/assets/index.ts-B5YNbXY6.js": "7ae1526281546962248b5e19373fd89a1a7eff652c33387942f74f752e9a5edf",
+    "dist/assets/index.ts-DauaXD6I.js": "077929df330b031c02d2a6b7058e3f1a28729d57765dd566d3616aadeaa68759",
+    "dist/assets/injected-runner-BkgYDIQP.js": "9165d38e6e8a9f9b7ffe2951a9267462e628785fdd7e64927970fedc88fd3414",
+    "dist/assets/panel-Cxp3-dAV.js": "2bade3f42e12ed204becbcb4786434e5f95e540b05226423a8affd6aa6e0dcb3",
+    "dist/assets/panel-DOOMB-U3.css": "bdcba6f93b181840ea8ca57a4c0ca9daa54aac2962118609884ee0297537183c",
+    "dist/manifest.json": "667f4173d130f0ee4527395c2077be03b0e44dd78992d7c108fe47c5b49db119",
+    "dist/service-worker-loader.js": "93e5bd15e458f5941ecf16ff41032dd47373895a35d47cc5ba85058f45aeee6a",
+    "dist/src/assets/icon128.png": "3786a71c5d8c8cacd795631af93a9c1f03832483faed06d1daa0768dd52a2579",
+    "dist/src/assets/icon16.png": "a310a93f1d8a7104e296070c6190339a816f09f879b307880b78af8b8ee404d8",
+    "dist/src/assets/icon48.png": "13478268419efe913ee50896644fadd25d3e6d87498147e865d3897ef97bfc3c",
+    "dist/src/auto/bridge.js": "c810cd277b66f82aff1f5d2f8b4b9e00b81be2db53c670cf846d4feb1dde6dfa",
+    "dist/src/content/index.js": "29dac6735cfa47318f274f0696287f563109708ede61e4d31875a11168be77f6",
+    "dist/src/options/index.html": "70cdbe0ef061b3d08dfaedd8e7c8efd6f858d38c399aa2d61c6c4da55a449f6d",
+    "dist/src/sidepanel/index.html": "1bcbc50699637daba28efff621b5b02980c21e3bddd1bc7193fc1f483765580c"
+  }
+}

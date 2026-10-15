@@ -124,3 +124,17 @@ describe('AiClient', () => {
     expect(typeof result.latencyMs).toBe('number');
   });
 });
+
+it('V2.1 显式关闭超时重发，失败请求只发送一次',async()=>{
+ const fetcher=vi.fn(async()=>{throw new DOMException('aborted','AbortError');});vi.stubGlobal('fetch',fetcher);
+ try{const client=new AiClient();await expect(client.generate(config,[{role:'user',content:'test'}],{jsonMode:true,thinking:false,autoRetry:false},{onDelta:()=>{}})).rejects.toBeInstanceOf(LubanError);expect(fetcher).toHaveBeenCalledOnce();}finally{vi.unstubAllGlobals();}
+});
+
+it('推理内容仅通知状态，不混入最终 JSON 或文本回调',async()=>{
+ const reasoning='PRIVATE_REASONING_NOT_FOR_OUTPUT';vi.stubGlobal('fetch',vi.fn(async()=>new Response(sseBody([`data: ${JSON.stringify({choices:[{delta:{reasoning_content:reasoning}}]})}\n\n`,sseLine('{"code":"ok"}'),'data: [DONE]\n\n']))));
+ try{const onThinking=vi.fn(),onDelta=vi.fn();const result=await new AiClient().generate(config,[],{jsonMode:true,thinking:true,autoRetry:false},{onThinking,onDelta});expect(result.text).toBe('{"code":"ok"}');expect(onThinking).toHaveBeenCalledOnce();expect(JSON.stringify(onDelta.mock.calls)).not.toContain(reasoning);}finally{vi.unstubAllGlobals();}
+});
+it('推理独立流式回调与最终结果限量保留，正文不混入推理',async()=>{
+ const large='中'.repeat(30000);vi.stubGlobal('fetch',vi.fn(async()=>new Response(sseBody([`data: ${JSON.stringify({choices:[{delta:{reasoning_content:large}}]})}\n\n`,sseLine('{"code":"ok"}'),'data: [DONE]\n\n']))));
+ try{const onReasoning=vi.fn(),onDelta=vi.fn();const result=await new AiClient().generate(config,[],{jsonMode:true,thinking:true,autoRetry:false},{onReasoning,onDelta});expect(result.text).toBe('{"code":"ok"}');expect(new TextEncoder().encode(result.reasoning).length).toBeLessThanOrEqual(65536);expect(result.reasoning).not.toContain('�');expect(result.reasoningTruncated).toBe(true);expect(onReasoning).toHaveBeenCalledWith(result.reasoning,true);expect(JSON.stringify(onDelta.mock.calls)).not.toContain('中');}finally{vi.unstubAllGlobals();}
+});

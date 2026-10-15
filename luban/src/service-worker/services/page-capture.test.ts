@@ -1,0 +1,14 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+vi.mock('../../content/index.ts?script&iife',()=>({default:'content.js'}));
+import { acceptCapture, captureCurrentPage, currentSite } from './page-capture';
+import type { PageContext } from '../../shared/types';
+const context:PageContext={scope:'page',meta:{url:'https://example.com/page',title:'page',siteType:'unknown'},target:null,domSummary:{counts:{inputs:0,buttons:0,forms:0,links:0,images:0},inputs:[],buttons:[],title:'page',truncated:false}};
+let mock:{runtime:{id:string};tabs:{query:ReturnType<typeof vi.fn>;get:ReturnType<typeof vi.fn>;sendMessage:ReturnType<typeof vi.fn>};scripting:{executeScript:ReturnType<typeof vi.fn>}};
+beforeEach(()=>{mock={runtime:{id:'luban'},tabs:{query:vi.fn(async()=>[{id:1,url:'https://example.com/page',title:'page'}]),get:vi.fn(async()=>({id:1,url:'https://example.com/page'})),sendMessage:vi.fn()},scripting:{executeScript:vi.fn(async()=>[])}};Object.assign(globalThis,{chrome:mock});});
+afterEach(()=>vi.useRealTimers());
+describe('P2 浏览器来源与页面身份',()=>{
+ it('只有浏览器sender的tab/frame/document被接受，不相信页面自报文档',async()=>{mock.tabs.sendMessage.mockImplementation(async(_id,m)=>{await acceptCapture(m.requestId,context,{id:'luban',frameId:0,documentId:'browser-doc',url:'https://example.com/page',tab:{id:1} as chrome.tabs.Tab});return{ok:true};});const r=await captureCurrentPage();expect(r.binding).toMatchObject({tabId:1,documentId:'browser-doc',host:'example.com'});expect(mock.scripting.executeScript).toHaveBeenCalledOnce();});
+ it('不是当前tab或frame的报告拒绝，并使未获得有效报告的采集超时',async()=>{vi.useFakeTimers();mock.tabs.sendMessage.mockImplementation(async(_id,m)=>{await expect(acceptCapture(m.requestId,context,{id:'luban',frameId:1,documentId:'bad',url:'https://example.com/page',tab:{id:1} as chrome.tabs.Tab})).rejects.toMatchObject({code:'INVALID_CAPTURE_SOURCE'});return{ok:true};});const task=captureCurrentPage();const rejected=expect(task).rejects.toMatchObject({code:'CAPTURE_TIMEOUT'});await vi.advanceTimersByTimeAsync(5001);await rejected;});
+ it('采集期间导航拒绝旧文档，不能以旧URL冒充新页面',async()=>{mock.tabs.get.mockResolvedValue({id:1,url:'https://example.com/next'});mock.tabs.sendMessage.mockImplementation(async(_id,m)=>{await acceptCapture(m.requestId,context,{id:'luban',frameId:0,documentId:'old',url:'https://example.com/page',tab:{id:1} as chrome.tabs.Tab});return{ok:true};});await expect(captureCurrentPage()).rejects.toMatchObject({code:'PAGE_CHANGED'});});
+ it('当前tab可查但无URL/注入授权时不给虚假activeTab兜底',async()=>{mock.tabs.query.mockResolvedValue([{id:1}]);await expect(currentSite()).rejects.toMatchObject({code:'ACTIVE_TAB_EXPIRED'});mock.tabs.query.mockResolvedValue([{id:1,url:'https://example.com/page'}]);mock.scripting.executeScript.mockRejectedValue(Error('Cannot access'));await expect(captureCurrentPage()).rejects.toMatchObject({code:'ACTIVE_TAB_EXPIRED'});});
+});

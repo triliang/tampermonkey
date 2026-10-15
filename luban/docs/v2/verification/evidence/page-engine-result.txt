@@ -1,0 +1,13 @@
+Computer use observed result on Google Chrome 155.0.8059.40
+URL: http://localhost:18888/storage-probe.html
+Action: clicked “执行页面引擎检查” using cua_repl
+
+IDB transaction abort: PASS
+current=A; previous=OLD
+256 KiB application size guard: PASS
+GM_info standard object accessible: PASS
+GM_info legacy function call rejected: PASS
+Scope: webpage origin only (http://localhost:18888); not extension storage quota proof
+2026-10-13T11:18:25.993Z
+
+This file is a transcription of observed UI text, not a downloaded extension evidence JSON.

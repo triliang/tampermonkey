@@ -1,0 +1,15 @@
+来源：computer use 点击 http://localhost:18888/p1-browser.html 的“执行 P1 仓储检查”，读取可见页面结果。
+PASS · 旧脚本迁移、自动运行关闭
+PASS · GM 保留，Key 不迁移
+PASS · 工作区与对话隔离
+PASS · 连接重开、输入与草稿恢复、请求标中断
+PASS · CAS 并发只允许一份修改
+PASS · 跨记录事务中止，原版本与日志完整
+PASS · GM null 与删除明确区分
+PASS · 删除关联数据且旧备份不复活，其他草稿保留
+ALL PASS · 8 项真实 Chrome 网页 origin 仓储检查
+Chrome/155.0.0.0
+2026-10-13T12:08:59.781Z
+数据库：luban-p1-browser-test-dbda5e60-fbb4-4a89-9266-89dd8ca99bb2
+不代表扩展升级 UI 或 Chrome 138 验收。
+使用正式仓储源码构建；旧存储来源为注入测试夹具。其后仅加严非法 draft/undefined patch 的校验，合法输入路径不变，额外校验由最后一次自动测试覆盖。

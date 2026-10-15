@@ -184,3 +184,5 @@ body {
   color: var(--danger);
   font-size: 13px;
 }
+
+.options-header .brand{display:inline-flex;align-items:center;gap:8px}.options-header .brand img{display:block;flex-shrink:0;object-fit:contain}

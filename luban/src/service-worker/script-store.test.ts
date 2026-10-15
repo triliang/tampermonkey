@@ -1,3 +1,6 @@
+vi.mock('../auto/bridge.ts?script&iife',()=>({default:'test-auto-bridge.js'}));
+import 'fake-indexeddb/auto';
+import { Database } from './repositories/database';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { STORAGE_KEYS } from '../shared/constants';
 import type { UserScript } from '../shared/types';
@@ -10,6 +13,7 @@ function makeLocal() {
   const data: Record<string, unknown> = {};
   return {
     get: vi.fn(async (key: string | string[]) => {
+      if (key === null) return { ...data };
       const keys = Array.isArray(key) ? key : [key];
       const out: Record<string, unknown> = {};
       for (const k of keys) if (k in data) out[k] = data[k];
@@ -56,13 +60,14 @@ describe('ScriptStore', () => {
   });
 
   it('保存后索引与单条一致，删除时同步清掉 GM 存储和索引', async () => {
-    const store = new ScriptStore(new StorageManager());
+    const store = new ScriptStore(new Database('script-test-' + crypto.randomUUID()), async () => ({}));
     const saved = script('s1');
     await store.save(saved);
     expect(await store.list()).toEqual([{ id: 's1', name: '标红', updatedAt: 2, source: 'ai' }]);
     expect(await store.get('s1')).toEqual(saved);
     await store.writeGm('s1', { k: 'v' });
-    expect(local._data[STORAGE_KEYS.gm('s1')]).toEqual({ k: 'v' });
+    expect(await store.readGm('s1')).toEqual({ k: 'v' });
+    expect(local.set).not.toHaveBeenCalled();
 
     await store.delete('s1');
     expect(await store.list()).toEqual([]);
@@ -97,6 +102,7 @@ describe('SAVE_SCRIPT · handleSaveScript', () => {
       storage: { local: saveLocal, session },
       userScripts: { register },
       runtime: {
+        id: 'test-extension',
         onInstalled: { addListener: vi.fn() },
         onMessage: {
           addListener: (fn: typeof onMessage) => {
@@ -113,20 +119,21 @@ describe('SAVE_SCRIPT · handleSaveScript', () => {
     await import('./index');
   });
 
-  it('经 SAVE_SCRIPT 落库不含 autoRun，且不调用 userScripts.register', async () => {
+  it('P3 禁止旧 SAVE_SCRIPT 绕过试运行凭证，不写入任何版本', async () => {
     register.mockClear();
     const saved = script('s-save-handler');
     const respond = vi.fn();
     await new Promise<void>((resolve) => {
-      onMessage({ type: 'SAVE_SCRIPT', requestId: 'req-save', script: saved }, {}, (r) => {
+      onMessage({ type: 'SAVE_SCRIPT', requestId: 'req-save', script: saved }, { id: 'test-extension', url: 'chrome-extension://test-extension/src/sidepanel/index.html' }, (r) => {
         respond(r);
         resolve();
       });
     });
-    expect(respond).toHaveBeenCalledWith({ ok: true, data: { id: 's-save-handler' } });
-    const stored = saveLocal._data[STORAGE_KEYS.script('s-save-handler')] as UserScript;
-    expect(stored).toBeDefined();
-    expect('autoRun' in stored).toBe(false);
+    expect(respond).toHaveBeenCalledWith(expect.objectContaining({ok:false,error:expect.objectContaining({code:'RUN_WORKSPACE_REQUIRED'})}));
+    const { getScriptStore } = await import('./script-store');
+    const stored = await getScriptStore().record('s-save-handler');
+    expect(stored).toBeUndefined();
+    expect(saveLocal._data[STORAGE_KEYS.script('s-save-handler')]).toBeUndefined();
     expect(register).not.toHaveBeenCalled();
   });
 });

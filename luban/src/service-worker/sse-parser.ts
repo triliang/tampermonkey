@@ -92,7 +92,7 @@ export interface ChatCompletionChunk {
 /** 高层封装：直接消费 `ReadableStream<Uint8Array>`，按 OpenAI 协议产出累计文本增量迭代器。 */
 export async function* parseOpenAIStream(
   stream: ReadableStream<Uint8Array>,
-): AsyncGenerator<{ delta: string; done: boolean; usage?: ChatCompletionChunk['usage'] }, void, void> {
+): AsyncGenerator<{ delta: string; done: boolean; usage?: ChatCompletionChunk['usage']; finishReason?:string; streamEnd?:'done'|'eof'; malformed?:boolean;thinking?:boolean;reasoningDelta?:string }, void, void> {
   const reader = stream.getReader();
   const decoder = new TextDecoder();
   const parser = new SseParser();
@@ -102,7 +102,7 @@ export async function* parseOpenAIStream(
       const events = done ? parser.flush() : parser.push(decoder.decode(value, { stream: true }));
       for (const evt of events) {
         if (evt.data === '[DONE]') {
-          yield { delta: '', done: true };
+          yield { delta: '', done: true, streamEnd:'done' };
           return;
         }
         if (evt.data === '') continue;
@@ -110,13 +110,16 @@ export async function* parseOpenAIStream(
         try {
           parsed = JSON.parse(evt.data) as ChatCompletionChunk;
         } catch {
+          yield {delta:'',done:false,malformed:true};
           continue; // 畸形 data 行跳过，不中断整条流
         }
+        const finish=parsed.choices?.[0]?.finish_reason;if(finish)yield{delta:'',done:false,finishReason:finish};
+        const reasoning=parsed.choices?.[0]?.delta?.reasoning_content;if(typeof reasoning==='string'&&reasoning)yield{delta:'',done:false,thinking:true,reasoningDelta:reasoning};
         const content = parsed.choices?.[0]?.delta?.content ?? '';
         if (content) yield { delta: content, done: false };
         if (parsed.usage) yield { delta: '', done: false, usage: parsed.usage };
       }
-      if (done) return;
+      if (done) {yield{delta:'',done:true,streamEnd:'eof'};return;}
     }
   } finally {
     reader.releaseLock();

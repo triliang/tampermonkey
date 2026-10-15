@@ -1,0 +1,16 @@
+
+> luban@0.1.0 test
+> vitest run
+
+
+ RUN  v5.0.3 /Users/jinxiong.yang/Code/tampermonkey/luban
+
+
+ Test Files  26 passed (26)
+      Tests  273 passed (273)
+   Start at  17:50:01
+   Duration  1.35s (environment 41%, tests 35%, transform 15%, import 8%, worker 1%)
+
+    Isolate  26 workers spawned · ~181ms startup each (spawn + environment, per file)
+             at least ~490ms faster with isolate: false — reuses workers across files instead of one per file
+

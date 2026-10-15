@@ -1,0 +1,19 @@
+ D luban/docs/ai-automation-development-tasks.md
+ D luban/docs/ai-automation-product-requirements.md
+ D luban/docs/ai-automation-prototype.html
+ D luban/docs/ai-automation-technical-design.md
+ D luban/docs/phase1-verification.md
+ D luban/docs/phase2-verification.md
+ D luban/docs/phase3-verification.md
+ D luban/docs/phase4-verification.md
+ D luban/docs/phase5-verification.md
+ D luban/docs/phase6-verification.md
+ D luban/docs/phase7-verification.md
+ D luban/docs/spike-injection-results.md
+ M luban/src/shared/i18n-strings.ts
+ M luban/src/sidepanel/views/IdleView.tsx
+ M luban/src/sidepanel/views/IntentView.tsx
+?? luban/.vitest/
+?? luban/docs/v1/
+?? luban/docs/v2/
+?? luban/spike-v2/

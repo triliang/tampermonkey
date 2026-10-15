@@ -26,12 +26,13 @@ export function IntentView({ element, intent, error, errorActions, offline, page
   const o = s.outgoing;
   const [draft, setDraft] = useState(intent);
   const outgoing = pageContext ? describeOutgoingContext(pageContext) : null;
+  const pageMode = outgoing ? outgoing.scope === 'page' : !element;
   const showElementFields = outgoing ? shouldShowOutgoingElementFields(outgoing.scope) : Boolean(element?.tag.length);
-  const scopeLabel = outgoing?.scope === 'page' ? o.scopePage : o.scopeElement;
+  const scopeLabel = pageMode ? o.scopePage : o.scopeElement;
 
   return (
     <section class="view">
-      <h2>{s.heading}</h2>
+      <h2>{pageMode ? s.headingPage : s.heading}</h2>
       {showElementFields ? (
         <div class="target-summary">
           <code>{element?.tag}</code>
@@ -86,7 +87,7 @@ export function IntentView({ element, intent, error, errorActions, offline, page
       {error ? <p class="error">{error}</p> : null}
       <div class="row">
         <Button label={s.generate} variant="primary" disabled={offline} onClick={() => draft.trim() && onSubmit(draft.trim())} />
-        <Button label={s.repick} onClick={onReselect} />
+        <Button label={pageMode ? s.pick : s.repick} onClick={onReselect} />
         {errorActions?.some((a) => a.type === 'OPEN_SETTINGS') ? <Button label={s.openSettings} onClick={onOpenSettings} /> : null}
       </div>
       {!draft.trim() ? <p class="hint">{s.empty}</p> : null}

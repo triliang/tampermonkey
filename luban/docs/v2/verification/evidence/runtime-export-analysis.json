@@ -1,0 +1,35 @@
+{
+  "source_attachment": "/Users/jinxiong.yang/.codex/attachments/14f58a71-6f6f-4913-b624-ef39354ec8e6/Pasted text.txt",
+  "sha256": "ae5078358f1b3707d94374ad06ed6d580e0df1a06f49add72037d1e3010556f0",
+  "event_counts": {
+    "START_ALLOWED": 9,
+    "GM_DELTA": 48,
+    "RUNNER_RESULT": 8,
+    "SW_BOOT": 6,
+    "PREPARED": 3,
+    "BOOT_RECOVERY": 2,
+    "COMMITTED_B": 1,
+    "IDB_ABORT": 1,
+    "CAPACITY_GUARD": 1,
+    "GM_INFO": 1
+  },
+  "runner_results": 8,
+  "recovery_events": 2,
+  "checks": {
+    "valid_json": true,
+    "committed_equals_registered": true,
+    "journal_cleared": true,
+    "all_runner_gm_increments_valid": true,
+    "idb_abort_passed": true,
+    "capacity_guard_passed": true,
+    "gm_info_passed": true
+  },
+  "snapshot": {
+    "current": "B",
+    "previous": "A",
+    "auto": true,
+    "permission": true,
+    "registered": 1,
+    "bridges": 1
+  }
+}

@@ -1,0 +1,45 @@
+
+> luban@0.1.0 build
+> tsc --noEmit && vite build
+
+vite v8.3.4 building client environment for production...
+transforming...
+✓ 103 modules transformed.
+rendering chunks...
+
+[crx:content-scripts-iife] Building 2 content script(s) as IIFE...
+
+ WARN  inlineDynamicImports option is ignored because codeSplitting: false is set.
+
+  ✓ index.ts → src/content/index.js
+
+ WARN  inlineDynamicImports option is ignored because codeSplitting: false is set.
+
+  ✓ bridge.ts → src/auto/bridge.js
+[crx:content-scripts-iife] IIFE build complete
+
+computing gzip size...
+dist/service-worker-loader.js                 0.04 kB
+dist/src/auto/bridge.js                       0.76 kB
+dist/src/options/index.html                   0.81 kB │ gzip:  0.40 kB
+dist/src/sidepanel/index.html                 0.81 kB │ gzip:  0.39 kB
+dist/manifest.json                            1.19 kB │ gzip:  0.56 kB
+dist/src/assets/icon16.png                    1.87 kB
+dist/src/assets/icon48.png                    2.79 kB
+dist/src/assets/icon128.png                  10.73 kB
+dist/src/content/index.js                    56.03 kB
+dist/assets/index-CxTi6fDG.css                2.67 kB │ gzip:  0.90 kB
+dist/assets/panel-0dIx-kEo.css               19.80 kB │ gzip:  4.94 kB
+dist/assets/bridge.ts-DszPh4uo.js             0.75 kB │ gzip:  0.50 kB
+dist/assets/script-attachment-dTSvjGiZ.js     1.40 kB │ gzip:  0.89 kB
+dist/assets/injected-runner-BkgYDIQP.js       2.31 kB │ gzip:  1.03 kB
+dist/assets/panel-DW5wKcou.js                 2.51 kB │ gzip:  1.31 kB
+dist/assets/errors-qQhLwch8.js                3.06 kB │ gzip:  1.78 kB
+dist/assets/host-policy-Z-w8m8Pm.js           4.86 kB │ gzip:  2.41 kB
+dist/assets/CodeArtifactDialog-DngLgm9f.js   18.97 kB │ gzip:  8.19 kB
+dist/assets/index.html-pEFtXCJs.js           19.04 kB │ gzip:  7.92 kB
+dist/assets/index.ts-CNTQ36f0.js             35.39 kB │ gzip: 11.25 kB
+dist/assets/index.html-XNZbgIM3.js           40.59 kB │ gzip: 14.02 kB
+dist/assets/index.ts-CPviOKIS.js            290.44 kB │ gzip: 86.85 kB
+
+✓ built in 100ms

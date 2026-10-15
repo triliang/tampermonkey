@@ -1,0 +1,14 @@
+{
+  "luban/src/service-worker/repositories/draft-buffer.ts": "a7a015921067ca8e3d95627f0fdd2298b4e180b1f4792c90c10432ddbd990915",
+  "luban/src/service-worker/repositories/migration.ts": "4d4f23154021054e1b6b839beae2a2496d199dbc9b9d872abf07bc1d4977ddd0",
+  "luban/src/service-worker/repositories/workspace-router.ts": "596137c2ff892dba702e2fa114a7c3ccce61534d711b598a283fde2349a4f421",
+  "luban/src/service-worker/repositories/database.ts": "0161fc06a080cf3bfbf88b432c1a5af5eab74a06a4926f32c8e82db66d750620",
+  "luban/src/service-worker/repositories/workspace-store.ts": "0ff218b7dd0f9c1fb3db13d53b36a5b537c1189bc95fe0365138ec160c357d9c",
+  "luban/src/service-worker/repositories/p1-repositories.test.ts": "989524ebecc367fe677da08c856f5937535b37858afca5c2b7d356ea3260aeb1",
+  "luban/src/service-worker/script-store.ts": "5aba199e8df4ba29b43775ab9e1ad39dd7899ddee1257472f3ab7650953cd01e",
+  "luban/src/service-worker/index.ts": "7ec9505c3059b8db6d394bb08eb08b572996f1c9f069c26dfc515a71b96fc214",
+  "luban/src/shared/v2-types.ts": "6eba2e615150f6f881eaf7ff5ec735c2cea1fc3d10cc9c0b0c7e0c771a3427e9",
+  "luban/src/shared/messages.ts": "a8a0b1114a38dae4cde41b0d4491637d60f77dc6c5e7929d65a4b85bfeb346b8",
+  "luban/package.json": "c98ebd6e45aff4b79cd7890150930db03ac96d3eff14969f41b76674a03f978f",
+  "luban/package-lock.json": "aff313cb51d7bfb40e851cbbd58aef31d79272b4ce88087fa15e1e13ab108b9d"
+}

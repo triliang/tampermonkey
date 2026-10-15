@@ -1,3 +1,11 @@
+import type {CodePreviewMessage} from './code-preview-types';
+import type {V21Message} from './v21-types';
+import type { P7Message } from './p7-types';
+import type { P5Message } from './p5-types';
+import type { P4Message } from './p4-types';
+import type { P3Message } from './p3-types';
+import type { P2Message } from './p2-types';
+import type { DraftPatch, ConversationMessage } from './v2-types';
 // 消息协议：所有跨上下文通信以 type-safe 判别联合约束，消除魔法字符串（§3.1）。
 // 仅类型 + 少量构造辅助，零业务运行时。
 
@@ -5,13 +13,15 @@ import type { GenerationResult, InjectionMethod, InjectionResult, PageContext, P
 import type { SerializedError } from './errors';
 
 /** 消息类型（§3.1 全量 + PING/PONG 内部链路自检）。 */
-export type MessageType =
+export type MessageType = CodePreviewMessage['type'] | V21Message['type'] | P7Message['type'] | P5Message['type'] | P4Message['type'] | P3Message['type'] | P2Message['type'] | WorkspaceMessage['type']
   | 'START_PICKER' // SidePanel → SW → Content: 启动元素选择
   | 'COLLECT_PAGE_CONTEXT' // SidePanel → SW → Content: 整页上下文采集（不启动选择器）
   | 'CANCEL_PICKER' // SidePanel → SW → Content: 主动取消元素选择（停止监听与高亮）
   | 'ELEMENT_PICKED' // Content → SW → SidePanel: 元素已选中 + 上下文
   | 'PICK_CANCELLED' // Content → SidePanel: 页面内 Esc 取消选择，广播同步 UI 状态
   | 'GENERATE_SCRIPT' // SidePanel → SW: 请求 AI 生成
+  | 'GENERATION_REASONING'
+  | 'ANALYSIS_REASONING'
   | 'GENERATION_PROGRESS' // SW → SidePanel (via Port): 流式 delta
   | 'GENERATION_COMPLETE' // SW → SidePanel: 生成完成
   | 'GENERATION_FAILED' // SW → SidePanel: 生成失败
@@ -64,6 +74,7 @@ export interface GenerateScriptMsg extends BaseMessage {
   intent: string;
   regenerateContext?: RegenerateContext;
 }
+export interface ReasoningProgressMsg extends BaseMessage {type:'GENERATION_REASONING'|'ANALYSIS_REASONING';content:string;truncated:boolean;attempt:number;}
 export interface GenerationProgressMsg extends BaseMessage {
   type: 'GENERATION_PROGRESS';
   /** 累计原始流文本 */
@@ -149,14 +160,32 @@ export interface PongMsg extends BaseMessage {
   from: 'sw' | 'content' | 'main';
 }
 
+
+export type WorkspaceMessage = BaseMessage & (
+  | { type: 'CREATE_WORKSPACE'; scriptId: string | null; host: string | null }
+  | { type: 'GET_WORKSPACE'; workspaceId: string }
+  | { type: 'LIST_WORKSPACES' }
+  | { type: 'SAVE_DRAFT'; workspaceId: string; expectedDraftRevision: number; patch: DraftPatch; messages?: ConversationMessage[] }
+  | { type: 'DISCARD_DRAFT'; workspaceId: string; expectedDraftRevision: number }
+  | { type: 'RENAME_SCRIPT'; scriptId: string; expectedRevision: number; name: string }
+);
+
 /** 全消息判别联合（发送端使用）。 */
-export type LubanMessage =
+export type LubanMessage = CodePreviewMessage
+  | V21Message
+  | P7Message
+  | P5Message
+  | P4Message
+  | P3Message
+  | P2Message
+  | WorkspaceMessage
   | StartPickerMsg
   | CollectPageContextMsg
   | CancelPickerMsg
   | ElementPickedMsg
   | PickCancelledMsg
   | GenerateScriptMsg
+  | ReasoningProgressMsg
   | GenerationProgressMsg
   | GenerationCompleteMsg
   | GenerationFailedMsg

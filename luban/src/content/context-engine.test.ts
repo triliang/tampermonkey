@@ -25,9 +25,9 @@ describe('sanitizeUrl 脱敏（§3.2 Phase 3）', () => {
     expect(out).not.toContain('session');
     expect(out).toContain('page=2');
   });
-  it('非法 URL 原样返回，不抛异常', () => {
+  it('非法 URL 清空，不把未解析的敏感内容原样发送', () => {
     expect(() => sanitizeUrl('not a url')).not.toThrow();
-    expect(sanitizeUrl('not a url')).toBe('not a url');
+    expect(sanitizeUrl('not a url')).toBe('');
   });
   it('password input 的 value 永不出现在采集结果中（本模块不采集任何 value 字段）', () => {
     document.body.innerHTML = '<input id="pw" type="password" value="s3cr3t" />';
@@ -133,5 +133,17 @@ describe('collectPageContext 两种 scope', () => {
         expect(ctx.meta.url).toContain('keep=1');
       }
     });
+  });
+});
+
+// P2 整页定位与隐私约束。
+describe('P2 页面结构摘要', () => {
+  it('包含有限稳定选择器，不采集隐藏脚本或密码值', () => {
+    document.body.innerHTML = '<main id="main"><article class="product">陶瓷杯<script>SECRET_SCRIPT_VALUE</script><input type="password" value="PASSWORD_VALUE"></article></main>';
+    const summary = summarizeDom(document);
+    expect(summary.structure?.some(node => node.selectors.length > 0)).toBe(true);
+    expect(JSON.stringify(summary)).not.toContain('SECRET_SCRIPT_VALUE');
+    expect(JSON.stringify(summary)).not.toContain('PASSWORD_VALUE');
+    expect(summary.structure!.length).toBeLessThanOrEqual(30);
   });
 });

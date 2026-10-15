@@ -1,0 +1,14 @@
+import { afterEach, expect, it, vi } from 'vitest';
+vi.mock('../../auto/bridge.ts?script&iife',()=>({default:'src/auto/bridge.js'}));
+import { ChromeAutoAdapter, registrationId, bridgeId } from './auto-adapter';
+import { hostPermissionOrigins } from '../../shared/host-policy';
+import { autoSource } from './auto-source';
+import type { ScriptRecord } from '../../shared/v2-types';
+const original=globalThis.chrome;
+afterEach(()=>{Object.defineProperty(globalThis,'chrome',{configurable:true,value:original});});
+const record:ScriptRecord={id:'test',schemaVersion:2,name:'测试',host:'localhost',matches:['*://localhost/*'],needsRuleReview:false,recordRevision:2,current:{versionId:'A',hash:'hash-A',code:'console.log("PRIVATE_CODE")',grants:[],runAt:'document_end',explanation:'说明',createdAt:1},previous:null,autoRun:{desired:true,generation:1},tombstone:false,source:'ai',enabled:true,createdAt:1,updatedAt:1};
+function setup(){const code=autoSource(record);const getScripts=vi.fn(async()=>[{id:registrationId(record.id),matches:record.matches,world:'MAIN',runAt:'document_end',js:[{code}]}]);Object.defineProperty(globalThis,'chrome',{configurable:true,value:{runtime:{getManifest:()=>({version:'0.1.0',optional_host_permissions:['http://*/*','https://*/*']})},permissions:{contains:vi.fn(async()=>true)},userScripts:{getScripts},scripting:{getRegisteredContentScripts:vi.fn(async()=>[{id:bridgeId('localhost'),matches:record.matches,world:'ISOLATED',runAt:'document_start',js:['src/auto/bridge.js']}])}}});return{adapter:new ChromeAutoAdapter(),getScripts};}
+it('读取真实 adapter 注册身份供诊断，不返回代码正文或敏感配置',async()=>{const{adapter}=setup();const d=await adapter.inspect(record) as {registered:{identity:unknown;sourceMatchesExpected:boolean}};expect(d.registered.identity).toEqual({scriptId:'test',versionId:'A',hash:'hash-A',generation:1});expect(d.registered.sourceMatchesExpected).toBe(true);expect(JSON.stringify(d)).not.toContain('PRIVATE_CODE');});
+it('缺失注册与API失败可区分，不伪装为注册成功',async()=>{const{adapter,getScripts}=setup();getScripts.mockResolvedValueOnce([]);expect((await adapter.inspect(record)).registered).toBeNull();getScripts.mockRejectedValueOnce(Error('API disabled'));const d=await adapter.inspect(record);expect(d.registered).toBeNull();expect(d.userScriptsError).toContain('API disabled');});
+
+it('网站授权只请求 manifest 明确声明的两个协议及准确主机',async()=>{const{adapter}=setup();expect(hostPermissionOrigins('localhost')).toEqual(['http://localhost/*','https://localhost/*']);await adapter.permission('localhost');expect(chrome.permissions.contains).toHaveBeenCalledWith({origins:['http://localhost/*','https://localhost/*']});const d=await adapter.inspect(record);expect(d.declaredOptionalHostPermissions).toEqual(['http://*/*','https://*/*']);expect(d.requestedOrigins).toEqual(['http://localhost/*','https://localhost/*']);});

@@ -1,3 +1,5 @@
+import {showCodePreview,dismissCodePreview} from './code-preview';
+import {clearRangePreview,previewRange,ownElement} from './target-context';
 // Content Script（ISOLATED world，按需注入）。
 // 幂等：SW 可能对同一标签页多次 executeScript，用 window 标记守卫，避免重复注册监听。
 // Phase 1 仅实现链路自检（PING/ECHO）与 START_PICKER 回执；采集/桥接随 Phase 2/5 落地。
@@ -25,6 +27,11 @@ function boot(): void {
 
   chrome.runtime.onMessage.addListener((msg: LubanMessage, _sender, sendResponse) => {
     switch (msg.type) {
+      case 'RENDER_CODE_PREVIEW':{void showCodePreview(msg.snapshot).then(sendResponse).catch(e=>sendResponse({ok:false,error:String(e)}));return true;}
+      case 'DISMISS_CODE_PREVIEW':{sendResponse(dismissCodePreview(msg.sessionId));return;}
+
+      case 'V21_CLEAR_PREVIEW':{clearRangePreview();sendResponse({ok:true});return;}
+      case 'V21_PREVIEW_TARGET':{try{previewRange(msg.selectors,msg.fingerprint);sendResponse({ok:true});}catch(e){sendResponse({ok:false,error:String(e)});}return;}
       case 'PING': {
         // ISOLATED 侧应答；若要求探测 MAIN，由 SW 用 executeScript world:MAIN 完成。
         const pong: PongMsg = { type: 'PONG', from: 'content', requestId: msg.requestId };
@@ -38,7 +45,7 @@ function boot(): void {
         pickerSession.start(
           (el) => {
             const context = collectPageContext(el);
-            const picked: ElementPickedMsg = { type: 'ELEMENT_PICKED', requestId: makeRequestId(), context };
+            const picked: ElementPickedMsg = { type: 'ELEMENT_PICKED', requestId: msg.requestId, context };
             void chrome.runtime.sendMessage(picked);
           },
           () => {
@@ -47,6 +54,17 @@ function boot(): void {
           },
         );
         return;
+      }
+      case 'P2_CAPTURE': {
+        let target: Element | null = null;
+        try {
+          for (const selector of msg.selectors ?? []) { try { const all=document.querySelectorAll(selector);target=all.length===1&&!ownElement(all[0])?all[0]:null; } catch { /* 下个候选 */ } if (target) break; }
+          if (msg.selectors?.length && !target) throw Error('选中的元素已变化，请重新点选。');
+          const context = target ? collectPageContext(target) : collectPageContext();
+          void chrome.runtime.sendMessage({ type: 'CAPTURE_REPORT', requestId: msg.requestId, context })
+            .then(() => sendResponse({ ok: true })).catch(e => sendResponse({ ok: false, error: String(e) }));
+        } catch (e) { sendResponse({ ok: false, error: String(e) }); }
+        return true;
       }
       case 'COLLECT_PAGE_CONTEXT': {
         sendResponse({ context: collectPageContext() });
@@ -82,6 +100,8 @@ function boot(): void {
     }
   });
 
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')clearRangePreview();});
+  window.addEventListener('scroll',clearRangePreview,{passive:true});window.addEventListener('resize',clearRangePreview);
   console.log('[luban content] ready in', location.href);
 }
 

@@ -26,6 +26,8 @@ export const SYSTEM_PROMPT = `你是「鲁班」——一个为用户生成可�
 1. 必须返回单个结构化 JSON 对象，不得输出 Markdown 代码围栏，不得输出任何前后缀说明文字。
 2. 六个字段全部必填：code、explanation、selectors、gmGrants、confidence、warnings（warnings 允许为空数组）。
 3. code 为纯 JavaScript，不得包含 <script> 标签或 HTML 片段。
+4. 若用户需求与已确认保留约束冲突、目标无法唯一确认或触发时机不明，返回可选 needsClarification: {reason: "constraint_conflict" 或 "target_ambiguous" 或 "trigger_ambiguous", question: "需要用户补充的问题"}，并将 code 设为空字符串；保留其他必填字段，不猜测目标或静默扩大范围。
+5. gmGrants 必须包含 code 中引用的全部白名单 GM API，包括赋给变量的别名引用。例如 const get = GM_getValue 对应 gmGrants: ["GM_getValue"]。权限必须写入 JSON 的 gmGrants 字段，仅在代码注释中写 @grant 无效。
 
 【选择器质量要求】
 1. 优先级：语义化 id > 稳定 class（非哈希/非动态后缀）> data-* 等属性选择器 > 结构组合（tag + nth-child），绝对路径仅作兜底。
@@ -126,6 +128,7 @@ export function buildUserContent(
     else domSummary.buttons = domSummary.buttons.slice(0, -1);
   }
   if (estimateTokens(render()) <= budget) return render();
+  while (estimateTokens(render()) > budget && domSummary.structure?.length) domSummary.structure = domSummary.structure.slice(0, -1);
 
   while (estimateTokens(render()) > budget && payload.target && payload.target.siblings.length > 0) {
     payload.target.siblings = payload.target.siblings.slice(0, -1);
@@ -162,12 +165,13 @@ function isValidShape(obj: unknown): obj is ParsedResponse {
   if (!obj || typeof obj !== 'object') return false;
   const o = obj as Record<string, unknown>;
   return (
+    (o.needsClarification===undefined||(!!o.needsClarification&&typeof o.needsClarification==='object'&&['constraint_conflict','target_ambiguous','trigger_ambiguous'].includes(String((o.needsClarification as Record<string,unknown>).reason))&&typeof(o.needsClarification as Record<string,unknown>).question==='string'&&String((o.needsClarification as Record<string,unknown>).question).length<=1000))&&
     typeof o.code === 'string' &&
     typeof o.explanation === 'string' &&
-    Array.isArray(o.selectors) &&
-    Array.isArray(o.gmGrants) &&
-    typeof o.confidence === 'number' &&
-    Array.isArray(o.warnings) &&
+    Array.isArray(o.selectors) && o.selectors.every(x => typeof x === 'string') &&
+    Array.isArray(o.gmGrants) && o.gmGrants.every(x => typeof x === 'string') &&
+    typeof o.confidence === 'number' && Number.isFinite(o.confidence) && o.confidence >= 0 && o.confidence <= 1 &&
+    Array.isArray(o.warnings) && o.warnings.every(x => typeof x === 'string') &&
     REQUIRED_FIELDS.every((f) => f in o)
   );
 }

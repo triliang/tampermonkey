@@ -1,3 +1,5 @@
+import {thinkingParameters} from '../../shared/thinking';
+import { customOrigin, normalizeCustomUrl } from '../../shared/settings-store';
 // OpenAI 兼容适配器（P3-T2）：当前唯一接入方 = 小米 MiMo（PRD 附录 B），但协议本身通用，
 // 后续新增 OpenAI 兼容端点可直接复用本文件，无需专用 SDK。
 
@@ -13,27 +15,27 @@ function endpointUrl(config: ProviderConfig): string {
 function headers(config: ProviderConfig): Record<string, string> {
   return {
     'Content-Type': 'application/json',
-    'api-key': config.apiKey,
+    ...(!config.customEndpoint ? {'api-key': config.apiKey} : {}),
     Authorization: `Bearer ${config.apiKey}`,
   };
 }
 
-async function doFetch(config: ProviderConfig, body: unknown, signal: AbortSignal): Promise<Response> {
-  const res = await fetch(endpointUrl(config), {
+async function doFetch(config: ProviderConfig, body: unknown, signal: AbortSignal,onRequest?:()=>void): Promise<Response> {
+  if(config.customEndpoint){
+    normalizeCustomUrl(config.baseUrl);
+    if(!config.model.trim())throw new Error('自定义模型名称为空。');
+    if(!await chrome.permissions.contains({origins:[customOrigin(config.baseUrl)]}))throw makeError(ErrorLayer.NETWORK,'ENDPOINT_PERMISSION','自定义端点未授权，请在设置中重新保存并授权。',[{type:'DISMISS'}]);
+  }
+  const pending = fetch(endpointUrl(config), {
     method: 'POST',
     headers: headers(config),
     body: JSON.stringify(body),
     signal,
   });
+  onRequest?.();const res=await pending;
   if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    let parsedBody: unknown = text;
-    try {
-      parsedBody = JSON.parse(text);
-    } catch {
-      /* 非 JSON 错误体，原样保留文本 */
-    }
-    throw openaiCompatibleProvider.mapHttpError(res.status, parsedBody, res.headers);
+    // 供应商错误体可能回显认证信息，不把原文带入用户错误。
+    throw openaiCompatibleProvider.mapHttpError(res.status, undefined, res.headers);
   }
   return res;
 }
@@ -46,10 +48,10 @@ export const openaiCompatibleProvider: AIProvider = {
       model: config.model,
       messages: opts.messages,
       response_format: opts.jsonMode ? { type: 'json_object' } : undefined,
-      thinking: { type: opts.thinking ? 'enabled' : 'disabled' },
+      ...thinkingParameters(config,opts.thinking),
       stream: true,
     };
-    return doFetch(config, body, opts.signal);
+    return doFetch(config, body, opts.signal,opts.onRequest);
   },
 
   async testConnection(config: ProviderConfig, signal: AbortSignal): Promise<TestConnectionResult> {
@@ -60,6 +62,7 @@ export const openaiCompatibleProvider: AIProvider = {
         {
           model: config.model,
           messages: [{ role: 'user', content: 'ping' }],
+          ...thinkingParameters(config,false),
           max_tokens: 1,
           stream: false,
         },
@@ -86,7 +89,7 @@ export const openaiCompatibleProvider: AIProvider = {
     return makeError(
       ErrorLayer.NETWORK,
       `HTTP_${status}`,
-      message ? `AI 服务返回错误：${message}` : `AI 服务返回错误（HTTP ${status}）。`,
+      message ? `AI 服务返回错误（HTTP ${status}）。` : `AI 服务返回错误（HTTP ${status}）。`,
       [{ type: 'RETRY' }, { type: 'DISMISS' }],
     );
   },
@@ -106,7 +109,7 @@ function toUnexpected(e: unknown) {
   if (/Failed to fetch|NetworkError|net::ERR/i.test(message)) {
     return makeError(ErrorLayer.NETWORK, 'OFFLINE', '网络不可用', [{ type: 'RETRY' }]);
   }
-  return makeError(ErrorLayer.NETWORK, 'UNEXPECTED', message || '网络请求失败。', [{ type: 'RETRY' }]);
+  return makeError(ErrorLayer.NETWORK, 'UNEXPECTED', '连接失败，请检查端点、模型与网络。', [{ type: 'RETRY' }]);
 }
 
 registerProvider(openaiCompatibleProvider);

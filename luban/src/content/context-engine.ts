@@ -1,8 +1,10 @@
+import {captureTargetContext} from './target-context';
+import { sanitizePageUrl } from '../shared/safe-url';
 // 页面上下文引擎（§3.2）：Phase1 目标元素同步采集 → Phase2 TreeWalker 限流摘要 → Phase3 脱敏。
 // 纯函数操作真实 DOM，不依赖 chrome.* API，可在 jsdom 下单测。
 
 import type { DOMSummary, PageContext, TargetElement } from '../shared/types';
-import { CONTEXT_LIMITS, SENSITIVE_URL_PARAMS } from '../shared/constants';
+import { CONTEXT_LIMITS } from '../shared/constants';
 import { generateSelectors } from './selector-generator';
 
 const MAX_TEXT_LEN = 120;
@@ -19,7 +21,7 @@ function captureAttributes(el: Element): Record<string, string> {
   const out: Record<string, string> = {};
   for (const name of CAPTURED_ATTRS) {
     const v = el.getAttribute(name);
-    if (v) out[name] = v;
+    if (v) out[name] = name === 'href' ? sanitizePageUrl(v, location.href) : v;
   }
   return out;
 }
@@ -47,6 +49,7 @@ function siblingTags(el: Element): string[] {
 /** Phase 1（~3ms）：目标元素同步采集，含选择器候选链。 */
 export function captureTargetElement(el: Element): TargetElement {
   return {
+    targetContext:captureTargetContext(el),
     selectorCandidates: generateSelectors(el),
     tag: el.tagName.toLowerCase(),
     text: truncateText(el.textContent ?? ''),
@@ -62,6 +65,7 @@ export function summarizeDom(root: Document = document): DOMSummary {
   const inputs: string[] = [];
   const buttons: string[] = [];
   let truncated = false;
+  const structure: NonNullable<DOMSummary['structure']> = [];
   const depthCache = new WeakMap<Node, number>();
   const start = performance.now();
 
@@ -85,6 +89,11 @@ export function summarizeDom(root: Document = document): DOMSummary {
     }
     const el = node as Element;
     const tag = el.tagName.toLowerCase();
+    if (structure.length < 30 && (['main', 'section', 'article', 'table', 'ul', 'ol', 'h1', 'h2', 'h3'].includes(tag) || ['main', 'navigation', 'list', 'table'].includes(el.getAttribute('role') ?? ''))) {
+      const clone = el.cloneNode(true) as Element;
+      clone.querySelectorAll('script,style,input,textarea,select,[hidden]').forEach(node => node.remove());
+      structure.push({ tag, selectors: generateSelectors(el).slice(0, 4), text: truncateText(clone.textContent ?? ''), role: el.getAttribute('role') ?? undefined });
+    }
     switch (tag) {
       case 'input':
       case 'textarea':
@@ -119,21 +128,11 @@ export function summarizeDom(root: Document = document): DOMSummary {
     node = walker.nextNode();
   }
 
-  return { counts, inputs, buttons, title: document.title, truncated };
+  return { counts, inputs, buttons, title: root.title, truncated, structure };
 }
 
 /** Phase 3（~10ms）：脱敏——剔除敏感 URL 参数；password 值永不采集（本模块本身不采集任何 input value）。 */
-export function sanitizeUrl(url: string): string {
-  try {
-    const u = new URL(url);
-    for (const key of SENSITIVE_URL_PARAMS) {
-      u.searchParams.delete(key);
-    }
-    return u.toString();
-  } catch {
-    return url;
-  }
-}
+export function sanitizeUrl(url: string): string { return sanitizePageUrl(url); }
 
 function buildPageContextBase(): Pick<PageContext, 'meta' | 'domSummary'> {
   return {

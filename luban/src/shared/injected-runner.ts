@@ -38,7 +38,7 @@ export function compileRunnerSource(
     'style.textContent=css;' +
     'document.documentElement.appendChild(style);' +
     '};}' +
-    'if(grants.has("GM_info")){GM_info=function(){return {script:{name:"luban-generated"},version:"0.1.0"};};}' +
+    'if(grants.has("GM_info")){var info={script:{name:"luban-generated"},version:"0.1.0"};GM_info=' + (/\bGM_info\s*\(/.test(code) ? 'Object.assign(function(){return info;},info)' : 'info') + ';}' +
     'if(grants.has("unsafeWindow")){unsafeWindow=window;}' +
     'var settled=false;' +
     'function finish(payload){if(settled)return;settled=true;resolve(payload);}' +

@@ -1,0 +1,27 @@
+[
+  {
+    "model": "v21-format",
+    "status": 200,
+    "streamComplete": true
+  },
+  {
+    "model": "v21-good",
+    "status": 200,
+    "streamComplete": true
+  },
+  {
+    "model": "v21-scopechange",
+    "status": 200,
+    "streamComplete": true
+  },
+  {
+    "model": "v21-truncated",
+    "status": 200,
+    "streamComplete": true
+  },
+  {
+    "model": "v21-undefined",
+    "status": 200,
+    "streamComplete": true
+  }
+]

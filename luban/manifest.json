@@ -3,20 +3,45 @@
   "name": "鲁班 Luban",
   "version": "0.1.0",
   "description": "AI 网页自动化——说出意图，工具即成",
-  "permissions": ["storage", "activeTab", "scripting", "sidePanel", "userScripts"],
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "sidePanel",
+    "userScripts"
+  ],
   "host_permissions": [
     "https://api.xiaomimimo.com/*",
     "https://token-plan-cn.xiaomimimo.com/*",
     "https://token-plan-sgp.xiaomimimo.com/*",
     "https://token-plan-ams.xiaomimimo.com/*"
   ],
-  "background": { "service_worker": "src/service-worker/index.ts", "type": "module" },
-  "side_panel": { "default_path": "src/sidepanel/index.html" },
+  "background": {
+    "service_worker": "src/service-worker/index.ts",
+    "type": "module"
+  },
+  "side_panel": {
+    "default_path": "src/sidepanel/index.html"
+  },
   "options_page": "src/options/index.html",
-  "action": { "default_title": "鲁班 Luban" },
+  "action": {
+    "default_title": "鲁班 Luban",
+    "default_icon": {
+      "16": "src/assets/icon16.png",
+      "32": "src/assets/icon32.png",
+      "48": "src/assets/icon48.png",
+      "128": "src/assets/icon128.png"
+    }
+  },
   "icons": {
     "16": "src/assets/icon16.png",
     "48": "src/assets/icon48.png",
-    "128": "src/assets/icon128.png"
-  }
+    "128": "src/assets/icon128.png",
+    "32": "src/assets/icon32.png"
+  },
+  "optional_host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "minimum_chrome_version": "138"
 }

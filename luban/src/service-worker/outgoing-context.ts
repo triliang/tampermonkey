@@ -1,17 +1,6 @@
-import { SENSITIVE_URL_PARAMS } from '../shared/constants';
+import { sanitizePageUrl } from '../shared/safe-url';
 import type { PageContext, PageContextScope } from '../shared/types';
 
-function redactMetaUrl(url: string): string {
-  try {
-    const u = new URL(url);
-    for (const key of SENSITIVE_URL_PARAMS) {
-      u.searchParams.delete(key);
-    }
-    return u.toString();
-  } catch {
-    return url;
-  }
-}
 
 export type OutgoingScope = PageContext['scope'];
 
@@ -33,7 +22,7 @@ export function describeOutgoingContext(context: PageContext): OutgoingContextDe
     scope: context.scope,
     meta: {
       ...context.meta,
-      url: redactMetaUrl(context.meta.url),
+      url: sanitizePageUrl(context.meta.url),
     },
     element: context.target
       ? { tag: context.target.tag, text: context.target.text }

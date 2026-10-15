@@ -1,0 +1,34 @@
+
+> luban@0.1.0 test
+> vitest run --maxWorkers=2
+
+
+ RUN  v5.0.3 /Users/jinxiong.yang/Code/tampermonkey/luban
+
+ ❯ src/service-worker/sse-parser.test.ts (17 tests | 1 failed) 137ms
+   ❯ parseOpenAIStream (4)
+     × 解析 1MB 规模的流 < 50ms 110ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/service-worker/sse-parser.test.ts > parseOpenAIStream > 解析 1MB 规模的流 < 50ms
+AssertionError: expected 77.30649999999997 to be less than 50
+ ❯ src/service-worker/sse-parser.test.ts:167:21
+    165|     const elapsed = performance.now() - start;
+    166|     expect(total).toBe(2000 * 500);
+    167|     expect(elapsed).toBeLessThan(50);
+       |                     ^
+    168|   });
+    169| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 38 passed (39)
+      Tests  1 failed | 329 passed (330)
+   Start at  16:56:35
+   Duration  20.24s (environment 63%, tests 22%, transform 7%, import 6%, worker 1%)
+
+    Isolate  39 workers spawned · ~748ms startup each (spawn + environment, per file)
+             at least ~13.84s faster with isolate: false — reuses workers across files instead of one per file
+

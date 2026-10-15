@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="112 115 1030 1030" fill="none">
+<title>Luban · 鲁班锁</title>
+<desc>深蓝与青蓝线条组成三向穿插的鲁班锁，中央凹槽和断口表现榫卯嵌合。</desc>
+<g fill="none" stroke="#DCE9FA" stroke-width="19" stroke-linejoin="round" stroke-linecap="butt">
+<path d="M484 226L627 149L768 226L627 304Z M484 226V460 M627 304V498 M768 226V582L680 632V518L634 545"/>
+<path d="M794 343L887 292L1029 366V524L923 583 M1029 366L796 492"/>
+<path d="M470 608L218 736V887L352 965L574 846V801 M218 736L352 815L531 717V777L564 795L630 757 M352 815V965"/>
+<path d="M484 928V1023L627 1105L768 1023V923 M627 849V1105"/>
+</g>
+<g fill="none" stroke="#36D8EC" stroke-width="19" stroke-linejoin="round" stroke-linecap="butt">
+<path d="M460 412L352 360L218 434V600L310 652 M218 434L564 627V760 M484 460L634 545 M564 627L680 560V632"/>
+<path d="M796 541L1034 679V839L861 943L605 799 M1034 679L861 786L636 657V750L564 790 M861 786V943"/>
+</g>
+</svg>

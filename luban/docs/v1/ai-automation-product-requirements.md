@@ -4,7 +4,7 @@
 >
 > **鲁班（Luban）**——一个基于 Chrome **Manifest V3** 的 **AI 原生网页自动化扩展**：以"页面上下文"为驱动，用户点选元素并表达意图、或由 AI 主动分析页面推荐可自动化点，通过 **BYOK（用户自带 Key）** 直连大模型生成用户脚本，并在当前网页运行 / 持久管理。
 >
-> 参考基础：本仓库 [`docs/project-overview.md`](../../docs/project-overview.md)（Tampermonkey v2.9，MV2）。本产品为**全新独立项目**，继承"用户脚本 + GM_*"心智，但架构全面 MV3 化、AI 原生化。
+> 参考基础：本仓库 [`docs/project-overview.md`](../../../docs/project-overview.md)（Tampermonkey v2.9，MV2）。本产品为**全新独立项目**，继承"用户脚本 + GM_*"心智，但架构全面 MV3 化、AI 原生化。
 
 ---
 

@@ -10,6 +10,7 @@ export interface ChatMessage {
 }
 
 export interface ChatRequestOptions {
+  onRequest?:()=>void;
   messages: ChatMessage[];
   /** 结构化 JSON 输出（§I.1 输出格式双保险） */
   jsonMode: boolean;

@@ -1,0 +1,9 @@
+background.js syntax PASS
+bridge.js syntax PASS
+panel.js syntax PASS
+runner.js syntax PASS
+fixture.js syntax PASS
+compiled A source PASS
+compiled B source PASS
+localhost-only optional host PASS
+Acorn 8.19.0 (existing transitive dependency; production dependency not added)

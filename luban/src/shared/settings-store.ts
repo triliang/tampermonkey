@@ -5,7 +5,11 @@
 import { MIMO, STORAGE_KEYS } from './constants';
 import type { BillingType, ProviderConfig, Settings, ValidationResult } from './types';
 
+const CUSTOM_KEY = 'luban:customApiKey';
+
 export const DEFAULT_SETTINGS: Settings = {
+  thinkingEnabled:true,
+  customThinkingProtocol:'auto',
   defaultModel: MIMO.models.flash,
   endpoint: 'onDemand',
   billing: 'onDemand',
@@ -15,7 +19,7 @@ export const DEFAULT_SETTINGS: Settings = {
 export async function getSettings(): Promise<Settings> {
   const stored = await chrome.storage.sync.get(STORAGE_KEYS.SETTINGS);
   const saved = stored[STORAGE_KEYS.SETTINGS] as Partial<Settings> | undefined;
-  return { ...DEFAULT_SETTINGS, ...saved };
+  return { ...DEFAULT_SETTINGS, ...saved,thinkingEnabled:saved?.thinkingEnabled!==false };
 }
 
 export async function saveSettings(settings: Settings): Promise<void> {
@@ -23,9 +27,9 @@ export async function saveSettings(settings: Settings): Promise<void> {
 }
 
 /** 读取 API Key 明文（base64 解混淆后）；未设置时返回空字符串，不区分「未设置」与「空」给调用方。 */
-export async function getApiKey(): Promise<string> {
-  const stored = await chrome.storage.local.get(STORAGE_KEYS.API_KEY);
-  const encoded = stored[STORAGE_KEYS.API_KEY] as string | undefined;
+export async function getApiKey(custom = false): Promise<string> {
+  const stored = await chrome.storage.local.get(custom ? CUSTOM_KEY : STORAGE_KEYS.API_KEY);
+  const encoded = stored[custom ? CUSTOM_KEY : STORAGE_KEYS.API_KEY] as string | undefined;
   if (!encoded) return '';
   try {
     return atob(encoded);
@@ -34,12 +38,12 @@ export async function getApiKey(): Promise<string> {
   }
 }
 
-export async function saveApiKey(apiKey: string): Promise<void> {
-  await chrome.storage.local.set({ [STORAGE_KEYS.API_KEY]: btoa(apiKey) });
+export async function saveApiKey(apiKey: string, custom = false): Promise<void> {
+  await chrome.storage.local.set({ [custom ? CUSTOM_KEY : STORAGE_KEYS.API_KEY]: btoa(apiKey) });
 }
 
-export async function clearApiKey(): Promise<void> {
-  await chrome.storage.local.remove(STORAGE_KEYS.API_KEY);
+export async function clearApiKey(custom = false): Promise<void> {
+  await chrome.storage.local.remove(custom ? CUSTOM_KEY : STORAGE_KEYS.API_KEY);
 }
 
 /** Key 前缀 ↔ 计费方式一致性校验（附录 B.5：tp-/ttp- 配 tokenPlan，sk- 配 onDemand，不可混用）。 */
@@ -57,6 +61,7 @@ export function validateKeyPrefix(apiKey: string, billing: BillingType): Validat
 
 /** 由 billing 决定 Base URL：onDemand 固定走按量付费端点，tokenPlan 按用户选的集群取值。 */
 export function resolveBaseUrl(settings: Settings): string {
+  if (settings.customEndpoint) return normalizeCustomUrl(settings.customBaseUrl ?? '');
   if (settings.billing === 'onDemand') return MIMO.endpoints.onDemand;
   const endpoint = settings.endpoint === 'onDemand' ? 'tokenPlanCn' : settings.endpoint;
   return MIMO.endpoints[endpoint];
@@ -66,10 +71,32 @@ export function resolveBaseUrl(settings: Settings): string {
 export function toProviderConfig(settings: Settings, apiKey: string): ProviderConfig {
   return {
     id: 'openai-compatible',
+    thinkingEnabled:settings.thinkingEnabled!==false,
+    thinkingProtocol:settings.customThinkingProtocol??'auto',
     baseUrl: resolveBaseUrl(settings),
     apiKey,
-    model: settings.defaultModel,
+    model: settings.customEndpoint ? settings.customModel!.trim() : settings.defaultModel,
+    customEndpoint: settings.customEndpoint,
     billing: settings.billing,
     timeoutMs: settings.timeoutMs,
   };
 }
+
+
+export function normalizeCustomUrl(raw: string): string {
+  let url: URL;
+  try { url = new URL(raw.trim()); } catch { throw new Error('请输入有效的 HTTP/HTTPS Base URL。'); }
+  if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password || url.search || url.hash) throw new Error('Base URL 仅支持 HTTP/HTTPS，不能包含凭据、查询参数或片段。');
+  if (/\/chat\/completions\/?$/.test(url.pathname)) throw new Error('请输入 Base URL，不要包含 /chat/completions。');
+  return url.href.replace(/\/+$/, '');
+}
+export function customOrigin(raw: string): string { const url=new URL(normalizeCustomUrl(raw));return `${url.protocol}//${url.hostname}/*`; }
+export function validateModelSettings(settings: Settings, key: string): ValidationResult {
+  if (!settings.customEndpoint) return validateKeyPrefix(key, settings.billing);
+  try { normalizeCustomUrl(settings.customBaseUrl ?? ''); } catch(e) { return {ok:false,message:(e as Error).message}; }
+  if (!settings.customModel?.trim()) return {ok:false,message:'请填写自定义模型名称。'};
+  if (!key.trim() || /[^\x21-\x7e]/.test(key)) return {ok:false,message:'请填写有效的 API Key（不含空白）。'};
+  return {ok:true};
+}
+
+export async function saveThinkingEnabled(enabled:boolean){await saveSettings({...await getSettings(),thinkingEnabled:enabled});}

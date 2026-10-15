@@ -39,12 +39,12 @@ export default defineConfig({
       contentScripts: {
         // 按需注入的 content script 以自包含 IIFE 构建，文件名不带 .iife 约定后缀，
         // 便于 SW 通过 chrome.scripting.executeScript({ files }) 注入。
-        standaloneFiles: ['src/content/index.ts'],
+        standaloneFiles: ['src/content/index.ts', 'src/auto/bridge.ts'],
       },
     }),
     copyMicrolighterGrammars(),
   ],
   build: {
-    target: 'chrome120',
+    target: 'chrome138',
   },
 });

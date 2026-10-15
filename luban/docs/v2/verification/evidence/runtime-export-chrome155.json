@@ -1,0 +1,1113 @@
+{
+  "ok": true,
+  "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+  "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "permission": true,
+  "state": {
+    "current": "B",
+    "previous": "A",
+    "auto": true,
+    "gm": {
+      "visits": 8,
+      "nullable": null,
+      "promiseWrites": 8,
+      "timerWrites": 8
+    },
+    "journal": null,
+    "events": [
+      {
+        "time": "2026-10-13T11:30:23.810Z",
+        "boot": "5ed26b1d-ab47-42ad-8384-c9f8f9740a4a",
+        "type": "START_ALLOWED",
+        "detail": {
+          "version": "A",
+          "documentId": "50F14A7B40D2B19FEE5252B8659BE074",
+          "tabId": 2028873246,
+          "gm": {}
+        }
+      },
+      {
+        "time": "2026-10-13T11:30:24.096Z",
+        "boot": "5ed26b1d-ab47-42ad-8384-c9f8f9740a4a",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "visits",
+          "op": "set",
+          "documentId": "50F14A7B40D2B19FEE5252B8659BE074"
+        }
+      },
+      {
+        "time": "2026-10-13T11:30:24.101Z",
+        "boot": "5ed26b1d-ab47-42ad-8384-c9f8f9740a4a",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "nullable",
+          "op": "set",
+          "documentId": "50F14A7B40D2B19FEE5252B8659BE074"
+        }
+      },
+      {
+        "time": "2026-10-13T11:30:24.135Z",
+        "boot": "5ed26b1d-ab47-42ad-8384-c9f8f9740a4a",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "removeMe",
+          "op": "set",
+          "documentId": "50F14A7B40D2B19FEE5252B8659BE074"
+        }
+      },
+      {
+        "time": "2026-10-13T11:30:24.143Z",
+        "boot": "5ed26b1d-ab47-42ad-8384-c9f8f9740a4a",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "removeMe",
+          "op": "delete",
+          "documentId": "50F14A7B40D2B19FEE5252B8659BE074"
+        }
+      },
+      {
+        "time": "2026-10-13T11:30:24.145Z",
+        "boot": "5ed26b1d-ab47-42ad-8384-c9f8f9740a4a",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "promiseWrites",
+          "op": "set",
+          "documentId": "50F14A7B40D2B19FEE5252B8659BE074"
+        }
+      },
+      {
+        "time": "2026-10-13T11:30:24.366Z",
+        "boot": "5ed26b1d-ab47-42ad-8384-c9f8f9740a4a",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "timerWrites",
+          "op": "set",
+          "documentId": "50F14A7B40D2B19FEE5252B8659BE074"
+        }
+      },
+      {
+        "time": "2026-10-13T11:30:24.368Z",
+        "boot": "5ed26b1d-ab47-42ad-8384-c9f8f9740a4a",
+        "type": "RUNNER_RESULT",
+        "detail": {
+          "status": "PASS · 用户正文 A 已执行，GM 写入已确认",
+          "version": "A",
+          "before": {},
+          "after": {
+            "visits": 1,
+            "nullable": null,
+            "promiseWrites": 1,
+            "timerWrites": 1
+          },
+          "GM_info": {
+            "script": {
+              "name": "P0 probe",
+              "version": "A"
+            },
+            "version": "0.0.1"
+          },
+          "acknowledgements": 6,
+          "documentId": "50F14A7B40D2B19FEE5252B8659BE074"
+        }
+      },
+      {
+        "time": "2026-10-13T11:36:37.403Z",
+        "boot": "a494928f-83f4-46f2-971e-19b9bafe2f48",
+        "type": "SW_BOOT",
+        "detail": {
+          "current": "A",
+          "journal": null
+        }
+      },
+      {
+        "time": "2026-10-13T11:36:37.405Z",
+        "boot": "a494928f-83f4-46f2-971e-19b9bafe2f48",
+        "type": "START_ALLOWED",
+        "detail": {
+          "version": "A",
+          "documentId": "187EA09A487F8CC793D88AAD0757D13A",
+          "tabId": 2028873249,
+          "gm": {
+            "visits": 1,
+            "nullable": null,
+            "promiseWrites": 1,
+            "timerWrites": 1
+          }
+        }
+      },
+      {
+        "time": "2026-10-13T11:36:37.642Z",
+        "boot": "a494928f-83f4-46f2-971e-19b9bafe2f48",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "visits",
+          "op": "set",
+          "documentId": "187EA09A487F8CC793D88AAD0757D13A"
+        }
+      },
+      {
+        "time": "2026-10-13T11:36:37.648Z",
+        "boot": "a494928f-83f4-46f2-971e-19b9bafe2f48",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "nullable",
+          "op": "set",
+          "documentId": "187EA09A487F8CC793D88AAD0757D13A"
+        }
+      },
+      {
+        "time": "2026-10-13T11:36:37.650Z",
+        "boot": "a494928f-83f4-46f2-971e-19b9bafe2f48",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "removeMe",
+          "op": "set",
+          "documentId": "187EA09A487F8CC793D88AAD0757D13A"
+        }
+      },
+      {
+        "time": "2026-10-13T11:36:37.651Z",
+        "boot": "a494928f-83f4-46f2-971e-19b9bafe2f48",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "removeMe",
+          "op": "delete",
+          "documentId": "187EA09A487F8CC793D88AAD0757D13A"
+        }
+      },
+      {
+        "time": "2026-10-13T11:36:37.651Z",
+        "boot": "a494928f-83f4-46f2-971e-19b9bafe2f48",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "promiseWrites",
+          "op": "set",
+          "documentId": "187EA09A487F8CC793D88AAD0757D13A"
+        }
+      },
+      {
+        "time": "2026-10-13T11:36:37.940Z",
+        "boot": "a494928f-83f4-46f2-971e-19b9bafe2f48",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "timerWrites",
+          "op": "set",
+          "documentId": "187EA09A487F8CC793D88AAD0757D13A"
+        }
+      },
+      {
+        "time": "2026-10-13T11:36:37.942Z",
+        "boot": "a494928f-83f4-46f2-971e-19b9bafe2f48",
+        "type": "RUNNER_RESULT",
+        "detail": {
+          "status": "PASS · 用户正文 A 已执行，GM 写入已确认",
+          "version": "A",
+          "before": {
+            "visits": 1,
+            "nullable": null,
+            "promiseWrites": 1,
+            "timerWrites": 1
+          },
+          "after": {
+            "visits": 2,
+            "nullable": null,
+            "promiseWrites": 2,
+            "timerWrites": 2
+          },
+          "GM_info": {
+            "script": {
+              "name": "P0 probe",
+              "version": "A"
+            },
+            "version": "0.0.1"
+          },
+          "acknowledgements": 6,
+          "documentId": "187EA09A487F8CC793D88AAD0757D13A"
+        }
+      },
+      {
+        "time": "2026-10-13T11:37:22.824Z",
+        "boot": "01ca0a33-b0ce-48ad-8be2-19d0f59b3b0c",
+        "type": "SW_BOOT",
+        "detail": {
+          "current": "A",
+          "journal": null
+        }
+      },
+      {
+        "time": "2026-10-13T11:37:45.329Z",
+        "boot": "01ca0a33-b0ce-48ad-8be2-19d0f59b3b0c",
+        "type": "START_ALLOWED",
+        "detail": {
+          "version": "A",
+          "documentId": "ECE1389921F80479E584AE2A23D94724",
+          "tabId": 2028873258,
+          "gm": {
+            "visits": 2,
+            "nullable": null,
+            "promiseWrites": 2,
+            "timerWrites": 2
+          }
+        }
+      },
+      {
+        "time": "2026-10-13T11:37:45.591Z",
+        "boot": "01ca0a33-b0ce-48ad-8be2-19d0f59b3b0c",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "visits",
+          "op": "set",
+          "documentId": "ECE1389921F80479E584AE2A23D94724"
+        }
+      },
+      {
+        "time": "2026-10-13T11:37:45.598Z",
+        "boot": "01ca0a33-b0ce-48ad-8be2-19d0f59b3b0c",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "nullable",
+          "op": "set",
+          "documentId": "ECE1389921F80479E584AE2A23D94724"
+        }
+      },
+      {
+        "time": "2026-10-13T11:37:45.626Z",
+        "boot": "01ca0a33-b0ce-48ad-8be2-19d0f59b3b0c",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "removeMe",
+          "op": "set",
+          "documentId": "ECE1389921F80479E584AE2A23D94724"
+        }
+      },
+      {
+        "time": "2026-10-13T11:37:45.636Z",
+        "boot": "01ca0a33-b0ce-48ad-8be2-19d0f59b3b0c",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "removeMe",
+          "op": "delete",
+          "documentId": "ECE1389921F80479E584AE2A23D94724"
+        }
+      },
+      {
+        "time": "2026-10-13T11:37:45.724Z",
+        "boot": "01ca0a33-b0ce-48ad-8be2-19d0f59b3b0c",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "promiseWrites",
+          "op": "set",
+          "documentId": "ECE1389921F80479E584AE2A23D94724"
+        }
+      },
+      {
+        "time": "2026-10-13T11:37:45.880Z",
+        "boot": "01ca0a33-b0ce-48ad-8be2-19d0f59b3b0c",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "timerWrites",
+          "op": "set",
+          "documentId": "ECE1389921F80479E584AE2A23D94724"
+        }
+      },
+      {
+        "time": "2026-10-13T11:37:45.882Z",
+        "boot": "01ca0a33-b0ce-48ad-8be2-19d0f59b3b0c",
+        "type": "RUNNER_RESULT",
+        "detail": {
+          "status": "PASS · 用户正文 A 已执行，GM 写入已确认",
+          "version": "A",
+          "before": {
+            "visits": 2,
+            "nullable": null,
+            "promiseWrites": 2,
+            "timerWrites": 2
+          },
+          "after": {
+            "visits": 3,
+            "nullable": null,
+            "promiseWrites": 3,
+            "timerWrites": 3
+          },
+          "GM_info": {
+            "script": {
+              "name": "P0 probe",
+              "version": "A"
+            },
+            "version": "0.0.1"
+          },
+          "acknowledgements": 6,
+          "documentId": "ECE1389921F80479E584AE2A23D94724"
+        }
+      },
+      {
+        "time": "2026-10-13T11:38:00.742Z",
+        "boot": "01ca0a33-b0ce-48ad-8be2-19d0f59b3b0c",
+        "type": "PREPARED",
+        "detail": {
+          "opId": "c017fbbe-c999-4e23-a5b1-2bf317ff47a4",
+          "type": "update",
+          "candidate": "B",
+          "committed": "A"
+        }
+      },
+      {
+        "time": "2026-10-13T11:40:24.909Z",
+        "boot": "b13baa5f-c0d4-4d1d-925d-4e958cb2fb28",
+        "type": "SW_BOOT",
+        "detail": {
+          "current": "A",
+          "journal": {
+            "opId": "c017fbbe-c999-4e23-a5b1-2bf317ff47a4",
+            "type": "update",
+            "candidate": "B",
+            "committed": "A"
+          }
+        }
+      },
+      {
+        "time": "2026-10-13T11:40:24.916Z",
+        "boot": "b13baa5f-c0d4-4d1d-925d-4e958cb2fb28",
+        "type": "BOOT_RECOVERY",
+        "detail": {
+          "current": "A"
+        }
+      },
+      {
+        "time": "2026-10-13T11:42:52.054Z",
+        "boot": "af942d8b-ec0a-469f-9a45-a5bb4be8ce06",
+        "type": "SW_BOOT",
+        "detail": {
+          "current": "A",
+          "journal": null
+        }
+      },
+      {
+        "time": "2026-10-13T11:42:52.057Z",
+        "boot": "af942d8b-ec0a-469f-9a45-a5bb4be8ce06",
+        "type": "START_ALLOWED",
+        "detail": {
+          "version": "A",
+          "documentId": "4C959CFB1FE6692626CCC212EAC470B3",
+          "tabId": 2028873271,
+          "gm": {
+            "visits": 3,
+            "nullable": null,
+            "promiseWrites": 3,
+            "timerWrites": 3
+          }
+        }
+      },
+      {
+        "time": "2026-10-13T11:42:52.387Z",
+        "boot": "af942d8b-ec0a-469f-9a45-a5bb4be8ce06",
+        "type": "START_ALLOWED",
+        "detail": {
+          "version": "A",
+          "documentId": "4C959CFB1FE6692626CCC212EAC470B3",
+          "tabId": 2028873271,
+          "gm": {
+            "visits": 3,
+            "nullable": null,
+            "promiseWrites": 3,
+            "timerWrites": 3
+          }
+        }
+      },
+      {
+        "time": "2026-10-13T11:42:52.390Z",
+        "boot": "af942d8b-ec0a-469f-9a45-a5bb4be8ce06",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "visits",
+          "op": "set",
+          "documentId": "4C959CFB1FE6692626CCC212EAC470B3"
+        }
+      },
+      {
+        "time": "2026-10-13T11:42:52.394Z",
+        "boot": "af942d8b-ec0a-469f-9a45-a5bb4be8ce06",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "nullable",
+          "op": "set",
+          "documentId": "4C959CFB1FE6692626CCC212EAC470B3"
+        }
+      },
+      {
+        "time": "2026-10-13T11:42:52.396Z",
+        "boot": "af942d8b-ec0a-469f-9a45-a5bb4be8ce06",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "removeMe",
+          "op": "set",
+          "documentId": "4C959CFB1FE6692626CCC212EAC470B3"
+        }
+      },
+      {
+        "time": "2026-10-13T11:42:52.402Z",
+        "boot": "af942d8b-ec0a-469f-9a45-a5bb4be8ce06",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "removeMe",
+          "op": "delete",
+          "documentId": "4C959CFB1FE6692626CCC212EAC470B3"
+        }
+      },
+      {
+        "time": "2026-10-13T11:42:52.406Z",
+        "boot": "af942d8b-ec0a-469f-9a45-a5bb4be8ce06",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "promiseWrites",
+          "op": "set",
+          "documentId": "4C959CFB1FE6692626CCC212EAC470B3"
+        }
+      },
+      {
+        "time": "2026-10-13T11:42:52.683Z",
+        "boot": "af942d8b-ec0a-469f-9a45-a5bb4be8ce06",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "timerWrites",
+          "op": "set",
+          "documentId": "4C959CFB1FE6692626CCC212EAC470B3"
+        }
+      },
+      {
+        "time": "2026-10-13T11:42:52.685Z",
+        "boot": "af942d8b-ec0a-469f-9a45-a5bb4be8ce06",
+        "type": "RUNNER_RESULT",
+        "detail": {
+          "status": "PASS · 用户正文 A 已执行，GM 写入已确认",
+          "version": "A",
+          "before": {
+            "visits": 3,
+            "nullable": null,
+            "promiseWrites": 3,
+            "timerWrites": 3
+          },
+          "after": {
+            "visits": 4,
+            "nullable": null,
+            "promiseWrites": 4,
+            "timerWrites": 4
+          },
+          "GM_info": {
+            "script": {
+              "name": "P0 probe",
+              "version": "A"
+            },
+            "version": "0.0.1"
+          },
+          "acknowledgements": 6,
+          "documentId": "4C959CFB1FE6692626CCC212EAC470B3"
+        }
+      },
+      {
+        "time": "2026-10-13T11:43:07.943Z",
+        "boot": "af942d8b-ec0a-469f-9a45-a5bb4be8ce06",
+        "type": "PREPARED",
+        "detail": {
+          "opId": "fe7c599e-6df0-4481-bbb9-3bbc3bac1ac3",
+          "type": "update",
+          "candidate": "B",
+          "committed": "A"
+        }
+      },
+      {
+        "time": "2026-10-13T11:43:26.296Z",
+        "boot": "926e5170-6d78-4ffe-a477-184f1b6380b3",
+        "type": "SW_BOOT",
+        "detail": {
+          "current": "A",
+          "journal": {
+            "opId": "fe7c599e-6df0-4481-bbb9-3bbc3bac1ac3",
+            "type": "update",
+            "candidate": "B",
+            "committed": "A"
+          }
+        }
+      },
+      {
+        "time": "2026-10-13T11:43:26.309Z",
+        "boot": "926e5170-6d78-4ffe-a477-184f1b6380b3",
+        "type": "BOOT_RECOVERY",
+        "detail": {
+          "current": "A"
+        }
+      },
+      {
+        "time": "2026-10-13T11:43:56.647Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "SW_BOOT",
+        "detail": {
+          "current": "A",
+          "journal": null
+        }
+      },
+      {
+        "time": "2026-10-13T11:44:22.683Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "START_ALLOWED",
+        "detail": {
+          "version": "A",
+          "documentId": "5FFD3E291EFBAAE8BC8E585016C1AF0D",
+          "tabId": 2028873280,
+          "gm": {
+            "visits": 4,
+            "nullable": null,
+            "promiseWrites": 4,
+            "timerWrites": 4
+          }
+        }
+      },
+      {
+        "time": "2026-10-13T11:44:22.940Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "visits",
+          "op": "set",
+          "documentId": "5FFD3E291EFBAAE8BC8E585016C1AF0D"
+        }
+      },
+      {
+        "time": "2026-10-13T11:44:22.946Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "nullable",
+          "op": "set",
+          "documentId": "5FFD3E291EFBAAE8BC8E585016C1AF0D"
+        }
+      },
+      {
+        "time": "2026-10-13T11:44:22.948Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "removeMe",
+          "op": "set",
+          "documentId": "5FFD3E291EFBAAE8BC8E585016C1AF0D"
+        }
+      },
+      {
+        "time": "2026-10-13T11:44:22.949Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "removeMe",
+          "op": "delete",
+          "documentId": "5FFD3E291EFBAAE8BC8E585016C1AF0D"
+        }
+      },
+      {
+        "time": "2026-10-13T11:44:22.951Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "promiseWrites",
+          "op": "set",
+          "documentId": "5FFD3E291EFBAAE8BC8E585016C1AF0D"
+        }
+      },
+      {
+        "time": "2026-10-13T11:44:23.237Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "timerWrites",
+          "op": "set",
+          "documentId": "5FFD3E291EFBAAE8BC8E585016C1AF0D"
+        }
+      },
+      {
+        "time": "2026-10-13T11:44:23.250Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "RUNNER_RESULT",
+        "detail": {
+          "status": "PASS · 用户正文 A 已执行，GM 写入已确认",
+          "version": "A",
+          "before": {
+            "visits": 4,
+            "nullable": null,
+            "promiseWrites": 4,
+            "timerWrites": 4
+          },
+          "after": {
+            "visits": 5,
+            "nullable": null,
+            "promiseWrites": 5,
+            "timerWrites": 5
+          },
+          "GM_info": {
+            "script": {
+              "name": "P0 probe",
+              "version": "A"
+            },
+            "version": "0.0.1"
+          },
+          "acknowledgements": 6,
+          "documentId": "5FFD3E291EFBAAE8BC8E585016C1AF0D"
+        }
+      },
+      {
+        "time": "2026-10-13T11:44:54.233Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "START_ALLOWED",
+        "detail": {
+          "version": "A",
+          "documentId": "7268FE847D79D07C1ACBFBB51991CB8E",
+          "tabId": 2028873284,
+          "gm": {
+            "visits": 5,
+            "nullable": null,
+            "promiseWrites": 5,
+            "timerWrites": 5
+          }
+        }
+      },
+      {
+        "time": "2026-10-13T11:44:54.481Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "visits",
+          "op": "set",
+          "documentId": "7268FE847D79D07C1ACBFBB51991CB8E"
+        }
+      },
+      {
+        "time": "2026-10-13T11:44:54.499Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "nullable",
+          "op": "set",
+          "documentId": "7268FE847D79D07C1ACBFBB51991CB8E"
+        }
+      },
+      {
+        "time": "2026-10-13T11:44:54.500Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "removeMe",
+          "op": "set",
+          "documentId": "7268FE847D79D07C1ACBFBB51991CB8E"
+        }
+      },
+      {
+        "time": "2026-10-13T11:44:54.501Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "removeMe",
+          "op": "delete",
+          "documentId": "7268FE847D79D07C1ACBFBB51991CB8E"
+        }
+      },
+      {
+        "time": "2026-10-13T11:44:54.502Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "promiseWrites",
+          "op": "set",
+          "documentId": "7268FE847D79D07C1ACBFBB51991CB8E"
+        }
+      },
+      {
+        "time": "2026-10-13T11:44:54.778Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "timerWrites",
+          "op": "set",
+          "documentId": "7268FE847D79D07C1ACBFBB51991CB8E"
+        }
+      },
+      {
+        "time": "2026-10-13T11:44:54.782Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "RUNNER_RESULT",
+        "detail": {
+          "status": "PASS · 用户正文 A 已执行，GM 写入已确认",
+          "version": "A",
+          "before": {
+            "visits": 5,
+            "nullable": null,
+            "promiseWrites": 5,
+            "timerWrites": 5
+          },
+          "after": {
+            "visits": 6,
+            "nullable": null,
+            "promiseWrites": 6,
+            "timerWrites": 6
+          },
+          "GM_info": {
+            "script": {
+              "name": "P0 probe",
+              "version": "A"
+            },
+            "version": "0.0.1"
+          },
+          "acknowledgements": 6,
+          "documentId": "7268FE847D79D07C1ACBFBB51991CB8E"
+        }
+      },
+      {
+        "time": "2026-10-13T11:45:02.191Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "PREPARED",
+        "detail": {
+          "opId": "1df79328-5b10-42d0-ab0b-f8a387780535",
+          "type": "update",
+          "candidate": "B",
+          "committed": "A"
+        }
+      },
+      {
+        "time": "2026-10-13T11:45:03.893Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "COMMITTED_B",
+        "detail": {}
+      },
+      {
+        "time": "2026-10-13T11:45:05.573Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "START_ALLOWED",
+        "detail": {
+          "version": "B",
+          "documentId": "E7C6C2D74536D41A5D6CB3C9C9123EED",
+          "tabId": 2028873288,
+          "gm": {
+            "visits": 6,
+            "nullable": null,
+            "promiseWrites": 6,
+            "timerWrites": 6
+          }
+        }
+      },
+      {
+        "time": "2026-10-13T11:45:05.810Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "visits",
+          "op": "set",
+          "documentId": "E7C6C2D74536D41A5D6CB3C9C9123EED"
+        }
+      },
+      {
+        "time": "2026-10-13T11:45:05.816Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "nullable",
+          "op": "set",
+          "documentId": "E7C6C2D74536D41A5D6CB3C9C9123EED"
+        }
+      },
+      {
+        "time": "2026-10-13T11:45:05.822Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "removeMe",
+          "op": "set",
+          "documentId": "E7C6C2D74536D41A5D6CB3C9C9123EED"
+        }
+      },
+      {
+        "time": "2026-10-13T11:45:05.823Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "removeMe",
+          "op": "delete",
+          "documentId": "E7C6C2D74536D41A5D6CB3C9C9123EED"
+        }
+      },
+      {
+        "time": "2026-10-13T11:45:05.825Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "promiseWrites",
+          "op": "set",
+          "documentId": "E7C6C2D74536D41A5D6CB3C9C9123EED"
+        }
+      },
+      {
+        "time": "2026-10-13T11:45:06.102Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "timerWrites",
+          "op": "set",
+          "documentId": "E7C6C2D74536D41A5D6CB3C9C9123EED"
+        }
+      },
+      {
+        "time": "2026-10-13T11:45:06.116Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "RUNNER_RESULT",
+        "detail": {
+          "status": "PASS · 用户正文 B 已执行，GM 写入已确认",
+          "version": "B",
+          "before": {
+            "visits": 6,
+            "nullable": null,
+            "promiseWrites": 6,
+            "timerWrites": 6
+          },
+          "after": {
+            "visits": 7,
+            "nullable": null,
+            "promiseWrites": 7,
+            "timerWrites": 7
+          },
+          "GM_info": {
+            "script": {
+              "name": "P0 probe",
+              "version": "B"
+            },
+            "version": "0.0.1"
+          },
+          "acknowledgements": 6,
+          "documentId": "E7C6C2D74536D41A5D6CB3C9C9123EED"
+        }
+      },
+      {
+        "time": "2026-10-13T11:45:23.312Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "IDB_ABORT",
+        "detail": {
+          "passed": true,
+          "actual": {
+            "current": "A",
+            "previous": "OLD"
+          }
+        }
+      },
+      {
+        "time": "2026-10-13T11:45:28.646Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "CAPACITY_GUARD",
+        "detail": {
+          "passed": true,
+          "codeLimitBytes": 262144,
+          "attemptBytes": 262145,
+          "current": "B",
+          "error": "CODE_TOO_LARGE",
+          "estimate": {
+            "quota": 10738822454,
+            "usage": 1404214,
+            "usageDetails": {
+              "indexedDB": 1392867,
+              "serviceWorkerRegistrations": 11347
+            }
+          }
+        }
+      },
+      {
+        "time": "2026-10-13T11:45:30.301Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "GM_INFO",
+        "detail": {
+          "standardObject": true,
+          "legacyCallRejected": true,
+          "legacyError": "GM_info is not a function",
+          "decision": "新正文使用标准对象；旧 GM_info() 需用户重新生成验证再导出。"
+        }
+      },
+      {
+        "time": "2026-10-13T11:45:41.537Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "START_ALLOWED",
+        "detail": {
+          "version": "B",
+          "documentId": "56FA9654798127142DDEC087642819A5",
+          "tabId": 2028873292,
+          "gm": {
+            "visits": 7,
+            "nullable": null,
+            "promiseWrites": 7,
+            "timerWrites": 7
+          }
+        }
+      },
+      {
+        "time": "2026-10-13T11:45:41.790Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "visits",
+          "op": "set",
+          "documentId": "56FA9654798127142DDEC087642819A5"
+        }
+      },
+      {
+        "time": "2026-10-13T11:45:41.796Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "nullable",
+          "op": "set",
+          "documentId": "56FA9654798127142DDEC087642819A5"
+        }
+      },
+      {
+        "time": "2026-10-13T11:45:41.805Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "removeMe",
+          "op": "set",
+          "documentId": "56FA9654798127142DDEC087642819A5"
+        }
+      },
+      {
+        "time": "2026-10-13T11:45:41.807Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "removeMe",
+          "op": "delete",
+          "documentId": "56FA9654798127142DDEC087642819A5"
+        }
+      },
+      {
+        "time": "2026-10-13T11:45:41.809Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "promiseWrites",
+          "op": "set",
+          "documentId": "56FA9654798127142DDEC087642819A5"
+        }
+      },
+      {
+        "time": "2026-10-13T11:45:42.075Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "GM_DELTA",
+        "detail": {
+          "key": "timerWrites",
+          "op": "set",
+          "documentId": "56FA9654798127142DDEC087642819A5"
+        }
+      },
+      {
+        "time": "2026-10-13T11:45:42.076Z",
+        "boot": "8095871a-c928-461c-8bb4-0b90d1637324",
+        "type": "RUNNER_RESULT",
+        "detail": {
+          "status": "PASS · 用户正文 B 已执行，GM 写入已确认",
+          "version": "B",
+          "before": {
+            "visits": 7,
+            "nullable": null,
+            "promiseWrites": 7,
+            "timerWrites": 7
+          },
+          "after": {
+            "visits": 8,
+            "nullable": null,
+            "promiseWrites": 8,
+            "timerWrites": 8
+          },
+          "GM_info": {
+            "script": {
+              "name": "P0 probe",
+              "version": "B"
+            },
+            "version": "0.0.1"
+          },
+          "acknowledgements": 6,
+          "documentId": "56FA9654798127142DDEC087642819A5"
+        }
+      }
+    ],
+    "dedup": [
+      "5ed26b1d-ab47-42ad-8384-c9f8f9740a4a:b44c272e-a59b-4cd9-945c-75e4e9e9ac61:1",
+      "5ed26b1d-ab47-42ad-8384-c9f8f9740a4a:b44c272e-a59b-4cd9-945c-75e4e9e9ac61:2",
+      "5ed26b1d-ab47-42ad-8384-c9f8f9740a4a:b44c272e-a59b-4cd9-945c-75e4e9e9ac61:3",
+      "5ed26b1d-ab47-42ad-8384-c9f8f9740a4a:b44c272e-a59b-4cd9-945c-75e4e9e9ac61:4",
+      "5ed26b1d-ab47-42ad-8384-c9f8f9740a4a:b44c272e-a59b-4cd9-945c-75e4e9e9ac61:5",
+      "5ed26b1d-ab47-42ad-8384-c9f8f9740a4a:b44c272e-a59b-4cd9-945c-75e4e9e9ac61:6",
+      "a494928f-83f4-46f2-971e-19b9bafe2f48:2e8271c1-285b-40ad-95a5-86ae280e78ee:1",
+      "a494928f-83f4-46f2-971e-19b9bafe2f48:2e8271c1-285b-40ad-95a5-86ae280e78ee:2",
+      "a494928f-83f4-46f2-971e-19b9bafe2f48:2e8271c1-285b-40ad-95a5-86ae280e78ee:3",
+      "a494928f-83f4-46f2-971e-19b9bafe2f48:2e8271c1-285b-40ad-95a5-86ae280e78ee:4",
+      "a494928f-83f4-46f2-971e-19b9bafe2f48:2e8271c1-285b-40ad-95a5-86ae280e78ee:5",
+      "a494928f-83f4-46f2-971e-19b9bafe2f48:2e8271c1-285b-40ad-95a5-86ae280e78ee:6",
+      "01ca0a33-b0ce-48ad-8be2-19d0f59b3b0c:ce8218a0-261d-4af2-a1ed-5acceb8a70d4:1",
+      "01ca0a33-b0ce-48ad-8be2-19d0f59b3b0c:ce8218a0-261d-4af2-a1ed-5acceb8a70d4:2",
+      "01ca0a33-b0ce-48ad-8be2-19d0f59b3b0c:ce8218a0-261d-4af2-a1ed-5acceb8a70d4:3",
+      "01ca0a33-b0ce-48ad-8be2-19d0f59b3b0c:ce8218a0-261d-4af2-a1ed-5acceb8a70d4:4",
+      "01ca0a33-b0ce-48ad-8be2-19d0f59b3b0c:ce8218a0-261d-4af2-a1ed-5acceb8a70d4:5",
+      "01ca0a33-b0ce-48ad-8be2-19d0f59b3b0c:ce8218a0-261d-4af2-a1ed-5acceb8a70d4:6",
+      "af942d8b-ec0a-469f-9a45-a5bb4be8ce06:64dad818-e1b9-4087-970b-d1c05dda2705:1",
+      "af942d8b-ec0a-469f-9a45-a5bb4be8ce06:64dad818-e1b9-4087-970b-d1c05dda2705:2",
+      "af942d8b-ec0a-469f-9a45-a5bb4be8ce06:64dad818-e1b9-4087-970b-d1c05dda2705:3",
+      "af942d8b-ec0a-469f-9a45-a5bb4be8ce06:64dad818-e1b9-4087-970b-d1c05dda2705:4",
+      "af942d8b-ec0a-469f-9a45-a5bb4be8ce06:64dad818-e1b9-4087-970b-d1c05dda2705:5",
+      "af942d8b-ec0a-469f-9a45-a5bb4be8ce06:64dad818-e1b9-4087-970b-d1c05dda2705:6",
+      "8095871a-c928-461c-8bb4-0b90d1637324:20c2f9d6-7494-4a9d-888c-017f1065eb1b:1",
+      "8095871a-c928-461c-8bb4-0b90d1637324:20c2f9d6-7494-4a9d-888c-017f1065eb1b:2",
+      "8095871a-c928-461c-8bb4-0b90d1637324:20c2f9d6-7494-4a9d-888c-017f1065eb1b:3",
+      "8095871a-c928-461c-8bb4-0b90d1637324:20c2f9d6-7494-4a9d-888c-017f1065eb1b:4",
+      "8095871a-c928-461c-8bb4-0b90d1637324:20c2f9d6-7494-4a9d-888c-017f1065eb1b:5",
+      "8095871a-c928-461c-8bb4-0b90d1637324:20c2f9d6-7494-4a9d-888c-017f1065eb1b:6",
+      "8095871a-c928-461c-8bb4-0b90d1637324:82996cde-a10c-46c3-b6d0-86919ed1d386:1",
+      "8095871a-c928-461c-8bb4-0b90d1637324:82996cde-a10c-46c3-b6d0-86919ed1d386:2",
+      "8095871a-c928-461c-8bb4-0b90d1637324:82996cde-a10c-46c3-b6d0-86919ed1d386:3",
+      "8095871a-c928-461c-8bb4-0b90d1637324:82996cde-a10c-46c3-b6d0-86919ed1d386:4",
+      "8095871a-c928-461c-8bb4-0b90d1637324:82996cde-a10c-46c3-b6d0-86919ed1d386:5",
+      "8095871a-c928-461c-8bb4-0b90d1637324:82996cde-a10c-46c3-b6d0-86919ed1d386:6",
+      "8095871a-c928-461c-8bb4-0b90d1637324:7ee9aafc-f9c2-40a0-8f80-9b0ed2b0a89a:1",
+      "8095871a-c928-461c-8bb4-0b90d1637324:7ee9aafc-f9c2-40a0-8f80-9b0ed2b0a89a:2",
+      "8095871a-c928-461c-8bb4-0b90d1637324:7ee9aafc-f9c2-40a0-8f80-9b0ed2b0a89a:3",
+      "8095871a-c928-461c-8bb4-0b90d1637324:7ee9aafc-f9c2-40a0-8f80-9b0ed2b0a89a:4",
+      "8095871a-c928-461c-8bb4-0b90d1637324:7ee9aafc-f9c2-40a0-8f80-9b0ed2b0a89a:5",
+      "8095871a-c928-461c-8bb4-0b90d1637324:7ee9aafc-f9c2-40a0-8f80-9b0ed2b0a89a:6",
+      "8095871a-c928-461c-8bb4-0b90d1637324:ef97ba9f-5c6e-4eac-bd8e-5df39e152415:1",
+      "8095871a-c928-461c-8bb4-0b90d1637324:ef97ba9f-5c6e-4eac-bd8e-5df39e152415:2",
+      "8095871a-c928-461c-8bb4-0b90d1637324:ef97ba9f-5c6e-4eac-bd8e-5df39e152415:3",
+      "8095871a-c928-461c-8bb4-0b90d1637324:ef97ba9f-5c6e-4eac-bd8e-5df39e152415:4",
+      "8095871a-c928-461c-8bb4-0b90d1637324:ef97ba9f-5c6e-4eac-bd8e-5df39e152415:5",
+      "8095871a-c928-461c-8bb4-0b90d1637324:ef97ba9f-5c6e-4eac-bd8e-5df39e152415:6"
+    ]
+  },
+  "registered": [
+    {
+      "id": "luban-p0-auto",
+      "world": "MAIN",
+      "runAt": "document_end",
+      "matches": [
+        "http://localhost/*"
+      ],
+      "version": "B"
+    }
+  ],
+  "bridges": [
+    {
+      "allFrames": false,
+      "id": "luban-p0-bridge",
+      "js": [
+        "bridge.js"
+      ],
+      "matchOriginAsFallback": false,
+      "matches": [
+        "http://localhost/*"
+      ],
+      "persistAcrossSessions": true,
+      "runAt": "document_start",
+      "world": "ISOLATED"
+    }
+  ]
+}

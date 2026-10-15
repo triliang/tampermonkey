@@ -40,8 +40,8 @@ export function IdleView({ picking, recent, onStartPick, onDescribePage, onCance
     <section class="view">
       <h2>{s.heading}</h2>
       <p class="hint">{s.hint}</p>
-      <Button label={s.startPick} onClick={onStartPick} variant="primary" />
-      <Button label={s.describePage} onClick={onDescribePage} />
+      <Button label={s.describePage} onClick={onDescribePage} variant="primary" />
+      <Button label={s.startPick} onClick={onStartPick} />
       <h3>{s.recent}</h3>
       {recent.length === 0 ? <p class="hint">{s.recentEmpty}</p> : (
         <ul class="script-list">

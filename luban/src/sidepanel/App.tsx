@@ -1,480 +1,439 @@
-import { useEffect, useReducer, useRef, useState } from 'preact/hooks';
-import { EMPTY_TARGET_ELEMENT, initialState, uiReducer, type RunOutcome, type UIAction, type UIState } from './state-machine';
-import { IdleView } from './views/IdleView';
-import { IntentView } from './views/IntentView';
-import { GeneratingView } from './views/GeneratingView';
-import { PreviewView } from './views/PreviewView';
-import { ResultView } from './views/ResultView';
-import { sendToSW, selfTest } from './comms';
+import brandLogo from '../assets/logo.svg';
+import type {ScriptAttachment} from '../shared/script-attachment';
+import {scriptFilename} from '../shared/script-attachment';
+import {ReasoningDetails} from './components/ReasoningDetails';
+import type {ReasoningStage} from '../shared/reasoning';
+import {CodeArtifactDialog} from './components/CodeArtifactDialog';
+import {ChatMarkdown} from './components/ChatMarkdown';
+import {createReference,lineLabel} from '../shared/code-reference';
+import type {CodeReference} from '../shared/code-reference';
+import {workspaceStage} from './workspace-controller';
+import {TargetCard,QualityCard} from './components/WorkflowCards';
+import {emptyWorkflow} from '../shared/v21-types';
+import type {Workflow,TargetCandidate,QualityReport} from '../shared/v21-types';
+import { getSettings,saveThinkingEnabled } from '../shared/settings-store';
+import type { AnalysisPreview, PageSuggestion } from '../shared/p7-types';
+import { ScriptLibrary } from '../shared/ScriptLibrary';
+import { ExportDialog } from '../shared/ExportDialog';
+import type { ExportArtifact } from '../shared/p5-types';
+import type { InjectionResult } from '../shared/types';
+import { hostPermissionOrigins } from '../shared/host-policy';
+import type { RuntimeStatus } from '../shared/p4-types';
+import type { TrialReceipt, TrialResult } from '../shared/p3-types';
+import { useEffect, useRef, useState } from 'preact/hooks';
+import { sendToSW } from './comms';
 import { makeRequestId } from '../shared/messages';
-import type { LubanMessage, LubanResponse, RegenerateContext } from '../shared/messages';
-import { PORT_NAMES, TIMING } from '../shared/constants';
-import type { InjectionResult, PageContext, ScriptMeta, TargetElement, UiSnapshot, UserScript } from '../shared/types';
-import { STRINGS } from '../shared/i18n-strings';
+import type { LubanMessage } from '../shared/messages';
+import { GM_P0_GRANTS, PORT_NAMES,STORAGE_KEYS } from '../shared/constants';
+import type { ScriptMeta, TargetElement } from '../shared/types';
+import type { ConversationMessage, DraftPatch, ScriptRecord, WorkspaceRecord } from '../shared/v2-types';
+import type { GenerationEnvelope } from '../shared/p2-types';
+import { DraftBuffer } from '../service-worker/repositories/draft-buffer';
 
-interface Diag {
-  running: boolean;
-  content?: LubanResponse;
-  main?: LubanResponse;
+interface Site { tabId: number; host: string; url: string; title: string; }
+interface Opened { workspace: WorkspaceRecord; messages: ConversationMessage[]; }
+async function call<T>(message: LubanMessage): Promise<T> {
+  const r = await sendToSW<T>(message); if (!r.ok) throw Error(r.error.message); return r.data;
 }
-
-interface LastRun {
-  scriptId?: string;
-  explanation: string;
-  code: string;
-  gmGrants: string[];
-  intent: string;
-  model: string;
-}
-
-export default function App() {
-  const [state, dispatch] = useReducer(uiReducer, initialState);
-  const [diag, setDiag] = useState<Diag>({ running: false });
-  const [pageContext, setPageContext] = useState<PageContext | null>(null);
-  const [recent, setRecent] = useState<ScriptMeta[]>([]);
-  const [booted, setBooted] = useState(false);
-  const [lastRun, setLastRun] = useState<LastRun | null>(null);
+const rid = () => makeRequestId();
+export default function App({initialView='home',embedded=false}:{initialView?:'home'|'library';embedded?:boolean}={}) {
+  const pagePreview=useRef<{sessionId:string;workspaceId:string}|null>(null);
+  const previewFocusChat=useRef(false);
+  const pagePreviewInput=useRef<string|null>(null);
+  const [previewBusy,setPreviewBusy]=useState(false);
+  const [activeScriptAttachment,setActiveScriptAttachment]=useState<ScriptAttachment>();
+  const [reasoningStages,setReasoningStages]=useState<ReasoningStage[]>([]);
+  const [analysisReasoning,setAnalysisReasoning]=useState<ReasoningStage[]>([]);
+  const [artifactOpen,setArtifactOpen]=useState(false);
+  const [contextOpen,setContextOpen]=useState(false);
+  const [settingsOpen,setSettingsOpen]=useState(false);
+  const [reference,setReference]=useState<CodeReference|null>(null);
+  const [queuedText,setQueuedText]=useState('');
+  const queued=useRef('');
+  const chatScroll=useRef<HTMLDivElement|null>(null);
+  const follow=useRef(true);
+  const [showLatest,setShowLatest]=useState(false);
+  const [thinkingEnabled,setThinkingEnabled]=useState(true);
+  const [thinkingSaving,setThinkingSaving]=useState(false);
+  const [analysisEnabled,setAnalysisEnabled]=useState(false);
+  const [analysisPreview,setAnalysisPreview]=useState<AnalysisPreview|null>(null);
+  const [suggestions,setSuggestions]=useState<PageSuggestion[]>([]);
+  const [analysing,setAnalysing]=useState(false);
+  const analysisEpoch=useRef(0);
+  const analysisId=useRef('');
+  const [workflow,setWorkflow]=useState<Workflow>(emptyWorkflow());
+  const [constraints,setConstraints]=useState('');
+  const [repairAllowed,setRepairAllowed]=useState(true);
+  const [quality,setQuality]=useState<QualityReport|null>(null);
+  const [feedbackMode,setFeedbackMode]=useState(false);
+  const [operation,setOperation]=useState<'trial'|'save'|'restore'|'rename'|null>(null);
+  const [view, setView] = useState<'home'|'editor'|'library'>(initialView);
+  const [site, setSite] = useState<Site|null>(null);
+  const [records, setRecords] = useState<ScriptRecord[]>([]);
+  const [workspace, setWorkspace] = useState<WorkspaceRecord|null>(null);
+  const [record, setRecord] = useState<ScriptRecord|null>(null);
+  const [messages, setMessages] = useState<ConversationMessage[]>([]);
+  const [input, setInput] = useState('');
+  const [code, setCode] = useState('');
+  const [selectors, setSelectors] = useState<string[]>([]);
+  const [target, setTarget] = useState<TargetElement|null>(null);
+  const [picking, setPicking] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [preparing, setPreparing] = useState(false);
+  const [stream, setStream] = useState('');
   const [notice, setNotice] = useState('');
   const [online, setOnline] = useState(navigator.onLine);
-  const genPortRef = useRef<chrome.runtime.Port | null>(null);
-  const pageContextRef = useRef<PageContext | null>(null);
-  const snapshotAt = useRef(0);
-  pageContextRef.current = pageContext;
+  const [envelope, setEnvelope] = useState<GenerationEnvelope|null>(null);
+  const [autoDiagnostics,setAutoDiagnostics]=useState('');
+  const [exportArtifact,setExportArtifact]=useState<ExportArtifact|null>(null);
+  const [runtimeIssues,setRuntimeIssues]=useState<RuntimeStatus[]>([]);
+  const [runtimeStatus,setRuntimeStatus]=useState<RuntimeStatus|null>(null);
+  const [deleteConfirm,setDeleteConfirm]=useState(false);
+  const [receipt, setReceipt] = useState<TrialReceipt|null>(null);
+  const [name, setName] = useState('');
+  const [versionBusy, setVersionBusy] = useState(false);
+  const [restoreConfirm, setRestoreConfirm] = useState(false);
+  const [leaving, setLeaving] = useState<null | (()=>void)>(null);
+  const wsRef = useRef<WorkspaceRecord|null>(null);
+  const buffer = useRef<DraftBuffer|null>(null);
+  const creating = useRef<Promise<WorkspaceRecord>|null>(null);
+  const port = useRef<chrome.runtime.Port|null>(null);
+  const pickerId = useRef('');
+  const activeGeneration = useRef('');
+  const selected = useRef(0);
+  const busy = useRef(false);
+  const dialogRef = useRef<HTMLDialogElement|null>(null);
+  const editable = !generating && !preparing && !versionBusy && !analysing && !previewBusy && !thinkingSaving;
+  const mismatch = !!workspace && (!site || workspace.host !== site.host);
+  const effective = workspace?.draft ?? record?.current;
+  const stage=workspaceStage({generating,stream,operation,preview:!!envelope,receipt:!!receipt,draft:!!workspace?.draft,failed:workflow.outcome?.state==='failed'});
 
-  function nextSnapshotAt(): number {
-    const at = Math.max(Date.now(), snapshotAt.current + 1);
-    snapshotAt.current = at;
-    return at;
+  const fail = (e: unknown) => setNotice(e instanceof Error ? e.message : String(e));
+  async function refreshSite() {
+    try { setSite(await call<Site>({ type:'GET_CURRENT_SITE', requestId:rid() })); }
+    catch(e) { setSite(null); fail(e); }
   }
-
-  const go = (a: UIAction) => dispatch(a);
-
-  useEffect(() => {
-    const on = () => setOnline(true);
-    const off = () => setOnline(false);
-    window.addEventListener('online', on);
-    window.addEventListener('offline', off);
-    return () => {
-      window.removeEventListener('online', on);
-      window.removeEventListener('offline', off);
+  async function refreshLists() {
+    const list = await call<ScriptMeta[]>({type:'LIST_SCRIPTS',requestId:rid()});
+    const loaded = await Promise.all(list.map(meta=>call<ScriptRecord>({type:'GET_SCRIPT_RECORD',requestId:rid(),scriptId:meta.id})));
+    setRecords(loaded.filter(Boolean));
+    setRuntimeIssues((await call<RuntimeStatus[]>({type:'LIST_RUNTIME_STATUS',requestId:rid()})).filter(r=>['unavailable','cleanup_required','error'].includes(r.state)));
+  }
+  function attach(ws: WorkspaceRecord) {
+    buffer.current?.dispose(); wsRef.current=ws; setWorkspace(ws);
+    buffer.current = new DraftBuffer(ws.draftRevision, async (revision,patch)=>{
+      const saved = await call<WorkspaceRecord>({type:'SAVE_DRAFT',requestId:rid(),workspaceId:ws.id,expectedDraftRevision:revision,patch});
+      if(wsRef.current?.id===saved.id){wsRef.current=saved;setWorkspace(saved);}return saved;
+    },fail);
+  }
+  async function loadWorkspace(id: string, epoch=selected.current) {
+    const opened = await call<Opened>({type:'GET_WORKSPACE',requestId:rid(),workspaceId:id});
+    if(epoch!==selected.current)return;
+    if(!opened.workspace)throw Error('工作区已不存在，请重新打开。');
+    const saved = opened.workspace.scriptId ? await call<ScriptRecord>({type:'GET_SCRIPT_RECORD',requestId:rid(),scriptId:opened.workspace.scriptId}) : null;
+    const runtime=saved?await call<RuntimeStatus>({type:'GET_RUNTIME_STATUS',requestId:rid(),scriptId:saved.id}):null;
+    if(epoch!==selected.current)return;
+    const flow=await call<Workflow>({type:'GET_WORKFLOW',requestId:rid(),workspaceId:id});if(epoch!==selected.current)return;setWorkflow(flow);setConstraints(flow.constraints);setQuality(null);
+    attach(opened.workspace);setRecord(saved);setRuntimeStatus(runtime);setAutoDiagnostics('');setMessages(opened.messages);setInput(opened.workspace.input);setReference(opened.workspace.codeReference??null);
+    setCode((opened.workspace.draft??saved?.current)?.code??'');setName(saved?.name??opened.messages.filter(m=>m.role==='user').at(-1)?.text.replace(/\s+/g,' ').slice(0,24)??'网页工具');setReceipt(null);
+  }
+  async function ensureWorkspace(): Promise<WorkspaceRecord> {
+    if(wsRef.current)return wsRef.current;
+    if(!site)throw Error('请切回目标网页并点击鲁班图标授权。');
+    if(!creating.current)creating.current=call<WorkspaceRecord>({type:'CREATE_WORKSPACE',requestId:rid(),scriptId:null,host:site.host});
+    try {const ws=await creating.current;if(!wsRef.current)attach(ws);return ws;}
+    finally{creating.current=null;}
+  }
+  function schedule(patch: DraftPatch) { setEnvelope(null); buffer.current?.schedule(patch); }
+  function inputChanged(value: string) {
+    cancelAnalysis();setInput(value);setEnvelope(null);setReceipt(null);
+    if(pagePreview.current){pagePreviewInput.current=value;return;}
+    void ensureWorkspace().then(()=>buffer.current?.schedule({input:value})).catch(fail);
+  }
+  async function closePagePreview(){
+    const current=pagePreview.current;if(!current)return;
+    await call({type:'CLOSE_CODE_PREVIEW',requestId:rid(),sessionId:current.sessionId});
+    pagePreview.current=null;const text=pagePreviewInput.current;pagePreviewInput.current=null;if(text!==null)inputChanged(text);
+  }
+  async function openCode(){
+    if(!editable||!effective)return;setPreviewBusy(true);
+    try{await flush();await closePagePreview();await flush();const ws=wsRef.current!;
+      const result=await call<{sessionId:string}>({type:'OPEN_CODE_PREVIEW',requestId:rid(),workspaceId:ws.id,name:name||'当前脚本'});pagePreview.current={sessionId:result.sessionId,workspaceId:ws.id};setNotice('代码已在左侧网页打开，聊天仍可继续。');
+    }catch(e){if(pagePreview.current){fail(e);return;}setArtifactOpen(true);setNotice('网页浮层不可用，已回退到侧栏预览。'+(e instanceof Error?e.message:String(e)));}finally{setPreviewBusy(false);}
+  }
+  async function flush() { if(creating.current)await creating.current;await buffer.current?.flush(); }
+  function resetActive() {
+    cancelAnalysis();
+    setReference(null);setArtifactOpen(false);setContextOpen(false);setSettingsOpen(false);queued.current='';setQueuedText('');
+    setReasoningStages([]);setAnalysisReasoning([]);setWorkflow(emptyWorkflow());setConstraints('');setQuality(null);setFeedbackMode(false);
+    setAutoDiagnostics('');setDeleteConfirm(false);setRuntimeStatus(null);setReceipt(null);setRestoreConfirm(false);selected.current++;buffer.current?.dispose();buffer.current=null;wsRef.current=null;setWorkspace(null);setRecord(null);setMessages([]);
+    setInput('');setCode('');setTarget(null);setSelectors([]);setEnvelope(null);setNotice('');
+  }
+  async function leave(action: ()=>void) {
+    if(busy.current){setNotice('请先取消生成或等待操作完成。');return;}
+    try {await closePagePreview();await flush();}catch(e){fail(e);return;}
+    if(wsRef.current && (wsRef.current.draft || wsRef.current.input)){setLeaving(()=>action);return;}
+    resetActive();action();
+  }
+  async function decideLeave(discard=false) {
+    const action=leaving;if(!action)return;
+    try{
+      if(discard&&wsRef.current)await call({type:'DISCARD_DRAFT',requestId:rid(),workspaceId:wsRef.current.id,expectedDraftRevision:wsRef.current.draftRevision});
+      else await flush();
+      setLeaving(null);resetActive();action();await refreshLists();
+    }catch(e){fail(e);}
+  }
+  async function openTool(s: ScriptRecord) {
+    await leave(()=>{setView('editor');const epoch=selected.current;void (async()=>{
+      const all=await call<WorkspaceRecord[]>({type:'LIST_WORKSPACES',requestId:rid()});
+      const old=all.filter(w=>w.scriptId===s.id).sort((a,b)=>b.updatedAt-a.updatedAt)[0];
+      const ws=old??await call<WorkspaceRecord>({type:'CREATE_WORKSPACE',requestId:rid(),scriptId:s.id,host:s.host});
+      await loadWorkspace(ws.id,epoch);
+    })().catch(fail);});
+  }
+  async function prepare(allowRepair=repairAllowed,autoSend=true) {
+    if(busy.current)return;busy.current=true;setPreparing(true);setNotice('');
+    try{
+      await closePagePreview();await ensureWorkspace();await flush();
+      if(constraints!==workflow.constraints)await changeWorkflow({constraints});
+      if(feedbackMode){await changeWorkflow({feedback:input});setFeedbackMode(false);}
+      if(workflow.scope==='module'&&!workflow.strategyConfirmed){setNotice('请先确认目标模块策略。');return;}
+      const ws=wsRef.current!;
+      const result=await call<GenerationEnvelope>({type:'PREPARE_GENERATION',requestId:rid(),workspaceId:ws.id,expectedDraftRevision:ws.draftRevision,selectors:selectors.length?selectors:undefined,repairAllowed:allowRepair});
+      setView('editor');
+      if(autoSend){busy.current=false;setPreparing(false);await generate(result);}
+      else setEnvelope(result);
+    }catch(e){fail(e);}finally{if(!activeGeneration.current)busy.current=false;setPreparing(false);}
+  }
+  async function generate(preview=envelope) {
+    if(!preview||busy.current||!wsRef.current)return;busy.current=true;
+    queued.current='';setQueuedText('');setReceipt(null);
+    setActiveScriptAttachment(preview.scriptAttachment);setReasoningStages([]);setGenerating(true);setEnvelope(null);setStream('');setNotice('');
+    const id=rid(),wsId=wsRef.current.id;activeGeneration.current=id;
+    let finished=false;
+    let connection: chrome.runtime.Port;
+    try { connection=chrome.runtime.connect({name:PORT_NAMES.GENERATION});port.current=connection; }
+    catch(e){activeGeneration.current='';busy.current=false;setGenerating(false);fail(e);return;}
+    const complete = async (error?:string) => {
+      if(activeGeneration.current!==id)return;finished=true;activeGeneration.current='';
+      try{await loadWorkspace(wsId);await refreshLists();}catch(e){fail(e);}finally{if(queued.current){const text=queued.current;queued.current='';setQueuedText('');inputChanged(text);}busy.current=false;setGenerating(false);setStream('');}
+      if(error)setNotice(error);
+      connection.disconnect();
     };
-  }, []);
-
-  useEffect(() => {
-    function onMessage(msg: LubanMessage): void {
-      if (msg.type === 'ELEMENT_PICKED') {
-        setPageContext(msg.context);
-        const picked = msg.context.target;
-        if (picked) dispatch({ type: 'ELEMENT_PICKED', element: picked });
-      } else if (msg.type === 'PICK_CANCELLED') {
-        dispatch({ type: 'CANCEL_PICK' });
-      }
-    }
-    chrome.runtime.onMessage.addListener(onMessage);
-    return () => chrome.runtime.onMessage.removeListener(onMessage);
-  }, []);
-
-  useEffect(() => {
-    void (async () => {
-      const r = await sendToSW<{ snapshot: UiSnapshot | null; expired: boolean }>({
-        type: 'GET_STATE',
-        requestId: makeRequestId(),
-      });
-      if (r.ok && r.data.snapshot) {
-        const snap = r.data.snapshot;
-        snapshotAt.current = Math.max(snapshotAt.current, snap.updatedAt);
-        setPageContext(snap.pageContext);
-        if (r.data.expired) {
-          dispatch({
-            type: 'HYDRATE',
-            state: {
-              type: 'INTENT_INPUT',
-              element: snap.element,
-              intent: snap.intent,
-              error: STRINGS.panel.result.expired,
-            },
-          });
-        } else if (snap.phase === 'PREVIEW' && snap.result) {
-          dispatch({
-            type: 'HYDRATE',
-            state: { type: 'PREVIEW', result: snap.result, element: snap.element, intent: snap.intent },
-          });
-        } else if (snap.phase === 'GENERATING') {
-          dispatch({
-            type: 'HYDRATE',
-            state: {
-              type: 'GENERATING',
-              startTime: snap.startedAt,
-              streamContent: snap.streamContent ?? '',
-              element: snap.element,
-              intent: snap.intent,
-            },
-          });
-          void connectGeneration(snap.intent, snap.pageContext ?? resolveStubContext(snap.element));
-        }
-      }
-      setBooted(true);
-    })();
-  }, []);
-
-  useEffect(() => {
-    if (!booted || state.type !== 'GENERATING') return;
-    const startedAt = state.startTime;
-    const intent = state.intent;
-    const element = state.element;
-    const write = () => {
-      const updatedAt = nextSnapshotAt();
-      const snapshot: UiSnapshot = {
-        phase: 'GENERATING',
-        startedAt,
-        updatedAt,
-        intent,
-        element,
-        pageContext: pageContextRef.current,
-      };
-      void sendToSW({ type: 'SET_UI_STATE', requestId: makeRequestId(), snapshot, updatedAt });
-    };
-    write();
-    const timer = window.setInterval(write, TIMING.SESSION_SNAPSHOT_MS);
-    return () => window.clearInterval(timer);
-  }, [booted, state.type, state.type === 'GENERATING' ? state.startTime : 0]);
-
-  useEffect(() => {
-    if (!booted || state.type !== 'PREVIEW') return;
-    const updatedAt = nextSnapshotAt();
-    const snapshot: UiSnapshot = {
-      phase: 'PREVIEW',
-      startedAt: updatedAt,
-      updatedAt,
-      intent: state.intent,
-      element: state.element,
-      pageContext: pageContextRef.current,
-      result: state.result,
-    };
-    void sendToSW({ type: 'SET_UI_STATE', requestId: makeRequestId(), snapshot, updatedAt });
-  }, [booted, state.type, state.type === 'PREVIEW' ? state.result.requestId : '']);
-
-  useEffect(() => {
-    if (!booted) return;
-    if (state.type === 'IDLE' || state.type === 'RESULT' || state.type === 'PICKING' || state.type === 'INTENT_INPUT') {
-      void sendToSW({ type: 'SET_UI_STATE', requestId: makeRequestId(), snapshot: null, updatedAt: nextSnapshotAt() });
-    }
-  }, [booted, state.type]);
-
-  useEffect(() => {
-    if (!booted || state.type !== 'IDLE') return;
-    void refreshRecent();
-  }, [booted, state.type]);
-
-  useEffect(() => {
-    if (state.type !== 'PICKING') return;
-    function onKeyDown(e: KeyboardEvent): void {
-      if (e.key === 'Escape') void onCancelPick();
-    }
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [state.type]);
-
-  async function refreshRecent(): Promise<void> {
-    const r = await sendToSW<ScriptMeta[]>({ type: 'LIST_SCRIPTS', requestId: makeRequestId() });
-    if (r.ok) setRecent(r.data);
-  }
-
-  async function onStartPick() {
-    setNotice('');
-    go({ type: 'START_PICK' });
-    const r = await sendToSW({ type: 'START_PICKER', requestId: makeRequestId() });
-    if (!r.ok) {
-      setNotice(r.error.message);
-      go({ type: 'CANCEL_PICK' });
-    }
-  }
-
-  async function onDescribePage() {
-    setNotice('');
-    const r = await sendToSW<{ context: PageContext }>({ type: 'COLLECT_PAGE_CONTEXT', requestId: makeRequestId() });
-    if (!r.ok) {
-      setNotice(r.error.message);
-      return;
-    }
-    setPageContext(r.data.context);
-    go({ type: 'START_PAGE_DESCRIBE' });
-  }
-
-  async function onCancelPick() {
-    go({ type: 'CANCEL_PICK' });
-    await sendToSW({ type: 'CANCEL_PICKER', requestId: makeRequestId() });
-  }
-
-  async function onSelfTest() {
-    setDiag({ running: true });
-    const r = await selfTest();
-    setDiag({ running: false, content: r.content, main: r.main });
-  }
-
-  function connectGeneration(intent: string, context: PageContext, regenerateContext?: RegenerateContext) {
-    const requestId = makeRequestId();
-    const port = chrome.runtime.connect({ name: PORT_NAMES.GENERATION });
-    genPortRef.current = port;
-    port.onMessage.addListener((raw: LubanMessage) => {
-      if (raw.type === 'GENERATION_PROGRESS') {
-        dispatch({ type: 'PROGRESS', content: raw.content });
-      } else if (raw.type === 'GENERATION_COMPLETE') {
-        dispatch({ type: 'GENERATED', result: raw.result });
-        port.disconnect();
-      } else if (raw.type === 'GENERATION_FAILED') {
-        dispatch({ type: 'GEN_FAILED', error: raw.error.message, actions: raw.error.actions });
-        port.disconnect();
-      }
+    connection.onMessage.addListener((m:LubanMessage)=>{
+      if(m.requestId!==id||activeGeneration.current!==id)return;
+      if(m.type==='GENERATION_REASONING')setReasoningStages(old=>{const next=[...old];next[m.attempt-1]={attempt:m.attempt,text:m.content,truncated:m.truncated};return next.filter(Boolean);});
+      if(m.type==='GENERATION_PROGRESS')setStream(m.content);
+      if(m.type==='GENERATION_COMPLETE')void complete();
+      if(m.type==='GENERATION_FAILED')void complete(m.error.message);
     });
-    port.onDisconnect.addListener(() => {
-      if (genPortRef.current === port) genPortRef.current = null;
-    });
-    port.postMessage({ type: 'GENERATE_SCRIPT', requestId, context, intent, regenerateContext });
+    connection.onDisconnect.addListener(()=>{if(port.current===connection)port.current=null;if(!finished&&activeGeneration.current===id)void complete('生成连接中断，原草稿仍保留；可重新打开后重试。');});
+    try{connection.postMessage({type:'GENERATE_WORKSPACE',requestId:id,workspaceId:wsId,envelopeId:preview.id});}catch(e){void complete(String(e));}
   }
-
-  async function onSubmitIntent(intent: string, regenerateContext?: RegenerateContext) {
-    if (!online) return;
-    if (state.type !== 'INTENT_INPUT' && state.type !== 'PREVIEW' && state.type !== 'RESULT') return;
-    const element = state.element;
-    go({ type: 'SUBMIT_INTENT', intent });
-    const context = pageContext ?? resolveStubContext(element);
-    connectGeneration(intent, context, regenerateContext);
+  async function cancel() {
+    if(!wsRef.current)return;
+    try{await call({type:'CANCEL_WORKSPACE_GENERATION',requestId:rid(),workspaceId:wsRef.current.id});activeGeneration.current='';port.current?.disconnect();port.current=null;
+      try{await loadWorkspace(wsRef.current.id);}finally{if(queued.current){const text=queued.current;queued.current='';setQueuedText('');inputChanged(text);}busy.current=false;setGenerating(false);setStream('');}setNotice('生成已取消，需求和原草稿已保留。');
+    }catch(e){fail(e);}
   }
-
-  async function onRun() {
-    if (state.type !== 'PREVIEW') return;
-    const captured: LastRun = {
-      code: state.result.code,
-      gmGrants: state.result.gmGrants,
-      explanation: state.result.explanation,
-      intent: state.intent,
-      model: state.result.model,
-    };
-    setLastRun(captured);
-    const r = await sendToSW<InjectionResult>({
-      type: 'INJECT_SCRIPT',
-      requestId: makeRequestId(),
-      code: captured.code,
-      gmGrants: captured.gmGrants,
-      storageSnapshot: {},
-    });
-    const shown = presentRun(r);
-    go({ type: 'RUN_DONE', outcome: shown.outcome, detail: shown.detail });
+  async function pick() {
+    try{await closePagePreview();await ensureWorkspace();await flush();setPicking(true);pickerId.current=rid();
+      await call({type:'START_PICKER',requestId:pickerId.current});
+    }catch(e){setPicking(false);fail(e);}
   }
-
-  async function onRunAgain() {
-    if (!lastRun || state.type !== 'RESULT') return;
-    const element = state.element;
-    const intent = state.intent;
-    const r = lastRun.scriptId
-      ? await sendToSW<InjectionResult>({ type: 'RUN_SAVED_SCRIPT', requestId: makeRequestId(), scriptId: lastRun.scriptId })
-      : await sendToSW<InjectionResult>({
-          type: 'INJECT_SCRIPT',
-          requestId: makeRequestId(),
-          code: lastRun.code,
-          gmGrants: lastRun.gmGrants,
-          storageSnapshot: {},
-        });
-    const shown = presentRun(r);
-    go({ type: 'SHOW_RESULT', outcome: shown.outcome, detail: shown.detail, element, intent });
+  async function clearPick() {if(wsRef.current)await changeWorkflow({scope:'page',selectors:[]});await call({type:'V21_CLEAR_PREVIEW',requestId:rid()}).catch(()=>{});pickerId.current='';setPicking(false);setTarget(null);setSelectors([]);setEnvelope(null);await call({type:'CANCEL_PICKER',requestId:rid()}).catch(fail);}
+  function editCode(value: string) {
+    if(!wsRef.current||!effective)return;
+    cancelAnalysis();setQuality(null);setWorkflow(old=>{const next={...old};delete next.quality;return next;});setReceipt(null);setCode(value);
+    schedule({draft:{...effective,versionId:crypto.randomUUID(),hash:'unverified-edit',code:value,explanation:'代码已手动修改，请检查实际代码并重新试运行。'}});
   }
-
-  async function onRunSaved(meta: ScriptMeta) {
-    const r = await sendToSW<InjectionResult>({ type: 'RUN_SAVED_SCRIPT', requestId: makeRequestId(), scriptId: meta.id });
-    const shown = presentRun(r);
-    setLastRun({
-      scriptId: meta.id,
-      explanation: meta.name,
-      code: '',
-      gmGrants: [],
-      intent: meta.name,
-      model: '',
-    });
-    go({ type: 'SHOW_RESULT', outcome: shown.outcome, detail: shown.detail, element: EMPTY_TARGET_ELEMENT, intent: meta.name });
-  }
-
-  async function onSave() {
-    const base = state.type === 'PREVIEW'
-      ? {
-          code: state.result.code,
-          gmGrants: state.result.gmGrants,
-          explanation: state.result.explanation,
-          intent: state.intent,
-          model: state.result.model,
-        }
-      : lastRun;
-    if (!base) return;
-    const now = Date.now();
-    const url = pageContext?.meta.url ?? '';
-    let host = '';
+  async function editGrant(grant: string, enabled: boolean) {
+    if(busy.current)return;
+    busy.current=true;setVersionBusy(true);setQuality(null);setWorkflow(old=>{const next={...old};delete next.quality;return next;});setReceipt(null);
     try {
-      host = new URL(url).hostname;
-    } catch {
-      host = '';
-    }
-    const script: UserScript = {
-      id: makeRequestId(),
-      name: base.intent.slice(0, 40) || '未命名脚本',
-      description: base.explanation,
-      explanation: base.explanation,
-      code: base.code,
-      matches: host ? [`*://${host}/*`] : [],
-      enabled: true,
-      runAt: 'document-end',
-      source: 'ai',
-      gmGrants: base.gmGrants,
-      aiMeta: {
-        intent: base.intent,
-        provider: 'xiaomi-mimo',
-        model: base.model,
-        pageContextSnapshot: { url, title: pageContext?.meta.title ?? '' },
-        createdAt: now,
-      },
-      createdAt: now,
-      updatedAt: now,
+      await flush();
+      const current=wsRef.current?.draft??record?.current;
+      if(!current)return;
+      const grants=enabled?[...new Set([...current.grants,grant])]:current.grants.filter(g=>g!==grant);
+      schedule({draft:{...current,code,grants,versionId:crypto.randomUUID(),hash:'unverified-edit'}});
+      await flush();
+      setNotice('草稿权限已更新，请重新试运行后保存。');
+    }catch(e){fail(e);}finally{busy.current=false;setVersionBusy(false);setOperation(null);}
+  }
+  useEffect(()=>{
+    void getSettings().then(s=>{setAnalysisEnabled(!!s.pageAnalysisEnabled);setThinkingEnabled(s.thinkingEnabled!==false);});
+    void refreshSite();void refreshLists().catch(fail);
+    const updateSite=()=>{void closePagePreview().catch(fail);cancelAnalysis();setReceipt(null);if(activeGeneration.current)void cancel();setEnvelope(null);setSelectors([]);setTarget(null);void refreshSite();};
+    const changed=(_id:number,change:{url?:string})=>{if(change.url)updateSite();};
+    const on=()=>setOnline(true),off=()=>setOnline(false);
+    chrome.tabs.onActivated?.addListener(updateSite);chrome.tabs.onUpdated?.addListener(changed);
+    const settingsChanged=(changes:Record<string,chrome.storage.StorageChange>,area:string)=>{if(area==='sync'&&changes[STORAGE_KEYS.SETTINGS]){setThinkingEnabled(changes[STORAGE_KEYS.SETTINGS].newValue?.thinkingEnabled!==false);setEnvelope(null);cancelAnalysis();}};
+    chrome.storage.onChanged?.addListener(settingsChanged);
+    window.addEventListener('online',on);window.addEventListener('offline',off);
+    return()=>{chrome.storage.onChanged?.removeListener(settingsChanged);chrome.tabs.onActivated?.removeListener(updateSite);chrome.tabs.onUpdated?.removeListener(changed);window.removeEventListener('online',on);window.removeEventListener('offline',off);buffer.current?.dispose();port.current?.disconnect();cancelAnalysis();};
+  },[]);
+  useEffect(()=>{
+    const onMessage=(m:LubanMessage,sender:chrome.runtime.MessageSender)=>{
+      if(m.type==='ELEMENT_PICKED'&&m.requestId===pickerId.current&&sender.id===chrome.runtime.id&&sender.frameId===0&&sender.tab?.id===site?.tabId){setReceipt(null);setTarget(m.context.target);void changeWorkflow({scope:'element',selectors:m.context.target?.selectorCandidates??[]}).catch(fail);setSelectors(m.context.target?.selectorCandidates??[]);setEnvelope(null);setPicking(false);}
+      if(m.type==='PICK_CANCELLED'){setPicking(false);pickerId.current='';}
     };
-    const r = await sendToSW<{ id: string }>({ type: 'SAVE_SCRIPT', requestId: makeRequestId(), script });
-    if (!r.ok) {
-      setNotice(r.error.message);
-      return;
-    }
-    setNotice('');
-    setLastRun({ ...base, scriptId: r.data.id });
-  }
+    chrome.runtime.onMessage.addListener(onMessage);return()=>chrome.runtime.onMessage.removeListener(onMessage);
+  },[site?.tabId]);
+  useEffect(()=>{const escape=(e:KeyboardEvent)=>{if(e.key==='Escape'&&picking)void clearPick();};window.addEventListener('keydown',escape);return()=>window.removeEventListener('keydown',escape);},[picking]);
+  useEffect(()=>{if(leaving&&!dialogRef.current?.open)dialogRef.current?.showModal();else if(!leaving&&dialogRef.current?.open)dialogRef.current.close();},[leaving]);
 
-  function renderView(s: UIState) {
-    switch (s.type) {
-      case 'IDLE':
-      case 'PICKING':
-        return (
-          <IdleView
-            picking={s.type === 'PICKING'}
-            recent={recent}
-            onStartPick={onStartPick}
-            onDescribePage={() => void onDescribePage()}
-            onCancelPick={onCancelPick}
-            onSelfTest={onSelfTest}
-            onRunSaved={(meta) => void onRunSaved(meta)}
-            diag={diag}
-          />
-        );
-      case 'INTENT_INPUT':
-        return (
-          <IntentView
-            element={s.element}
-            intent={s.intent}
-            error={s.error}
-            errorActions={s.errorActions}
-            offline={!online}
-            pageContext={pageContext}
-            onSubmit={onSubmitIntent}
-            onReselect={onStartPick}
-            onOpenSettings={() => void chrome.runtime.openOptionsPage()}
-          />
-        );
-      case 'GENERATING':
-        return (
-          <GeneratingView
-            streamContent={s.streamContent}
-            startTime={s.startTime}
-            onCancel={() => {
-              go({ type: 'CANCEL_GEN' });
-              void sendToSW({ type: 'CANCEL_GENERATION', requestId: makeRequestId() });
-              genPortRef.current?.disconnect();
-              genPortRef.current = null;
-            }}
-          />
-        );
-      case 'PREVIEW':
-        return (
-          <PreviewView
-            result={s.result}
-            onRun={() => void onRun()}
-            onSave={() => void onSave()}
-            onRegenerate={(extraRequirement) =>
-              void onSubmitIntent(s.intent, {
-                previousCode: s.result.code,
-                previousWarnings: s.result.warnings,
-                extraRequirement,
-              })
-            }
-            onEditIntent={() => go({ type: 'EDIT_INTENT' })}
-            offline={!online}
-          />
-        );
-      case 'RESULT':
-        return (
-          <ResultView
-            outcome={s.outcome}
-            detail={s.detail}
-            explanation={lastRun?.explanation ?? ''}
-            intent={s.intent}
-            saved={Boolean(lastRun?.scriptId)}
-            onRunAgain={() => void onRunAgain()}
-            onSave={() => void onSave()}
-            onOnce={() => go({ type: 'BACK_TO_IDLE' })}
-            onFeedback={() => go({ type: 'FEEDBACK' })}
-            onBack={() => go({ type: 'BACK_TO_IDLE' })}
-            offline={!online}
-          />
-        );
-    }
+  async function versionAction(action: 'trial'|'save'|'restore'|'rename') {
+    if(busy.current||!wsRef.current)return;busy.current=true;setOperation(action);setVersionBusy(true);setNotice('');
+    try {
+      await closePagePreview();await flush();const ws=wsRef.current!;
+      if(action==='trial'){
+        setReceipt(null);
+        const response=await call<{result:TrialResult;receipt:TrialReceipt|null}>({type:'TRIAL_DRAFT',requestId:rid(),workspaceId:ws.id,expectedDraftRevision:ws.draftRevision});
+        await loadWorkspace(ws.id);setName(name);setReceipt(response.receipt);
+        setNotice(response.receipt?(response.result.repeated?'同一内容已在本页执行，未重复运行。请检查页面效果。':'执行完成，请检查页面效果；尚未保存。'):(response.result.error??'试运行未完成，请检查代码。'));
+      } else if(action==='save'){
+        if(!receipt)throw Error('请先试运行。');
+        const saved=await call<ScriptRecord>({type:'COMMIT_DRAFT',requestId:rid(),workspaceId:ws.id,expectedDraftRevision:ws.draftRevision,receiptId:receipt.id,name,opId:rid(),effectAcknowledged:true});
+        await loadWorkspace(ws.id);await refreshLists();setNotice(saved.autoRun.desired?'已保存，后续新开网页运行此版本。':'已保存，自动运行关闭。');
+      } else if(action==='restore'){
+        if(!record)return;
+        await call({type:'RESTORE_PREVIOUS',requestId:rid(),workspaceId:ws.id,expectedDraftRevision:ws.draftRevision,expectedRevision:record.recordRevision,discardDraft:true,opId:rid()});
+        setRestoreConfirm(false);await loadWorkspace(ws.id);await refreshLists();setNotice('已恢复上一版。请刷新网页查看效果，已产生的页面变化不会即时撤销。');
+      } else {
+        if(!record)return;
+        await call({type:'RENAME_SCRIPT',requestId:rid(),scriptId:record.id,expectedRevision:record.recordRevision,name});
+        setRecord(await call<ScriptRecord>({type:'GET_SCRIPT_RECORD',requestId:rid(),scriptId:record.id}));await refreshLists();const updated=await call<Opened>({type:'GET_WORKSPACE',requestId:rid(),workspaceId:ws.id});attach(updated.workspace);setNotice('名称已更新，不轮换上一版。');
+      }
+    } catch(e){fail(e);} finally {busy.current=false;setVersionBusy(false);}
   }
-
-  if (!booted) {
-    return (
-      <div class="panel">
-        <header class="panel-header">
-          <span class="brand">{STRINGS.panel.title}</span>
-        </header>
-      </div>
-    );
+  async function toggleAuto(targetRecord=record){
+    if(!targetRecord||busy.current)return;busy.current=true;setVersionBusy(true);setNotice('');
+    try{
+      const enabled=!targetRecord.autoRun.desired;
+      if(enabled){if(!targetRecord.host)throw Error('请先确认适用网站。');const granted=await chrome.permissions.request({origins:hostPermissionOrigins(targetRecord.host)});if(!granted)throw Error('网站授权被拒绝，工具仍已保存，自动运行未开启。');}
+      await flush();await call({type:'SET_AUTO_RUN',requestId:rid(),scriptId:targetRecord.id,expectedRevision:targetRecord.recordRevision,enabled});
+      if(wsRef.current?.scriptId===targetRecord.id)await loadWorkspace(wsRef.current.id);await refreshLists();setNotice(enabled?'自动运行已开启。新开匹配网站验证，无需点击图标；已打开页面请刷新。':'自动运行已关闭。已打开页面的效果可能仍在，请刷新。');
+    }catch(e){if(wsRef.current?.scriptId===targetRecord.id)await loadWorkspace(wsRef.current.id).catch(()=>{});await refreshLists().catch(()=>{});fail(String(e).includes('Only permissions specified in the manifest')?new Error('网站权限声明未生效。请在 Chrome 扩展管理页重新加载最新 luban/dist，再开启；可查看自动运行诊断核对实际权限声明。'):e);}finally{busy.current=false;setVersionBusy(false);setOperation(null);}
   }
+  async function retryAuto(){try{await call({type:'RETRY_AUTO_RUN',requestId:rid()});if(wsRef.current)await loadWorkspace(wsRef.current.id);await refreshLists();const issues=(await call<RuntimeStatus[]>({type:'LIST_RUNTIME_STATUS',requestId:rid()})).filter(r=>['unavailable','cleanup_required','error'].includes(r.state));setNotice(issues.length?'仍有运行问题，请查看提示并重试。':'已重新核对注册，请查看运行状态。');}catch(e){fail(e);}}
+  async function deleteTool(){if(!record||busy.current)return;busy.current=true;setVersionBusy(true);try{await flush();await call({type:'DELETE_SCRIPT',requestId:rid(),scriptId:record.id});resetActive();setView('home');await refreshLists();setNotice('工具已删除。已打开页面的效果需刷新。');}catch(e){setDeleteConfirm(false);if(wsRef.current)await loadWorkspace(wsRef.current.id).catch(()=>{});await refreshLists().catch(()=>{});fail(e);}finally{busy.current=false;setVersionBusy(false);setOperation(null);}}
+  async function exportTool(targetRecord:ScriptRecord){
+    try{await flush();const artifact=await call<ExportArtifact>({type:'EXPORT_CURRENT',requestId:rid(),scriptId:targetRecord.id});setExportArtifact(artifact);}catch(e){fail(e);}
+  }
+  async function runSaved(targetRecord:ScriptRecord){
+    if(busy.current)return;busy.current=true;setVersionBusy(true);try{const result=await call<InjectionResult>({type:'RUN_SAVED_SCRIPT',requestId:rid(),scriptId:targetRecord.id});setNotice(result.scriptError??result.error??'执行完成，请检查页面效果。相同内容重复运行需刷新页面。');}catch(e){fail(e);}finally{busy.current=false;setVersionBusy(false);setOperation(null);}
+  }
+  async function deleteFromLibrary(targetRecord:ScriptRecord){
+    if(!window.confirm(`删除“${targetRecord.name}”及其草稿、对话和 GM 数据？无法撤销，已打开页面的效果需刷新。`))return;
+    try{await call({type:'DELETE_SCRIPT',requestId:rid(),scriptId:targetRecord.id});await refreshLists();setNotice('工具已删除，请刷新已运行的网页。');}catch(e){await refreshLists().catch(()=>{});fail(e);}
+  }
+  async function changeWorkflow(patch:{constraints?:string;trigger?:Workflow['trigger'];expectedEffect?:string;feedback?:string;selectors?:string[];scope?:Workflow['scope'];confirmStrategy?:boolean}){
+    await closePagePreview();await ensureWorkspace();await flush();const ws=wsRef.current!;
+    const r=await call<{workspace:WorkspaceRecord;workflow:Workflow}>({type:'UPDATE_WORKFLOW',requestId:rid(),workspaceId:ws.id,expectedDraftRevision:ws.draftRevision,...patch});
+    attach(r.workspace);setWorkflow(r.workflow);setEnvelope(null);setReceipt(null);setQuality(null);
+    if(patch.feedback!==undefined)setInput(patch.feedback);
+  }
+  async function selectTarget(c:TargetCandidate,scope:'element'|'module'){
+    try{await changeWorkflow({selectors:[c.selector],scope});setSelectors([c.selector]);}catch(e){fail(e);}
+  }
+  async function previewTarget(){
+    try{if(!workflow.targetFingerprint)return;const result=await call<{ok:boolean;error?:string}>({type:'V21_PREVIEW_TARGET',requestId:rid(),selectors:workflow.selectors,fingerprint:workflow.targetFingerprint});if(!result.ok)throw Error(result.error);setNotice('只读范围预览已显示，Esc 可清除。');}catch(e){fail(e);}
+  }
+  async function prepareManualRepair(){
+    if(busy.current)return;
+    try{await ensureWorkspace();await flush();const value='修复当前代码的基础检查错误，保持目标、触发方式、权限与其他功能不变。返回完整代码；不要扩大范围。';setInput(value);setFeedbackMode(false);buffer.current?.schedule({input:value});await flush();await prepare(false);}catch(e){fail(e);}
+  }
+  async function checkDraft(){try{await flush();const ws=wsRef.current!;setQuality(await call<QualityReport>({type:'CHECK_DRAFT',requestId:rid(),workspaceId:ws.id,expectedDraftRevision:ws.draftRevision}));}catch(e){fail(e);}}
+  async function editFailure(){try{await flush();const ws=wsRef.current!;await call({type:'EDIT_FAILURE',requestId:rid(),workspaceId:ws.id,expectedDraftRevision:ws.draftRevision});await loadWorkspace(ws.id);}catch(e){fail(e);}}
+  function feedback(text:string){setFeedbackMode(true);setReceipt(null);inputChanged(text);setNotice('反馈未发送。补充目标范围后，查看发送内容继续修改。');setTimeout(()=>document.querySelector<HTMLTextAreaElement>('#intent')?.focus(),0);}
+  function cancelAnalysis() {
+    analysisEpoch.current++;const id=analysisId.current;analysisId.current='';
+    if(id)void call({type:'CANCEL_PAGE_ANALYSIS',requestId:rid(),previewId:id}).catch(()=>{});
+    setAnalysisPreview(null);setSuggestions([]);setAnalysing(false);
+  }
+  async function prepareAnalysis(){
+    if(busy.current)return;cancelAnalysis();setAnalysisReasoning([]);const epoch=analysisEpoch.current;
+    busy.current=true;setPreparing(true);
+    try{await flush();const preview=await call<AnalysisPreview>({type:'PREPARE_PAGE_ANALYSIS',requestId:rid()});
+      if(epoch!==analysisEpoch.current){void call({type:'CANCEL_PAGE_ANALYSIS',requestId:rid(),previewId:preview.id});return;}
+      analysisId.current=preview.id;setAnalysisPreview(preview);
+    }catch(e){if(epoch===analysisEpoch.current)fail(e);}finally{busy.current=false;setPreparing(false);}
+  }
+  async function runAnalysis(){
+    if(!analysisPreview||busy.current)return;
+    const epoch=analysisEpoch.current,id=analysisPreview.id;setAnalysing(true);
+    try{const list=await call<PageSuggestion[]>({type:'RUN_PAGE_ANALYSIS',requestId:rid(),previewId:id});
+      if(epoch!==analysisEpoch.current)return;setSuggestions(list);setAnalysisPreview(null);setNotice(list.length?'选择建议后可编辑需求，再预览并生成。':'没有适合当前页面的建议。');
+    }catch(e){if(epoch===analysisEpoch.current)fail(e);}finally{if(epoch===analysisEpoch.current){analysisId.current='';setAnalysing(false);setAnalysisPreview(null);if(queued.current){const text=queued.current;queued.current='';setQueuedText('');inputChanged(text);}}}
+  }
+  useEffect(()=>{
+    const listener=(m:LubanMessage,sender:chrome.runtime.MessageSender,respond:(r:unknown)=>void)=>{
+      if(m.type==='ANALYSIS_REASONING'&&sender.id===chrome.runtime.id&&!sender.tab&&m.requestId===analysisId.current){setAnalysisReasoning([{attempt:1,text:m.content,truncated:m.truncated}]);respond({ok:true});return;}
 
-  return (
-    <div class="panel">
-      <header class="panel-header">
-        <span class="brand">{STRINGS.panel.title}</span>
-        <span class="tagline">{STRINGS.app.tagline}</span>
-      </header>
-      <main class="panel-body">
-        {!online ? <p class="offline-banner">{STRINGS.status.offline}</p> : null}
-        {notice ? <p class="error">{notice}</p> : null}
-        {renderView(state)}
-      </main>
+      if(m.type!=='CODE_PREVIEW_UPDATED'||sender.id!==chrome.runtime.id||sender.tab||m.sessionId!==pagePreview.current?.sessionId||m.workspaceId!==wsRef.current?.id)return;
+      void (async()=>{setPreviewBusy(true);try{
+        if(m.action==='close'||m.action==='more'){pagePreview.current=null;const text=pagePreviewInput.current;pagePreviewInput.current=null;if(text!==null)inputChanged(text);if(m.action==='more')setArtifactOpen(true);if(previewFocusChat.current){previewFocusChat.current=false;setTimeout(()=>document.querySelector<HTMLTextAreaElement>('#intent')?.focus(),0);}}
+        else if(m.action==='name')setName(m.name);
+        else{const oldReceipt=receipt;await loadWorkspace(m.workspaceId);setName(name);if(pagePreviewInput.current!==null)setInput(pagePreviewInput.current);if(m.action==='reference'){setReceipt(oldReceipt);previewFocusChat.current=true;}else{setReceipt(null);setNotice('代码已修改为未验证草稿，请重新检查并试运行。');}}
+        respond({ok:true});
+      }catch(e){fail(e);respond({ok:false});}finally{setPreviewBusy(false);}})();return true;
+    };
+    chrome.runtime.onMessage.addListener(listener);return()=>chrome.runtime.onMessage.removeListener(listener);
+  });
+  async function addCodeReference(version:NonNullable<typeof effective>,lines:number[]){
+    await ensureWorkspace();await flush();const ws=wsRef.current!;
+    const ref=await createReference(ws.id,version,name||record?.name||'当前脚本',lines);
+    schedule({codeReference:ref});await flush();setReference(ref);
+    setTimeout(()=>document.querySelector<HTMLTextAreaElement>('#intent')?.focus(),0);
+  }
+  function removeReference(){void closePagePreview().then(()=>{setReference(null);schedule({codeReference:null});}).catch(fail);}
+  async function keepCode(value:string){editCode(value);await flush();}
+  function chatInput(value:string){if(generating||analysing){queued.current=value;setQueuedText(value);}else inputChanged(value);}
+  async function toggleThinking(enabled:boolean){setThinkingSaving(true);try{await saveThinkingEnabled(enabled);setThinkingEnabled(enabled);setEnvelope(null);cancelAnalysis();}catch(e){fail(e);}finally{setThinkingSaving(false);}}
+  async function sendChat(){if(thinkingSaving||previewBusy)return;if(generating){await cancel();return;}if(analysing){cancelAnalysis();if(queued.current){const text=queued.current;queued.current='';setQueuedText('');inputChanged(text);}return;}await prepare(repairAllowed,true);}
+  function latest(){follow.current=true;setShowLatest(false);if(chatScroll.current)chatScroll.current.scrollTop=chatScroll.current.scrollHeight;}
+  useEffect(()=>{if(follow.current&&chatScroll.current)chatScroll.current.scrollTop=chatScroll.current.scrollHeight;},[messages,stream,reasoningStages,analysisReasoning,notice,suggestions,envelope,workflow]);
+  const streamingExplanation=(()=>{const match=stream.match(/"explanation"\s*:\s*"((?:\\.|[^"\\])*)/);if(!match)return '';try{return JSON.parse('"'+match[1]+'"') as string;}catch{return '';}})();
+  const artifactTools=<>
+    <details><summary>草稿 GM 权限</summary><fieldset disabled={!editable}>{GM_P0_GRANTS.map(grant=><label class="chat-permission"><input type="checkbox" checked={effective?.grants.includes(grant)??false} onChange={e=>void editGrant(grant,e.currentTarget.checked)}/>{grant}</label>)}</fieldset></details>
+    {workspace?.draft||workflow.failure?<QualityCard workflow={workflow} quality={quality} busy={!editable} onCheck={()=>void checkDraft()} onEditFailure={()=>void editFailure()} onRepair={()=>void prepareManualRepair()}/>:null}
+    {record?<><p class="p2-muted">自动运行：{runtimeStatus?.message??'关闭'} · {record.host}</p><div class="p2-row"><button disabled={!editable} onClick={()=>void toggleAuto()}>{record.autoRun.desired?'关闭自动运行':'授权并开启自动运行'}</button><button disabled={!editable} onClick={()=>void exportTool(record)}>导出保存版</button><button disabled={!editable} onClick={()=>void versionAction('rename')}>仅修改名称</button><button disabled={!editable||!record.previous} onClick={()=>setRestoreConfirm(true)}>恢复上一版</button><button disabled={!editable} onClick={()=>setDeleteConfirm(true)}>删除工具</button><button disabled={!editable||mismatch} onClick={()=>void runSaved(record)}>运行保存版</button><button disabled={!editable} onClick={()=>void retryAuto()}>重试注册</button><button onClick={()=>{void call({type:'GET_AUTO_DIAGNOSTICS',requestId:rid(),scriptId:record.id}).then(data=>setAutoDiagnostics(JSON.stringify(data,null,2))).catch(fail);}}>查看运行诊断</button></div>{autoDiagnostics?<pre>{autoDiagnostics}</pre>:null}</>:null}
+    {restoreConfirm?<div role="alert"><p>恢复会放弃当前草稿；请刷新页面观察效果。</p><button onClick={()=>setRestoreConfirm(false)}>取消恢复</button><button disabled={!editable} onClick={()=>void versionAction('restore')}>确认恢复并放弃草稿</button></div>:null}
+    {deleteConfirm?<div role="alert"><p>删除工具、草稿、对话与 GM 数据？无法撤销。</p><button onClick={()=>setDeleteConfirm(false)}>取消删除</button><button disabled={!editable} onClick={()=>void deleteTool()}>确认删除工具</button></div>:null}
+  </>;
+  return <div class={'panel p2-panel chat-app'+(embedded?' embedded':'')} data-workspace-stage={stage}>
+    <header class="chat-top"><div><strong class="chat-brand"><img src={brandLogo} alt="" width="26" height="26"/>鲁班 <small>Luban V2.1</small></strong><span>{site?.host??'请打开并授权普通网页'}</span></div><div class="chat-top-actions"><button title="新建工具" aria-label="新建工具" disabled={!editable} onClick={()=>void leave(()=>setView('home'))}>＋</button><button disabled={!editable} onClick={()=>void leave(()=>{setView(view==='library'?'home':'library');void refreshLists().catch(fail);})}>{view==='library'?'返回聊天':'我的工具'}</button><button aria-label="分析此页面" title="分析此页面" disabled={!editable||!online||!site||mismatch||!analysisEnabled} onClick={()=>void prepareAnalysis()}>✳</button><button aria-label="设置" title="设置" onClick={()=>setSettingsOpen(!settingsOpen)}>⚙</button></div></header>
+    {view==='library'?<main class="chat-library"><ScriptLibrary records={records} activeHost={site?.host??null} busy={!editable} onOpen={r=>void openTool(r)} onRun={r=>void runSaved(r)} onToggle={r=>void toggleAuto(r)} onExport={r=>void exportTool(r)} onDelete={r=>void deleteFromLibrary(r)}/></main>:<>
+    <div class="chat-messages" ref={chatScroll} aria-label="当前脚本对话" onScroll={()=>{const el=chatScroll.current;if(!el)return;follow.current=el.scrollHeight-el.scrollTop-el.clientHeight<65;setShowLatest(!follow.current);}}>
+      {!messages.length&&!generating?<section class="chat-welcome"><span>✳</span><h1>这个页面，<br/>你想怎么改？</h1><p>说出想法，再用几句话把效果做到位。</p><div>{['突出价格','隐藏干扰模块','改成暗色','提取当前页列表'].map(t=><button onClick={()=>inputChanged(t)}>{t} ↗</button>)}</div></section>:null}
+      {messages.map((m,i)=><article key={i} class={'chat-message '+m.role}><small>{m.role==='user'?'你':'鲁班'}</small><ReasoningDetails stages={m.reasoning??[]} omitted={m.reasoningOmitted}/><ChatMarkdown text={m.text}/>{m.scriptAttachment?<div class="chat-file-history">📄 {m.scriptAttachment.filename} · {m.scriptAttachment.source==='draft'?'草稿':'保存版'} · {m.scriptAttachment.versionId.slice(0,8)}</div>:null}{m.codeReference?<details class="chat-reference-history"><summary>引用 {m.codeReference.name} · 版本 {m.codeReference.versionId.slice(0,8)} · {lineLabel(m.codeReference.lines)}</summary><pre>{m.codeReference.text}</pre></details>:null}</article>)}
+      {generating?<article class="chat-message user"><small>你</small><ChatMarkdown text={input}/>{activeScriptAttachment?<div class="chat-file-history">📄 {activeScriptAttachment.filename} · {activeScriptAttachment.source==='draft'?'草稿':'保存版'} · {activeScriptAttachment.versionId.slice(0,8)}</div>:null}{reference?<details><summary>引用 {reference.name} · 版本 {reference.versionId.slice(0,8)} · {lineLabel(reference.lines)}</summary><pre>{reference.text}</pre></details>:null}</article>:null}
+      {preparing?<article class="chat-message assistant" aria-live="polite">正在准备本轮上下文…</article>:null}
+      {generating?<article class="chat-message assistant" aria-live="polite"><small>鲁班</small><ReasoningDetails stages={reasoningStages} live/><details><summary>{stage==='repairing'?'正在修复基础错误 · 1/1':stream.startsWith('模型正在推理')?'模型正在推理':'正在生成与检查脚本'}</summary><p>已确认本轮输入与发送范围；候选通过完整检查后才写入草稿。</p><p>完成后可查看检查结果与修改说明。</p></details>{streamingExplanation?<ChatMarkdown text={streamingExplanation}/>:<p class="chat-processing">处理中…已有保存版不变。</p>}</article>:null}
+      {!generating&&reasoningStages.length&&!messages.at(-1)?.reasoning?<ReasoningDetails stages={reasoningStages}/>:null}
+      {analysisReasoning.length?<article class="chat-message assistant"><small>页面分析</small><ReasoningDetails stages={analysisReasoning} live={analysing}/></article>:null}
+      {notice?<article class="chat-message assistant" aria-live="polite"><small>鲁班</small><ChatMarkdown text={notice}/>{receipt?<div class="chat-feedback">{['标签还在','仍有空白，请重新确认完整模块范围','隐藏范围太大，请保留相邻内容'].map(t=><button onClick={()=>feedback(t)}>{t}</button>)}<button onClick={()=>feedback('')}>继续反馈</button><button onClick={()=>setNotice('草稿保留，请继续观察页面效果，不会自动保存。')}>继续观察</button></div>:null}</article>:null}
+      {workflow.clarification?<article class="chat-message assistant"><strong>请先对齐需求</strong><ChatMarkdown text={workflow.clarification}/></article>:null}
+      {workflow.scope==='module'&&!workflow.strategyConfirmed?<article class="chat-message assistant"><p>当前选择的是完整模块。请核对是否包含广告标签与占位，并保留正文和相邻内容。</p><button disabled={!editable} onClick={()=>void previewTarget()}>预览范围</button><button disabled={!editable} onClick={()=>{void changeWorkflow({confirmStrategy:true}).catch(fail);}}>确认当前范围</button></article>:null}
+      {workflow.failure?<details class="chat-failure"><summary>本次候选未采纳 · 查看原因或编辑候选</summary><QualityCard workflow={workflow} quality={quality} busy={!editable} onCheck={()=>void checkDraft()} onEditFailure={()=>void editFailure()} onRepair={()=>void prepareManualRepair()}/></details>:null}
+      {envelope?<article class="chat-message assistant chat-disclosure"><strong>本轮发送详情</strong><p>{envelope.provider.model} · {envelope.thinkingEnabled?'推理开启':'推理关闭'}{envelope.thinkingProtocol==='none'?'（端点使用服务端默认）':''} · 当前需求、代码及有限页面摘要。{envelope.repairAllowed===false?'最多 1 次请求。':'允许修复一次，最多 2 次请求。'}</p><p>这是按需预览；点击输入框发送会直接生成。</p><details><summary>实际发送详情</summary><pre>{JSON.stringify({provider:envelope.provider,messages:envelope.messages,retryMessages:envelope.retryMessages},null,2)}</pre></details><button onClick={()=>setEnvelope(null)}>返回修改</button><button class="p2-primary" disabled={!editable||!online} onClick={()=>void generate()}>发送并生成</button></article>:null}
+      {analysisPreview?<article class="chat-message assistant"><strong>分析此页 · 发送确认</strong><p>{analysisPreview.thinkingEnabled?'推理开启':'推理关闭'}{analysisPreview.thinkingProtocol==='none'?'（端点使用服务端默认）':''}</p><p>仅发送页面摘要，返回建议，不生成或运行脚本。</p><details><summary>实际发送详情</summary><pre>{JSON.stringify(analysisPreview.messages,null,2)}</pre></details><button onClick={cancelAnalysis}>取消分析</button><button disabled={analysing||!online} onClick={()=>void runAnalysis()}>确认发送并分析</button></article>:null}
+      {suggestions.length?<article class="chat-message assistant"><h3>可以从这里开始</h3>{suggestions.map(item=><button class="chat-suggestion" onClick={()=>{inputChanged(item.intent);setSuggestions([]);}}><strong>{item.title}</strong><span>{item.intent}</span></button>)}</article>:null}
+      {mismatch?<p class="chat-warning">当前网站不匹配，生成与运行前请切回 {workspace?.host}。</p>:null}{!online?<p class="chat-warning">当前离线，本地查看与编辑仍可用。</p>:null}
+      {runtimeIssues.length?<details><summary>有工具的运行或清理需要处理</summary>{runtimeIssues.map(issue=><p>{issue.message}</p>)}<button disabled={!editable} onClick={()=>void retryAuto()}>重试清理与注册</button></details>:null}
     </div>
-  );
-}
+    {showLatest?<button class="chat-latest" onClick={latest}>↓ 回到最新</button>:null}
+    {effective?<section class="chat-artifact"><button class="chat-artifact-name" title="查看脚本制品" onClick={()=>void openCode()} disabled={!editable}><b>JS</b><span><strong>{scriptFilename(record?.name??'当前草稿')}</strong><small>{workspace?.draft?receipt?'已运行 · 待确认效果':workflow.quality?.passed?'已检查 · 待运行':'草稿 · 未验证':'保存版'} · 随消息发送 · 查看代码</small></span></button><button class={!receipt?'p2-primary':''} disabled={!editable||mismatch||!workspace?.draft||quality?.passed===false} onClick={()=>void versionAction('trial')}>运行</button><button class={receipt?'p2-primary':''} disabled={!editable||!receipt||!name.trim()} onClick={()=>void versionAction('save')}>{receipt?'效果符合，保存':'保存'}</button></section>:null}
+    <footer class="chat-composer">
 
-function presentRun(r: LubanResponse<InjectionResult>): { outcome: RunOutcome; detail: unknown } {
-  if (!r.ok) return { outcome: 'injection_fail', detail: r.error.message };
-  if (!r.data.ok) return { outcome: 'injection_fail', detail: r.data.error ?? '注入失败' };
-  if (r.data.scriptError) return { outcome: 'runtime_error', detail: r.data.scriptError };
-  return { outcome: 'success', detail: `Method ${r.data.method} · ${r.data.timingMs}ms` };
-}
-
-function resolveStubContext(element: TargetElement | null): PageContext {
-  if (element && (element.selectorCandidates.length > 0 || element.tag)) {
-    return stubElementContext(element.selectorCandidates[0] ?? '');
-  }
-  return stubPageContext();
-}
-
-function stubElementContext(selector: string): PageContext {
-  return {
-    scope: 'element',
-    meta: { url: location.href, title: document.title, siteType: 'unknown' },
-    target: { selectorCandidates: [selector], tag: '', text: '', attributes: {}, contextPath: '', siblings: [] },
-    domSummary: { counts: { inputs: 0, buttons: 0, forms: 0, links: 0, images: 0 }, inputs: [], buttons: [], title: '', truncated: false },
-  };
-}
-
-function stubPageContext(): PageContext {
-  return {
-    scope: 'page',
-    meta: { url: location.href, title: document.title, siteType: 'unknown' },
-    target: null,
-    domSummary: { counts: { inputs: 0, buttons: 0, forms: 0, links: 0, images: 0 }, inputs: [], buttons: [], title: '', truncated: false },
-  };
+      {reference?<div class="chat-reference"><details><summary>{reference.name} · 版本 {reference.versionId.slice(0,8)} · {lineLabel(reference.lines)}{reference.versionId!==effective?.versionId?' · 历史快照':''}</summary><pre>{reference.text}</pre></details><button aria-label="移除代码引用" disabled={generating} onClick={removeReference}>×</button></div>:null}
+      <div class="chat-context"><label class="chat-thinking"><input type="checkbox" aria-label="推理模式" checked={thinkingEnabled} disabled={!editable} onChange={e=>void toggleThinking(e.currentTarget.checked)}/>推理</label><button onClick={()=>setContextOpen(!contextOpen)}>{workflow.scope==='page'?'◌ 当前页面':workflow.scope==='module'?'◎ 完整模块':'◎ 已点选元素'} ⌄</button>{target?<button aria-label="清除点选" disabled={!editable} onClick={()=>void clearPick()}>×</button>:null}<button onClick={()=>void prepare(repairAllowed,false)} disabled={!editable||!input.trim()||!online}>发送范围</button></div>
+      {contextOpen?<div class="chat-context-details"><TargetCard workflow={workflow} candidates={target?.targetContext?.candidates??[]} busy={!editable} onSelect={(c,scope)=>void selectTarget(c,scope)} onPreview={()=>void previewTarget()} onConfirm={()=>{void changeWorkflow({confirmStrategy:true}).catch(fail);}} onTrigger={trigger=>{void changeWorkflow({trigger}).catch(fail);}} onEffect={expectedEffect=>{void changeWorkflow({expectedEffect}).catch(fail);}}/><label>保留范围<textarea aria-label="保留范围" value={constraints} disabled={!editable} onInput={e=>{setConstraints(e.currentTarget.value);setEnvelope(null);setReceipt(null);}}/></label></div>:null}
+      <div class="chat-input-shell"><textarea id="intent" aria-label="发送需求或继续反馈" rows={2} value={generating||analysing?queuedText:input} disabled={preparing||versionBusy} onInput={e=>chatInput(e.currentTarget.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&e.keyCode!==229){e.preventDefault();void sendChat();}}} placeholder="描述想法，或继续说哪里还不理想…"/><div><button onClick={()=>void pick()} disabled={!editable||!site}>⌖ 点选元素</button><small>{generating?'可输入下一条需求':'继续说，就能继续改'}</small><button class="chat-send" aria-label={generating||analysing?'停止生成':'发送'} disabled={!(generating||analysing)&&(!editable||!online||!input.trim()||mismatch||!site)} onClick={()=>void sendChat()}>{generating||analysing?'■':'↑'}</button></div></div><p>发送需求与有限摘要 · {thinkingEnabled?'推理已开启':'推理已关闭'} · {repairAllowed?'允许修复 1 次':'不追加自动修复'}</p>
+    </footer></>}
+    {settingsOpen?<section class="chat-settings"><strong>设置与快捷操作</strong><button aria-label="关闭快捷设置" onClick={()=>setSettingsOpen(false)}>×</button><label><input type="checkbox" checked={repairAllowed} disabled={!editable} onChange={e=>{setRepairAllowed(e.currentTarget.checked);setEnvelope(null);}}/>允许基础检查失败时修复一次</label><button onClick={()=>void chrome.runtime.openOptionsPage()}>打开模型与隐私设置</button><button disabled={!editable} onClick={()=>void refreshSite()}>刷新当前页面状态</button></section>:null}
+    <CodeArtifactDialog open={artifactOpen} onClose={()=>setArtifactOpen(false)} current={effective??null} saved={record?.current} previous={record?.previous} name={name} onName={setName} onEdit={keepCode} onReference={addCodeReference} busy={!editable} hasReference={!!reference}>{artifactTools}</CodeArtifactDialog>
+    {exportArtifact?<ExportDialog artifact={exportArtifact} onClose={()=>setExportArtifact(null)} onDownloaded={()=>{setExportArtifact(null);setNotice('已发起保存版下载，请在目标管理器验证效果。');}}/>:null}
+    <dialog class="p2-dialog" ref={dialogRef} onCancel={()=>setLeaving(null)}><h2>保留这次修改？</h2><p>需求或草稿尚未成为新的保存版本。</p><div class="p2-row"><button autoFocus onClick={()=>setLeaving(null)}>继续编辑</button><button onClick={()=>void decideLeave(true)}>放弃修改并离开</button><button class="p2-primary" onClick={()=>void decideLeave()}>保留草稿并离开</button></div></dialog>
+  </div>;
 }

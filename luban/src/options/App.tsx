@@ -1,3 +1,5 @@
+import brandLogo from '../assets/logo.svg';
+import { Privacy } from './tabs/Privacy';
 import { useState } from 'preact/hooks';
 import { AiSettings } from './tabs/AiSettings';
 import { ScriptManager } from './tabs/ScriptManager';
@@ -11,7 +13,7 @@ export default function App() {
   return (
     <div class="options-app">
       <header class="options-header">
-        <span class="brand">{STRINGS.app.name}</span>
+        <span class="brand"><img src={brandLogo} alt="" width="32" height="32"/>{STRINGS.app.name}</span>
         <span class="title">{STRINGS.options.title}</span>
       </header>
       <nav class="options-tabs">
@@ -28,7 +30,7 @@ export default function App() {
       <main class="options-body">
         {tab === 'ai' && <AiSettings />}
         {tab === 'scripts' && <ScriptManager />}
-        {tab === 'privacy' && <p class="muted">隐私与安全设置将随后续阶段落地。</p>}
+        {tab === 'privacy' && <Privacy />}
       </main>
     </div>
   );

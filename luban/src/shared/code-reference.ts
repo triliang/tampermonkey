@@ -1,0 +1,8 @@
+import type {ScriptVersion} from './v2-types';
+export interface CodeReference {workspaceId:string;versionId:string;hash:string;name:string;lines:number[];text:string;}
+export async function versionHash(v:ScriptVersion):Promise<string>{const bytes=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify({code:v.code,grants:[...v.grants].sort(),runAt:v.runAt})));return Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,'0')).join('');}
+export function validReference(value:unknown,workspaceId:string):value is CodeReference {
+ const r=value as CodeReference;return !!r&&typeof r==='object'&&r.workspaceId===workspaceId&&typeof r.versionId==='string'&&typeof r.hash==='string'&&typeof r.name==='string'&&r.name.length<=100&&typeof r.text==='string'&&new TextEncoder().encode(r.text).length<=32*1024&&Array.isArray(r.lines)&&r.lines.length>0&&r.lines.length<=200&&r.lines.every((n,i)=>Number.isInteger(n)&&n>=1&&(i===0||n>r.lines[i-1]));
+}
+export async function createReference(workspaceId:string,v:ScriptVersion,name:string,selected:number[]):Promise<CodeReference>{const lines=[...new Set(selected)].sort((a,b)=>a-b),source=v.code.split('\n');const ref={workspaceId,versionId:v.versionId,hash:await versionHash(v),name:name.slice(0,100),lines,text:lines.map(n=>`L${n}: ${source[n-1]??''}`).join('\n')};if(!validReference(ref,workspaceId)||lines.some(n=>n>source.length))throw Error('最多引用 200 行、32 KiB 代码，请缩小选择范围。');return ref;}
+export function lineLabel(lines:number[]):string {const ranges:string[]=[];let start=lines[0],end=start;for(let i=1;i<=lines.length;i++){if(lines[i]===end+1){end=lines[i];continue;}ranges.push(start===end?`L${start}`:`L${start}–L${end}`);start=end=lines[i];}return ranges.join(', ');}

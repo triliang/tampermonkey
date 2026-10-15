@@ -1,70 +1,32 @@
-import { useEffect, useState } from 'preact/hooks';
-import { sendToSW } from '../comms';
-import { makeRequestId } from '../../shared/messages';
-import type { InjectionResult, ScriptMeta } from '../../shared/types';
-import { STRINGS } from '../../shared/i18n-strings';
-
-export function ScriptManager() {
-  const s = STRINGS.options;
-  const [items, setItems] = useState<ScriptMeta[]>([]);
-  const [notice, setNotice] = useState('');
-
-  async function reload(): Promise<void> {
-    const r = await sendToSW<ScriptMeta[]>({ type: 'LIST_SCRIPTS', requestId: makeRequestId() });
-    if (r.ok) setItems(r.data);
-    else setNotice(r.error.message);
-  }
-
-  useEffect(() => {
-    void reload();
-  }, []);
-
-  async function onRun(id: string): Promise<void> {
-    const r = await sendToSW<InjectionResult>({ type: 'RUN_SAVED_SCRIPT', requestId: makeRequestId(), scriptId: id });
-    if (!r.ok) {
-      setNotice(r.error.message);
-      return;
-    }
-    setNotice(r.data.ok ? (r.data.scriptError ?? '已在当前页运行') : (r.data.error ?? '运行失败'));
-  }
-
-  async function onDelete(id: string): Promise<void> {
-    if (!window.confirm(s.scriptDeleteConfirm)) return;
-    const r = await sendToSW({ type: 'DELETE_SCRIPT', requestId: makeRequestId(), scriptId: id });
-    if (!r.ok) {
-      setNotice(r.error.message);
-      return;
-    }
-    setItems((list) => list.filter((item) => item.id !== id));
-  }
-
-  if (items.length === 0) {
-    return (
-      <>
-        {notice ? <p class="error">{notice}</p> : null}
-        <p class="hint">{s.scriptEmpty}</p>
-      </>
-    );
-  }
-
-  return (
-    <div class="script-manager">
-      {notice ? <p class="hint">{notice}</p> : null}
-      <ul class="script-list">
-        {items.map((item) => (
-          <li key={item.id}>
-            <div>
-              <strong>{item.name}</strong>
-              <span class="badge">{item.source === 'manual' ? s.sourceManual : s.sourceAi}</span>
-              <span class="hint">{new Date(item.updatedAt).toLocaleString()}</span>
-            </div>
-            <div class="row">
-              <button type="button" onClick={() => void onRun(item.id)}>{s.scriptRun}</button>
-              <button type="button" onClick={() => void onDelete(item.id)}>{s.scriptDelete}</button>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+import {useEffect,useState} from 'preact/hooks';
+import {ScriptLibrary} from '../../shared/ScriptLibrary';
+import {CodeArtifactDialog} from '../../sidepanel/components/CodeArtifactDialog';
+import {hostPermissionOrigins} from '../../shared/host-policy';
+import {sendToSW} from '../comms';
+import type {LubanMessage} from '../../shared/messages';
+import type {ScriptRecord,WorkspaceRecord} from '../../shared/v2-types';
+import type {TrialReceipt,TrialResult} from '../../shared/p3-types';
+import '../../sidepanel/styles/panel.css';
+const rid=()=>crypto.randomUUID();
+async function call<T>(m:LubanMessage){const r=await sendToSW<T>(m);if(!r.ok)throw Error(r.error.message);return r.data;}
+/** Management is independent from chat; editing still uses the same version services. */
+export function ScriptManager(){
+ const [records,setRecords]=useState<ScriptRecord[]>([]),[record,setRecord]=useState<ScriptRecord|null>(null),[workspace,setWorkspace]=useState<WorkspaceRecord|null>(null),[receipt,setReceipt]=useState<TrialReceipt|null>(null),[busy,setBusy]=useState(false),[notice,setNotice]=useState('');
+ const error=(e:unknown)=>setNotice(e instanceof Error?e.message:String(e));
+ async function refresh(){const index=await call<Array<{id:string}>>({type:'LIST_SCRIPTS',requestId:rid()});setRecords((await Promise.all(index.map(r=>call<ScriptRecord>({type:'GET_SCRIPT_RECORD',requestId:rid(),scriptId:r.id})))).filter(Boolean));}
+ useEffect(()=>{void refresh().catch(error);},[]);
+ async function open(r:ScriptRecord){setBusy(true);setNotice('');setWorkspace(null);setReceipt(null);setRecord(r);try{const all=await call<WorkspaceRecord[]>({type:'LIST_WORKSPACES',requestId:rid()});const draft=all.filter(w=>w.scriptId===r.id&&w.draft).sort((a,b)=>b.updatedAt-a.updatedAt)[0];if(draft){setWorkspace(draft);setNotice(draft.status==='generating'?'此脚本正在生成，请完成后重新打开；当前仅可查看。':'当前有未保存草稿；保存版保持不变。');}}catch(e){error(e);}finally{setBusy(false);}}
+ async function ensureWorkspace(){if(workspace)return workspace;if(!record)throw Error('请先选择脚本。');const ws=await call<WorkspaceRecord>({type:'CREATE_WORKSPACE',requestId:rid(),scriptId:record.id,host:record.host});setWorkspace(ws);return ws;}
+ async function edit(code:string){setBusy(true);setReceipt(null);try{const ws=await ensureWorkspace();if(ws.status==='generating')throw Error('此脚本正在生成，请结束后重新打开。');const current=ws.draft??record!.current;const saved=await call<WorkspaceRecord>({type:'SAVE_DRAFT',requestId:rid(),workspaceId:ws.id,expectedDraftRevision:ws.draftRevision,patch:{draft:{...current,code,versionId:rid(),hash:'unverified-edit',explanation:'手动编辑，请重新检查并试运行。'}}});setWorkspace(saved);setNotice('已保留为未验证草稿；请在匹配网页试运行后确认保存。');}finally{setBusy(false);}}
+ async function activateTarget(tabId?:number){
+  const tabs=tabId?[await chrome.tabs.get(tabId)]:await chrome.tabs.query({});const target=tabs.find(t=>{try{return !!t.id&&new URL(t.url??'').hostname===record?.host;}catch{return false;}});
+  if(!target?.id)throw Error('请先打开匹配网站并点击鲁班图标授权，再试运行。');await chrome.tabs.update(target.id,{active:true});await chrome.windows.update(target.windowId,{focused:true});
+ }
+ async function trial(){if(!workspace)return;setBusy(true);setReceipt(null);try{await activateTarget();const result=await call<{result:TrialResult;receipt:TrialReceipt|null}>({type:'TRIAL_DRAFT',requestId:rid(),workspaceId:workspace.id,expectedDraftRevision:workspace.draftRevision});setReceipt(result.receipt);if(!result.receipt){const latest=await call<{workspace:WorkspaceRecord}>({type:'GET_WORKSPACE',requestId:rid(),workspaceId:workspace.id});setWorkspace(latest.workspace);}setNotice(result.receipt?'执行完成，请检查网页实际效果，再确认保存。':result.result.error??'试运行失败，草稿仍保留。');}catch(e){error(e);}finally{setBusy(false);}}
+ async function save(){if(!workspace||!receipt||!record)return;setBusy(true);try{await activateTarget(receipt.binding.tabId);const saved=await call<ScriptRecord>({type:'COMMIT_DRAFT',requestId:rid(),workspaceId:workspace.id,expectedDraftRevision:workspace.draftRevision,receiptId:receipt.id,name:record.name,opId:rid(),effectAcknowledged:true});setRecord(saved);setWorkspace(null);setReceipt(null);await refresh();setNotice('脚本已保存，上一版本可在版本选择中查看。');}catch(e){error(e);}finally{setBusy(false);}}
+ async function toggle(r:ScriptRecord){setBusy(true);try{const enabled=!r.autoRun.desired;if(enabled&&(!r.host||!await chrome.permissions.request({origins:hostPermissionOrigins(r.host)})))throw Error('未授权，自动运行未开启。');await call({type:'SET_AUTO_RUN',requestId:rid(),scriptId:r.id,expectedRevision:r.recordRevision,enabled});setNotice(enabled?'自动运行已开启，请在新开匹配网页验证。':'自动运行已关闭，已打开网页需刷新。');}catch(e){error(e);}finally{await refresh().catch(error);setBusy(false);}}
+ async function remove(r:ScriptRecord){if(!window.confirm(`删除脚本“${r.name}”？相关数据将一并删除，无法撤销。`))return;setBusy(true);try{await call({type:'DELETE_SCRIPT',requestId:rid(),scriptId:r.id});await refresh();setNotice('脚本已删除。');}catch(e){error(e);}finally{await refresh().catch(error);setBusy(false);}}
+ async function restore(){if(!record?.previous)return;if(!window.confirm('恢复上一保存版？当前管理页草稿将被放弃，网页效果需刷新。'))return;setBusy(true);try{const ws=await ensureWorkspace();const restored=await call<ScriptRecord>({type:'RESTORE_PREVIOUS',requestId:rid(),workspaceId:ws.id,expectedDraftRevision:ws.draftRevision,expectedRevision:record.recordRevision,discardDraft:true,opId:rid()});setRecord(restored);setWorkspace(null);setReceipt(null);await refresh();setNotice('已恢复上一版本，请刷新匹配网页。');}catch(e){error(e);}finally{setBusy(false);}}
+ function close(){if(busy){setNotice('操作进行中，请等待完成。');return;}if(workspace?.draft)setNotice('草稿已保留，保存版未更新。重新打开脚本可继续编辑。');setRecord(null);setWorkspace(null);setReceipt(null);}
+ return <div class="script-manager"><ScriptLibrary records={records} activeHost={null} busy={busy} onOpen={r=>void open(r)} onToggle={r=>void toggle(r)} onDelete={r=>void remove(r)}/>{notice?<p role="status">{notice}</p>:null}<CodeArtifactDialog open={!!record} onClose={close} current={workspace?.draft??record?.current??null} saved={record?.current} previous={record?.previous} name={record?.name??''} nameReadOnly onName={()=>{}} onEdit={edit} onReference={async()=>{}} referencesEnabled={false} busy={busy||workspace?.status==='generating'} footerContent={<>{notice?<p role="status">{notice}</p>:null}{workspace?.draft?<div class="p2-row"><button disabled={busy} onClick={()=>void trial()}>在网页试运行</button><button disabled={busy||!receipt} onClick={()=>void save()}>效果符合，保存</button><p>试运行会切到已打开的匹配网页；检查效果后返回此页确认保存。保留草稿不等于更新保存版。</p></div>:null}{record?.previous?<button disabled={busy} onClick={()=>void restore()}>恢复上一版本</button>:null}</>}/></div>;
 }
