@@ -25,6 +25,7 @@ it('正式工作区通过真实服务完成生成/检查/试运行/人工效果�
  expect(harness.sent.length).toBe(1);expect(harness.modelOptions[0].thinking).toBe(false);
  // 引用只添加上下文，不自动发送；生成期间的新输入保留到下一轮。
  Object.defineProperties(HTMLDialogElement.prototype,{showModal:{configurable:true,value:function(){this.open=true;}},close:{configurable:true,value:function(){this.open=false;}}});
+ await vi.waitFor(()=>expect(root.querySelector<HTMLButtonElement>('.chat-artifact-name')!.disabled).toBe(false));
  await act(async()=>root.querySelector<HTMLButtonElement>('.chat-artifact-name')!.click());
  await vi.waitFor(()=>expect(root.querySelector<HTMLDialogElement>('.chat-code-dialog')!.open).toBe(true));
  await act(async()=>root.querySelector<HTMLLIElement>('.chat-code-lines li')!.click());
@@ -58,11 +59,20 @@ it('左侧网页预览回传引用时保留聊天输入，关闭后可直接继�
  const type=async(text:string)=>act(async()=>{const area=root.querySelector<HTMLTextAreaElement>('#intent')!;area.value=text;area.dispatchEvent(new Event('input',{bubbles:true}));});
  try{
  await act(async()=>render(h(App,{initialView:'home' as const,embedded:false}),root));await vi.waitFor(()=>expect(root.textContent).toContain('shop.example.com'));await type('调整字号');await act(async()=>root.querySelector<HTMLButtonElement>('button[aria-label="发送"]')!.click());await vi.waitFor(()=>expect(root.querySelector('.chat-artifact')).not.toBeNull());
+ await vi.waitFor(()=>expect(root.querySelector<HTMLButtonElement>('.chat-artifact-name')!.disabled).toBe(false));
  await act(async()=>root.querySelector<HTMLButtonElement>('.chat-artifact-name')!.click());await vi.waitFor(()=>expect(harness.preview()).not.toBeNull());expect(root.querySelector<HTMLDialogElement>('.chat-code-dialog')!.open).toBe(false);
  await type('只修改这段，保留其他功能');const preview=harness.preview()!;
  await act(async()=>{await harness.previewAction({action:'reference',versionId:preview.current.versionId,lines:[1]});});expect(root.querySelector<HTMLTextAreaElement>('#intent')!.value).toBe('只修改这段，保留其他功能');expect(root.querySelector('.chat-reference')?.textContent).toContain('L1');
  await act(async()=>{await harness.previewAction({action:'close'});});await vi.waitFor(()=>expect(document.activeElement?.id).toBe('intent'));
  await act(async()=>root.querySelector<HTMLButtonElement>('button[aria-label="发送"]')!.click());await vi.waitFor(()=>expect(harness.sent.length).toBe(2));expect(JSON.stringify(harness.sent[1])).toContain('只修改这段');expect(JSON.stringify(harness.sent[1])).toContain('L1:');
  await vi.waitFor(()=>expect(root.querySelector('button[aria-label="停止生成"]')).toBeNull());
+ // 网页预览已打开，但键盘焦点回到侧栏时，Esc 仍应关闭预览并保留尚未发送的输入。
+ await act(async()=>root.querySelector<HTMLButtonElement>('.chat-artifact-name')!.click());
+ await vi.waitFor(()=>expect(harness.preview()).not.toBeNull());
+ await vi.waitFor(()=>expect(root.querySelector<HTMLButtonElement>('.chat-artifact-name')!.disabled).toBe(false));
+ await type('Esc 后保留的未发送内容');
+ await act(async()=>{root.querySelector<HTMLTextAreaElement>('#intent')!.focus();window.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));});
+ await vi.waitFor(()=>expect(harness.preview()).toBeNull());
+ expect(root.querySelector<HTMLTextAreaElement>('#intent')!.value).toBe('Esc 后保留的未发送内容');expect(harness.sent).toHaveLength(2);
  }finally{render(null,root);root.remove();await harness.close();vi.unstubAllGlobals();}
 });

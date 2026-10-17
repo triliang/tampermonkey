@@ -1,3 +1,7 @@
+import {settleTask} from './task-journal';
+import type {TrialOperation} from './trial-operation';
+import type {LocalTask} from '../../shared/bridge-types';
+import {assertWorkspaceOwner,assertScriptExecutionIdle,workerId,type WorkspaceOwner} from '../services/workspace-lock';
 import {REASONING_BYTES} from '../../shared/reasoning';
 import type {TrialReceipt} from '../../shared/p3-types';
 import {validReference} from '../../shared/code-reference';
@@ -15,6 +19,7 @@ export function validateVersion(v: unknown): asserts v is ScriptVersion {
 export class WorkspaceStore {
   constructor(public readonly db: Database, private initialize: () => Promise<void> = async () => undefined) {}
   private async writableScript(tx: IDBTransaction, id: string, expected: number): Promise<ScriptRecord> {
+    await assertScriptExecutionIdle(tx,id);
     const s = await request<ScriptRecord | undefined>(tx.objectStore('scripts').get(id));
     if (!s || s.tombstone) throw new DataError('SCRIPT_MISSING', '脚本不存在或已删除。');
     if (s.recordRevision !== expected) throw new DataError('REVISION_CONFLICT', '脚本已在其他窗口更新，请重载；当前草稿仍保留。');
@@ -41,7 +46,7 @@ export class WorkspaceStore {
   async conversation(id: string): Promise<ConversationMessage[]> {
     await this.initialize(); return (await this.db.get<{ id: string; messages: ConversationMessage[] }>('conversations', id))?.messages ?? [];
   }
-  async saveDraft(id: string, expectedRevision: number, patch: DraftPatch, messages: ConversationMessage[] = [], workflow?:Workflow): Promise<WorkspaceRecord> {
+  async saveDraft(id: string, expectedRevision: number, patch: DraftPatch, messages: ConversationMessage[] = [], workflow?:Workflow, owner?:WorkspaceOwner,guard?:(tx:IDBTransaction)=>Promise<void>): Promise<WorkspaceRecord> {
     await this.initialize();
     if (!Number.isInteger(expectedRevision) || expectedRevision < 0 || !patch || typeof patch !== 'object' || Array.isArray(patch)
       || Object.keys(patch).some(k => !['input', 'draft', 'status', 'activeRequestId','codeReference'].includes(k))
@@ -58,6 +63,8 @@ export class WorkspaceStore {
       if (new TextEncoder().encode(patch.draft.code).length > this.db.limits.codeBytes) throw new DataError('CODE_TOO_LARGE', '代码超过单版容量上限。');
     }
     return this.db.mutate(async tx => {
+      await assertWorkspaceOwner(tx,id,owner);
+      if(guard)await guard(tx);
       const store = tx.objectStore('workspaces');
       const ws = await request<WorkspaceRecord | undefined>(store.get(id));
       if (!ws) throw new DataError('WORKSPACE_MISSING', '草稿不存在。');
@@ -105,12 +112,13 @@ export class WorkspaceStore {
     if (op.candidate) validateVersion(op.candidate);
     await this.db.mutate(async tx => { await this.writableScript(tx, op.scriptId, op.expectedRevision); await request(tx.objectStore('operations').add(op)); });
   }
-  async endGeneration(id: string, requestId: string, status: 'idle' | 'interrupted'): Promise<void> {
+  async endGeneration(id: string, requestId: string, status: 'idle' | 'interrupted',owner?:WorkspaceOwner): Promise<void> {
     await this.initialize();
     await this.db.mutate(async tx => {
       const store = tx.objectStore('workspaces');
       const ws = await request<WorkspaceRecord | undefined>(store.get(id));
       if (!ws || ws.activeRequestId !== requestId) return;
+      await assertWorkspaceOwner(tx,id,owner);
       ws.status = status; ws.activeRequestId = null; ws.draftRevision++; ws.updatedAt = Date.now();
       await request(store.put(ws));
     });
@@ -135,8 +143,13 @@ export class WorkspaceStore {
   async recoverLocalState(): Promise<void> {
     // P1 不调用 Chrome 注册 API，也不把未处理日志当作已恢复。P4 接管注册恢复后才能解除写保护。
     await this.db.mutate(async tx => {
+      for(const task of await request<LocalTask[]>(tx.objectStore('tasks').getAll()))if(['running','cancelRequested'].includes(task.state)&&task.workerId!==workerId)await settleTask(tx,task.id,'waitingUser','WORKER_INTERRUPTED');
+      for(const op of await request<TrialOperation[]>(tx.objectStore('approvals').getAll()))if(op.state==='executing'&&op.workerId!==workerId){op.state='unknown';op.updatedAt=Date.now();await request(tx.objectStore('approvals').put(op));await settleTask(tx,op.ownerToken,'waitingUser','WORKER_INTERRUPTED');}
+      for(const grant of await request<Array<{id:string;workerId?:string}>>(tx.objectStore('pageGrants').getAll()))if(grant.workerId!==workerId)await request(tx.objectStore('pageGrants').delete(grant.id));
+      for(const lease of await request<Array<{id:string;workerId:string;token:string;epoch:number;expiresAt:number}>>(tx.objectStore('workspaceLeases').getAll())){if(lease.workerId!==workerId){await settleTask(tx,lease.token,'waitingUser','WORKER_INTERRUPTED');lease.token='';lease.epoch++;lease.expiresAt=0;await request(tx.objectStore('workspaceLeases').put(lease));}}
       for (const ws of await request<WorkspaceRecord[]>(tx.objectStore('workspaces').getAll())) {
-        if (ws.status === 'generating') { ws.status = 'interrupted'; ws.activeRequestId = null; ws.draftRevision++; await request(tx.objectStore('workspaces').put(ws)); }
+        const lease=await request<{workerId:string;token:string;expiresAt:number}|undefined>(tx.objectStore('workspaceLeases').get(ws.id));
+        if (ws.status === 'generating'&&!(lease?.workerId===workerId&&lease.token&&lease.expiresAt>Date.now())) { ws.status = 'interrupted'; ws.activeRequestId = null; ws.draftRevision++; await request(tx.objectStore('workspaces').put(ws)); }
       }
       for (const op of await request<OperationRecord[]>(tx.objectStore('operations').getAll())) {
         op.phase = 'recovery_required'; await request(tx.objectStore('operations').put(op));

@@ -3,6 +3,7 @@ import type { ScriptRecord, WorkspaceRecord, OperationRecord } from '../shared/v
 import { DataError, Database, request } from './repositories/database';
 import { migrateLegacy, recordFromLegacy, type LegacySnapshot } from './repositories/migration';
 import { WorkspaceStore } from './repositories/workspace-store';
+import {assertScriptExecutionIdle,assertWorkspaceOwner} from './services/workspace-lock';
 
 /** V1 UI 兼容适配器；权威业务数据已迁入 IDB，不能再直接覆盖旧存储键。 */
 export class ScriptStore {
@@ -16,6 +17,8 @@ export class ScriptStore {
       await migrateLegacy(this.db, this.snapshot);
       await new WorkspaceStore(this.db).recoverLocalState();
     })();
+    const pending=this.initialization;
+    void pending.catch(()=>{if(this.initialization===pending)this.initialization=null;});
     return this.initialization;
   }
   async list(): Promise<ScriptMeta[]> {
@@ -43,11 +46,13 @@ export class ScriptStore {
   async delete(id: string): Promise<void> {
     await this.ready();
     await this.db.mutate(async tx => {
+      await assertScriptExecutionIdle(tx,id);
       const s = await request<ScriptRecord | undefined>(tx.objectStore('scripts').get(id));
       const ops = await request<OperationRecord[]>(tx.objectStore('operations').getAll());
       if (s?.autoRun.desired || ops.some(op => op.scriptId === id)) throw new DataError('RECOVERY_REQUIRED', '脚本仍有注册或未完成操作，请先停用并恢复。');
       for (const ws of await request<WorkspaceRecord[]>(tx.objectStore('workspaces').getAll())) {
         if (ws.scriptId === id) {
+          await assertWorkspaceOwner(tx,ws.id);
           await request(tx.objectStore('workspaces').delete(ws.id));
           await request(tx.objectStore('conversations').delete(ws.id));
           await request(tx.objectStore('meta').delete('v21:workflow:'+ws.id));

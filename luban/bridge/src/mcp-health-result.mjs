@@ -1,0 +1,1 @@
+export function hasHealth(v){if(typeof v==='string'){try{return hasHealth(JSON.parse(v))}catch{return false}}if(!v||typeof v!=='object')return false;if(v.ok===true&&v.stage==='S0'&&Array.isArray(v.pageCapabilities)&&v.pageCapabilities.length===0)return true;return Object.values(v).some(hasHealth);}

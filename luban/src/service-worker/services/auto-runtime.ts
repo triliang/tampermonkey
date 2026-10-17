@@ -5,6 +5,7 @@ import { DataError, request, byteSize } from '../repositories/database';
 import type { AutoAdapter } from './auto-adapter';
 import { hostPattern } from '../../shared/host-policy';
 import { validateTrial } from './trial-runner';
+import {assertScriptExecutionIdle,assertWorkspaceOwner} from './workspace-lock';
 interface Source{tabId:number;documentId:string;host:string;}
 interface Lease{ id:string;kind:'lease';scriptId:string;versionId:string;hash:string;generation:number;source:Source;lastSeq:number;expiresAt:number; }
 const failure=(code:string,message:string):never=>{throw new DataError(code,message);};
@@ -25,6 +26,7 @@ export class AutoRuntime{
   private async setStatus(id:string,state:RuntimeStatus['state'],message:string,versionId?:string){await this.store.db.mutate(async tx=>{await request(tx.objectStore('runtimeStatus').put({id,state,message,registeredVersionId:versionId,updatedAt:Date.now()}));});}
   private async pending(tx:IDBTransaction,id:string){return (await request<OperationRecord[]>(tx.objectStore('operations').getAll())).filter(o=>o.scriptId===id);}
   private async check(tx:IDBTransaction,id:string,revision:number){
+    await assertScriptExecutionIdle(tx,id);
     const r=await request<ScriptRecord|undefined>(tx.objectStore('scripts').get(id));
     if(!r||r.tombstone||r.recordRevision!==revision)failure('REVISION_CONFLICT','工具已变化，请重新打开。');
     if((await this.pending(tx,id)).length)failure('RECOVERY_REQUIRED','存在未完成的注册操作，请重试恢复。');return r!;
@@ -81,7 +83,7 @@ export class AutoRuntime{
     });})();
   };
   async delete(id:string,revision:number){await this.ready();return this.serial(async()=>{
-    await this.store.db.mutate(async tx=>{const r=await this.check(tx,id,revision);r.tombstone=true;r.autoRun={desired:false,generation:r.autoRun.generation+1};r.recordRevision++;await request(tx.objectStore('scripts').put(r));await request(tx.objectStore('operations').put({id:crypto.randomUUID(),scriptId:id,type:'delete',expectedRevision:r.recordRevision,phase:'prepared',createdAt:Date.now()}));});
+    await this.store.db.mutate(async tx=>{for(const workspace of await request<WorkspaceRecord[]>(tx.objectStore('workspaces').getAll()))if(workspace.scriptId===id)await assertWorkspaceOwner(tx,workspace.id);const r=await this.check(tx,id,revision);r.tombstone=true;r.autoRun={desired:false,generation:r.autoRun.generation+1};r.recordRevision++;await request(tx.objectStore('scripts').put(r));await request(tx.objectStore('operations').put({id:crypto.randomUUID(),scriptId:id,type:'delete',expectedRevision:r.recordRevision,phase:'prepared',createdAt:Date.now()}));});
     try{await this.adapter.remove(id);await this.purge(id);await this.syncBridges();}catch(e){await this.setStatus(id,'cleanup_required','删除已禁用运行，清理失败，请重试：'+String(e));throw e;}
   });}
   private async purge(id:string){await this.store.db.mutate(async tx=>{
@@ -113,9 +115,16 @@ export class AutoRuntime{
     const rate=this.rates.get(rateKey)??{at:Date.now(),count:0};if(Date.now()-rate.at>1000){rate.at=Date.now();rate.count=0;}if(++rate.count>120)failure('RATE_LIMIT','运行消息过多。');this.rates.set(rateKey,rate);if(this.rates.size>1000)for(const[k,v]of this.rates)if(Date.now()-v.at>1000)this.rates.delete(k);
     const record=await this.store.record(raw.scriptId);if(!record?.host||!await this.adapter.permission(record.host))failure('SITE_PERMISSION_REQUIRED','网站权限不可用。');
     return this.store.db.mutate(async tx=>{
+      await assertScriptExecutionIdle(tx,raw.scriptId);
       const r=await request<ScriptRecord|undefined>(tx.objectStore('scripts').get(raw.scriptId));
       const status=await request<RuntimeStatus|undefined>(tx.objectStore('runtimeStatus').get(raw.scriptId));
       if(!r||r.tombstone||!r.autoRun.desired||r.host!==source.host||r.current.versionId!==raw.versionId||r.current.hash!==raw.hash||r.autoRun.generation!==raw.generation||(status?.state!=='ready'||status.registeredVersionId!==raw.versionId)||(await this.pending(tx,r.id)).length)failure('START_DENIED','此版本未获准运行，或已有未完成的操作。');
+      const workspaces=(await request<WorkspaceRecord[]>(tx.objectStore('workspaces').getAll())).filter(ws=>ws.scriptId===raw.scriptId);
+      if(raw.kind!=='result'){
+        for(const workspace of workspaces){const lock=await request<{token:string;expiresAt:number}|undefined>(tx.objectStore('workspaceLeases').get(workspace.id));if(lock?.token&&lock.expiresAt>Date.now())failure('WORKSPACE_BUSY','当前工作区正在处理，自动运行未获准写入。');}
+        const operations=await request<Array<{workspaceId:string;state:string}>>(tx.objectStore('approvals').getAll());
+        if(operations.some(operation=>workspaces.some(ws=>ws.id===operation.workspaceId)&&['executing','unknown'].includes(operation.state)))failure('RECOVERY_REQUIRED','当前工具存在未核对的网页操作。');
+      }
       if(raw.kind==='start'){
         const leases=await request<Lease[]>(tx.objectStore('runtimeStatus').getAll());
         for(const l of leases)if(l.kind==='lease'&&l.expiresAt<Date.now())await request(tx.objectStore('runtimeStatus').delete(l.id));

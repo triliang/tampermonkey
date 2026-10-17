@@ -7,6 +7,7 @@ import type { AutoAdapter } from './auto-adapter';
 import { autoSource } from './auto-source';
 import { hostPattern } from '../../shared/host-policy';
 import { VersionService } from './version-service';
+import {lockWorkspace} from './workspace-lock';
 import { verifyAutoSource } from './auto-origin';
 import type { AutoRequest } from '../../shared/p4-types';
 import type { ScriptRecord, ScriptVersion } from '../../shared/v2-types';
@@ -29,6 +30,17 @@ async function setup(){
   return{db,store,adapter,origin,runtime,versions,installed,msg,sender,enable,setAllowed:(v:boolean)=>{allowed=v;},get hosts(){return hosts;}};
 }
 describe('P4 准确主机与注册生命周期',()=>{
+ it('S1 保存版执行与工作区任务阻止自动启动和迟到 GM 写入，释放后原注册仍可用',async()=>{
+  const s=await setup(),a=await s.enable();const lease=await s.runtime.bridge(s.msg(a),s.sender) as {leaseId:string};
+  const workspace=await s.store.workspaces.create(a.id);const release=await lockWorkspace(workspace.id,s.db,'trialRun','mcp');
+  await expect(s.runtime.bridge(s.msg(a),s.sender)).rejects.toMatchObject({code:'WORKSPACE_BUSY'});
+  await expect(s.runtime.bridge(s.msg(a,{kind:'delta',leaseId:lease.leaseId,seq:1,op:'set',key:'late',value:1}),s.sender)).rejects.toMatchObject({code:'WORKSPACE_BUSY'});
+  await expect(s.runtime.delete(a.id,a.recordRevision)).rejects.toMatchObject({code:'WORKSPACE_BUSY'});
+  expect(await s.store.readGm(a.id)).toEqual({});await release();
+  const saved=await lockWorkspace('script:'+a.id,s.db,'runSaved');
+  await expect(s.runtime.setEnabled(a.id,a.recordRevision,false)).rejects.toMatchObject({code:'WORKSPACE_BUSY'});await expect(s.runtime.bridge(s.msg(a),s.sender)).rejects.toMatchObject({code:'WORKSPACE_BUSY'});
+  await saved();expect(await s.runtime.bridge(s.msg(a),s.sender)).toHaveProperty('leaseId');expect((await s.store.record(a.id))?.autoRun.desired).toBe(true);
+ });
  it('只接受准确主机规则，不允许 wildcard/path/协议注入',()=>{expect(hostPattern('www.example.com')).toBe('*://www.example.com/*');for(const h of ['*.example.com','https://example.com','example.com/path','example.com:80',''])expect(()=>hostPattern(h)).toThrow();});
  it('首次保存关闭；拒绝权限不注册、不改变内容或开关',async()=>{const s=await setup(),before=(await s.store.record('a'))!;s.setAllowed(false);await expect(s.enable()).rejects.toMatchObject({code:'SITE_PERMISSION_REQUIRED'});expect(await s.store.record('a')).toEqual(before);expect(s.installed.size).toBe(0);});
  it('同站两脚本独立注册，共用桥；关一条不影响另一条',async()=>{const s=await setup(),a=await s.enable(),b=await s.enable('b');expect(s.hosts).toEqual(['example.com']);expect(s.installed.size).toBe(2);await s.runtime.setEnabled('a',a.recordRevision,false);expect(s.installed.has('a')).toBe(false);expect(s.installed.has('b')).toBe(true);expect(s.hosts).toEqual(['example.com']);expect(await s.runtime.bridge(s.msg(b),s.sender)).toHaveProperty('leaseId');});

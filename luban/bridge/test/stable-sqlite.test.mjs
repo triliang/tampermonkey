@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {spawnSync} from 'node:child_process';
+test('stable SQLite prebuild persists, deduplicates and rolls back with fixed runtime',()=>{const r=spawnSync(process.execPath,['src/sqlite-probe.mjs'],{encoding:'utf8',timeout:10000});assert.equal(r.status,0,r.stderr);const result=JSON.parse(r.stdout);assert.equal(result.driver,'13.0.3');assert.equal(result.persistence,true);assert.equal(result.uniqueness,true);assert.equal(result.rollback,true);});

@@ -23,7 +23,7 @@ export function trialSource(v: ScriptVersion, namespace: string, hash: string, v
   const info={script:{name:'鲁班试运行'},version:'0.2.0'};const GM_info=grants.has('GM_info')?(${/\bGM_info\s*\(/.test(v.code)}?Object.assign(()=>info,info):info):undefined;
   const unsafeWindow=grants.has('unsafeWindow')?window:undefined;
   let timer;try{return await Promise.race([(async()=>{try{await(async()=>{\n${v.code}\n})();return {ok:true,timedOut:false,changes};}catch(e){return {ok:false,timedOut:false,error:String(e),changes};}})(),new Promise(r=>{timer=setTimeout(()=>r({ok:false,timedOut:true,error:'执行超时，请刷新页面后重试',changes}),10000);})]);}finally{clearTimeout(timer);}})();
-  globalThis[key]=work;const result=await work;if(!result.ok)delete globalThis[key];return result;})()`;
+  globalThis[key]=work;const result=await work;if(!result.ok&&!result.timedOut)delete globalThis[key];return result;})()`;
 }
 export async function executeTrial(binding: PageBinding,v:ScriptVersion,namespace:string,hash:string,values:Record<string,unknown>):Promise<TrialResult>{
   const api=(chrome as unknown as {userScripts?:{execute:(input:unknown)=>Promise<Array<{documentId?:string;result?:TrialResult;error?:string}>>}}).userScripts;

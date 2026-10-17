@@ -1,0 +1,21 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {mkdtempSync,rmSync} from 'node:fs';import {tmpdir} from 'node:os';import {join} from 'node:path';import {ProfileStore} from '../src/store/profile-store.mjs';import {NativeGateway} from '../src/native-gateway.mjs';
+const req=(method,params={})=>({protocolVersion:1,requestId:'r',method,params});
+test('a replaced native connection cannot invalidate its successor pages or cancel successor work when it closes',()=>{
+ const store=new ProfileStore(':memory:'),stopped=[];
+ const services={agent:{disconnected:id=>stopped.push(id)},coordinator:{disconnected(){},pagesChanged(){}}};
+ try{
+  const old=new NativeGateway(store,'a'.repeat(32),services),current=new NativeGateway(store,'a'.repeat(32),services);
+  const pair=old.handle(req('profile.pair')).data;
+  assert.equal(current.handle(req('profile.authenticate',pair)).ok,true);
+  assert.equal(old.handle(req('pages.list')).error.code,'NATIVE_SESSION_REPLACED');
+  const page={pageRef:crypto.randomUUID(),browserSession:crypto.randomUUID(),documentId:'new-document',navigationEpoch:2,title:'New session page',url:'https://example.com',capabilities:['context.read']};
+  assert.equal(current.handle(req('pages.sync',{pages:[page]})).ok,true);
+  const prior=stopped.length;old.close();
+  assert.equal(current.handle(req('pages.list')).data.pages.length,1);
+  assert.equal(stopped.length,prior);
+  current.close();assert.equal(store.pages(pair.profileId).length,0);assert.equal(stopped.length,prior+1);
+ }finally{store.close();}
+});
+test('pairing grants no page access; credentials survive reopen and revocation invalidates live sessions',()=>{const dir=mkdtempSync(join(tmpdir(),'luban-profile-'));const path=join(dir,'profiles.sqlite');const store=new ProfileStore(path);const origin='a'.repeat(32);const a=new NativeGateway(store,origin);try{assert.equal(a.handle(req('pages.list')).error.code,'PAIRING_REQUIRED');const pair=a.handle(req('profile.pair')).data;assert.deepEqual(a.handle(req('pages.list')).data,{pages:[]});assert.equal(a.handle(req('context.read')).error.code,'PAGE_NOT_GRANTED');const other=new ProfileStore(path);try{const b=new NativeGateway(other,origin);assert.equal(b.handle(req('profile.authenticate',pair)).ok,true);assert.equal(new NativeGateway(other,'b'.repeat(32)).handle(req('profile.authenticate',pair)).ok,false);assert.equal(a.handle(req('profile.revoke')).ok,true);assert.equal(b.handle(req('pages.list')).error.code,'PAIRING_REQUIRED');}finally{other.close();}}finally{store.close();rmSync(dir,{recursive:true,force:true});}});
+test('protocol rejects unsupported versions, unknown methods and forged credentials without leaking them',()=>{const store=new ProfileStore(':memory:');try{const g=new NativeGateway(store,'a'.repeat(32));assert.equal(g.handle({...req('health.get'),protocolVersion:2}).ok,false);assert.equal(g.handle(req('executeJavaScript')).ok,false);const token='f'.repeat(64);const result=g.handle(req('profile.authenticate',{profileId:'123',token}));assert.equal(result.ok,false);assert.equal(JSON.stringify(result).includes(token),false);assert.deepEqual(g.handle(req('health.get')).data.pageCapabilities,[]);}finally{store.close();}});
+test('page metadata is profile scoped, excludes browser routing IDs and disappears on connection close',()=>{const store=new ProfileStore(':memory:');try{const a=new NativeGateway(store,'a'.repeat(32)),b=new NativeGateway(store,'a'.repeat(32));a.handle(req('profile.pair'));b.handle(req('profile.pair'));const page={pageRef:crypto.randomUUID(),browserSession:crypto.randomUUID(),documentId:'private-document',navigationEpoch:1,title:'Authorized page',url:'https://example.com',capabilities:['context.read']};assert.equal(a.handle(req('pages.sync',{pages:[page]})).ok,true);assert.equal(a.handle(req('pages.list')).data.pages.length,1);assert.deepEqual(b.handle(req('pages.list')).data.pages,[]);assert.equal(JSON.stringify(a.handle(req('pages.list'))).includes('private-document'),false);assert.equal(a.handle(req('pages.sync',{pages:[{...page,capabilities:['executeJavaScript']}]})).ok,false);a.close();assert.deepEqual(store.db.prepare('SELECT * FROM profile_pages').all(),[]);}finally{store.close();}});

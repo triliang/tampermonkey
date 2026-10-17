@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "鲁班 S0 Native 验证",
+  "version": "0.0.1",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3IbEinmusyrIW8NoC48hCRsf93FaW5ZrP18t4pwAZFwKDqL8Q37heVNv9G5TVhbLucdWzMqBtJD7olvqpP7TjfVVrKQ+DYZ42yXTS40se7u30KQ0q/i1TLnIxLx8I4bSQ0dVhNtyzM17Wk3Utt8a4Ts2D+UXyiTedspUYH49KpDfIC7b7/ZqaPr0pxPP89injRQ6tmsu1H3M2xwAyroUt7FPet56LzRcgDnBWGxhwCDp2CyAgA96ZPn1ALpb2r80O29Q++CCwzxZHJ9CGgtGzc/WE/2StdPRGk2uJaCyx6iwIuPg+gZHoMoUrpnvlsNpoxUmabviVbYcLrUoF+XjVQIDAQAB",
+  "permissions": [
+    "nativeMessaging"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}

@@ -1,11 +1,12 @@
 import brandLogo from '../assets/logo.svg';
 import { Privacy } from './tabs/Privacy';
+import { Integrations } from './tabs/Integrations';
 import { useState } from 'preact/hooks';
 import { AiSettings } from './tabs/AiSettings';
 import { ScriptManager } from './tabs/ScriptManager';
 import { STRINGS } from '../shared/i18n-strings';
 
-type TabId = 'ai' | 'scripts' | 'privacy';
+type TabId = 'ai' | 'scripts' | 'privacy' | 'integrations';
 
 export default function App() {
   const [tab, setTab] = useState<TabId>('ai');
@@ -17,6 +18,7 @@ export default function App() {
         <span class="title">{STRINGS.options.title}</span>
       </header>
       <nav class="options-tabs">
+        <button type="button" class={tab === 'integrations' ? 'active' : ''} onClick={() => setTab('integrations')}>连接与集成</button>
         <button type="button" class={tab === 'ai' ? 'active' : ''} onClick={() => setTab('ai')}>
           {STRINGS.options.aiTab}
         </button>
@@ -28,6 +30,7 @@ export default function App() {
         </button>
       </nav>
       <main class="options-body">
+        {tab === 'integrations' && <Integrations />}
         {tab === 'ai' && <AiSettings />}
         {tab === 'scripts' && <ScriptManager />}
         {tab === 'privacy' && <Privacy />}

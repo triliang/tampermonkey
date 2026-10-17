@@ -1,4 +1,4 @@
-export const STORES = ['scripts', 'workspaces', 'conversations', 'gm', 'operations', 'receipts', 'runtimeStatus', 'meta'] as const;
+export const STORES = ['scripts', 'workspaces', 'conversations', 'gm', 'operations', 'receipts', 'runtimeStatus', 'meta', 'tasks', 'taskEvents', 'workspaceLeases', 'pageGrants', 'approvals'] as const;
 export type StoreName = typeof STORES[number];
 export const DEFAULT_LIMITS = { codeBytes: 256 * 1024, conversationBytes: 1024 * 1024, totalBytes: 40 * 1024 * 1024 };
 export type StorageLimits = typeof DEFAULT_LIMITS;
@@ -21,8 +21,9 @@ export class Database {
   open(): Promise<IDBDatabase> {
     if (!this.connection) this.connection = new Promise((resolve, reject) => {
       let rejected = false;
-      const r = indexedDB.open(this.name, 1);
+      const r = indexedDB.open(this.name, 2);
       r.onupgradeneeded = () => {
+        if (rejected) { r.transaction?.abort(); return; }
         for (const name of STORES) if (!r.result.objectStoreNames.contains(name)) r.result.createObjectStore(name, { keyPath: 'id' });
       };
       r.onerror = () => reject(r.error);
@@ -34,6 +35,8 @@ export class Database {
         resolve(db);
       };
     });
+    const pending = this.connection;
+    void pending.catch(() => { if (this.connection === pending) this.connection = null; });
     return this.connection;
   }
   async close(): Promise<void> { if (this.connection) (await this.connection).close(); this.connection = null; }
@@ -64,7 +67,7 @@ export class Database {
       const value = await work(tx);
       const after = await this.usage(tx);
       // 升级不因新软上限丢失旧成果；超限后允许缩减、不允许继续增长。
-      if (!migration && after > this.limits.totalBytes && after > before) throw new DataError('TOTAL_TOO_LARGE', '本地数据超过总容量上限，请先删除不需要的工具或草稿。');
+      if (!migration && after > this.limits.totalBytes && after > before) throw new DataError('TOTAL_TOO_LARGE', '本地数据超过总容量上限，请先清理过期任务，或删除不需要的工具和草稿。');
       return value;
     });
   }

@@ -318,3 +318,10 @@
 .script-library-host,.script-library-secondary time{border-left:0;position:relative}.script-library-host::before,.script-library-secondary time::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);height:8px;width:1px;background:#81907b26}
 
 .chat-top .chat-brand{display:flex;align-items:center;gap:6px}.chat-brand img{display:block;flex-shrink:0;object-fit:contain}
+
+/* 外部确认与发送预览在窄侧栏中保持正文及键盘焦点可达。 */
+.chat-disclosure textarea{box-sizing:border-box;max-width:100%;width:100%;min-height:90px;resize:vertical}.chat-app article,.chat-app section{min-width:0}.chat-app pre{max-width:100%;box-sizing:border-box}.chat-code-dialog button:focus-visible,.chat-code-dialog summary:focus-visible,.chat-code-dialog select:focus-visible{outline:2px solid #238461;outline-offset:2px}
+
+.external-approvals{min-width:0;overflow-wrap:anywhere}.external-approvals pre{white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%;max-height:280px;overflow:auto;box-sizing:border-box}.chat-app{overflow-wrap:anywhere}
+
+.chat-settings{max-height:calc(100dvh - 85px);overflow:auto;overscroll-behavior:contain}

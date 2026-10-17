@@ -13,6 +13,7 @@ export class DraftBuffer {
     clearTimeout(this.timer);
     this.timer = setTimeout(() => { void this.flush().catch(this.onError); }, this.delay);
   }
+  get hasPendingChanges():boolean {return this.pending!==null||this.inFlight!==null;}
   async flush(): Promise<WorkspaceRecord | undefined> {
     clearTimeout(this.timer);
     if (this.inFlight) { await this.inFlight; return this.flush(); }

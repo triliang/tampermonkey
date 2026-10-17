@@ -43,5 +43,6 @@
     "http://*/*",
     "https://*/*"
   ],
+  "optional_permissions": ["nativeMessaging"],
   "minimum_chrome_version": "138"
 }

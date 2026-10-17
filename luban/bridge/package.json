@@ -1,0 +1,22 @@
+{
+  "name": "@luban/bridge-spike",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "24.14.1"
+  },
+  "scripts": {
+    "check": "node scripts/check.mjs",
+    "test": "node --test test/*.test.mjs",
+    "probe:mcp": "node scripts/probe-mcp.mjs",
+    "probe:codex": "node scripts/probe-codex.mjs",
+    "package": "node scripts/package-macos.mjs"
+  },
+  "dependencies": {
+    "@larksuiteoapi/node-sdk": "1.75.0",
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "better-sqlite3": "13.0.3",
+    "zod": "4.6.7"
+  }
+}

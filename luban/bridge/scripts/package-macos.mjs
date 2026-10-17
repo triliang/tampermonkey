@@ -1,0 +1,12 @@
+import {cpSync,mkdirSync,writeFileSync,readFileSync,chmodSync} from 'node:fs';
+import {resolve,join,dirname} from 'node:path';import {createHash} from 'node:crypto';
+if(process.platform!=='darwin'||process.arch!=='arm64'||process.version!=='v24.14.1')throw Error('S0 package requires verified darwin arm64 Node v24.14.1');
+const dest=resolve('dist/luban-s0-macos-arm64');mkdirSync(join(dest,'runtime'),{recursive:true});
+cpSync(process.execPath,join(dest,'runtime/node'));for(const item of ['src','node_modules','package.json','package-lock.json','probe-extension'])cpSync(item,join(dest,item),{recursive:true});
+writeFileSync(join(dest,'native-host'),'#!/bin/sh\nbase=$(CDPATH= cd -- "${0%/*}" && pwd)\nexec "$base/runtime/node" "$base/src/native-host.mjs" "$@"\n',{mode:0o755});chmodSync(join(dest,'runtime/node'),0o755);
+const manifest=JSON.parse(readFileSync('probe-extension/manifest.json'));const id=createHash('sha256').update(Buffer.from(manifest.key,'base64')).digest('hex').slice(0,32).replace(/[0-9a-f]/g,x=>String.fromCharCode(97+parseInt(x,16)));
+writeFileSync(join(dest,'host-manifest.template.json'),JSON.stringify({name:'com.luban.s0_probe',description:'Luban S0 health-only probe',path:join(dest,'native-host'),type:'stdio',allowed_origins:[`chrome-extension://${id}/`]},null,2)+'\n');
+cpSync('scripts/install-probe.mjs',join(dest,'install-probe.mjs'));
+const denied={...manifest,name:'鲁班 S0 未授权来源验证'};delete denied.key;mkdirSync(join(dest,'probe-extension-denied'),{recursive:true});for(const file of ['popup.html','popup.js'])cpSync(join('probe-extension',file),join(dest,'probe-extension-denied',file));writeFileSync(join(dest,'probe-extension-denied/manifest.json'),JSON.stringify(denied,null,2)+'\n');
+cpSync(join(dirname(dirname(process.execPath)),'LICENSE'),join(dest,'NODE-LICENSE.txt'));
+writeFileSync(join(dest,'build-info.json'),JSON.stringify({stage:'S0',node:process.version,platform:process.platform,arch:process.arch,extensionId:id,nodeSha256:createHash('sha256').update(readFileSync(process.execPath)).digest('hex')},null,2)+'\n');console.log(JSON.stringify({package:dest,extensionId:id,installed:false}));

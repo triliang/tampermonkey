@@ -1,0 +1,24 @@
+import {cpSync,mkdirSync,writeFileSync,readFileSync,chmodSync,existsSync,renameSync,mkdtempSync,rmSync,readdirSync} from 'node:fs';
+import {resolve,join,dirname} from 'node:path';import {createHash} from 'node:crypto';
+import {BRIDGE_VERSION} from '../src/protocol.mjs';
+if(process.platform!=='darwin'||process.arch!=='arm64'||process.version!=='v24.14.1')throw Error('Bridge package requires darwin arm64 Node v24.14.1');
+const target=resolve('dist/luban-bridge-macos-arm64');mkdirSync(dirname(target),{recursive:true});
+for(const forbidden of ['.local','profiles.sqlite'])if(existsSync(join(target,forbidden)))throw Error('Unexpected local state in package destination');
+const dest=mkdtempSync(resolve('dist/.luban-bridge-build-'));mkdirSync(join(dest,'runtime'),{recursive:true});
+cpSync(process.execPath,join(dest,'runtime/node.next'));chmodSync(join(dest,'runtime/node.next'),0o755);renameSync(join(dest,'runtime/node.next'),join(dest,'runtime/node'));
+for(const item of ['src','node_modules','package.json','package-lock.json'])cpSync(item,join(dest,item),{recursive:true});
+writeFileSync(join(dest,'native-host'),'#!/bin/sh\nbase=$(CDPATH= cd -- "${0%/*}" && pwd)\numask 077\nexec "$base/runtime/node" "$base/src/bridge-host.mjs" "$@"\n',{mode:0o755});chmodSync(join(dest,'native-host'),0o755);
+for(const [launcher,module] of [['luban-mcp','mcp-adapter.mjs'],['luban-mcp-enroll','mcp-enrollment.mjs']])writeFileSync(join(dest,launcher),'#!/bin/sh\nbase=$(CDPATH= cd -- "${0%/*}" && pwd)\numask 077\nexec "$base/runtime/node" "$base/src/'+module+'" "$@"\n',{mode:0o755});
+if(!existsSync('.local/keychain-secret'))throw Error('Build the Keychain helper before packaging');
+cpSync('.local/keychain-secret',join(dest,'runtime/keychain-secret'));chmodSync(join(dest,'runtime/keychain-secret'),0o755);
+cpSync('scripts/install-bridge.mjs',join(dest,'install-bridge.mjs'));
+cpSync('scripts/prepare-feishu-config.mjs',join(dest,'prepare-feishu-config.mjs'));
+cpSync('../docs/v3/verification/v3-manual-acceptance-guide.md',join(dest,'MANUAL-ACCEPTANCE.md'));
+for(const file of readdirSync('../docs/v3/verification'))if(/^v3-(manual-acceptance-guide|s[2-5]-(manual-checklist|mcp-setup|auto-verification-2026-10-17))\.md$/.test(file))cpSync(join('../docs/v3/verification',file),join(dest,file));
+cpSync(join(dirname(dirname(process.execPath)),'LICENSE'),join(dest,'NODE-LICENSE.txt'));
+const hashes={};function hashSource(dir){for(const item of readdirSync(dir,{withFileTypes:true})){const path=join(dir,item.name);if(item.isDirectory())hashSource(path);else hashes[path.slice(dest.length+1)]=createHash('sha256').update(readFileSync(path)).digest('hex');}}hashSource(join(dest,'src'));
+writeFileSync(join(dest,'build-info.json'),JSON.stringify({stage:'S5-manual-acceptance-pending',host:'com.luban.bridge',version:BRIDGE_VERSION,node:process.version,platform:process.platform,arch:process.arch,nodeSha256:createHash('sha256').update(readFileSync(process.execPath)).digest('hex'),sourceHashes:hashes},null,2)+'\n');
+const previous=target+'.previous-'+process.pid;if(existsSync(target))renameSync(target,previous);
+try{renameSync(dest,target);}catch(e){if(existsSync(previous))renameSync(previous,target);throw e;}
+if(existsSync(previous))rmSync(previous,{recursive:true,force:true});
+console.log(JSON.stringify({package:target,registrationChanged:false,scope:'V3-S3-S5-manual-acceptance-pending'}));

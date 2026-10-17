@@ -2,7 +2,7 @@ import {scriptFilename} from '../../shared/script-attachment';
 import type {ReasoningStage} from '../../shared/reasoning';
 import {thinkingProtocol} from '../../shared/thinking';
 import {createReference,versionHash,validReference} from '../../shared/code-reference';
-import {lockWorkspace,workspaceLocked} from './workspace-lock';
+import {lockWorkspace,workspaceLocked,type WorkspaceRelease} from './workspace-lock';
 import {inspectCode,safeRepair} from './code-quality';
 import {getWorkflow} from './workspace-workflow';
 import type {Workflow} from '../../shared/v21-types';
@@ -19,16 +19,17 @@ import { parseAiResponse } from '../prompt-builder';
 import { scanCode } from '../safety-scanner';
 
 export interface GenerationTransport {
+  waitForStop?():Promise<void>;
   tracksRequests?:boolean;
   cancel(): void;
   generate(config: ProviderConfig, messages: ChatMessage[], options: { jsonMode: boolean; thinking: boolean;autoRetry?:boolean }, callbacks: { onDelta: (s: string) => void;onRequest?:()=>void;onThinking?:()=>void;onReasoning?:(text:string,truncated:boolean)=>void }): Promise<{ text: string;reasoning?:string;reasoningTruncated?:boolean; finishReason?:string;malformed?:boolean;streamEnd?:'eof'|'done';usage?: { total_tokens?: number } }>;
 }
-interface Session { release:()=>void;requestId: string; client: GenerationTransport; cancelled: boolean; started: Promise<WorkspaceRecord>; }
+interface Session { release:WorkspaceRelease;requestId: string; client: GenerationTransport; cancelled: boolean; started: Promise<WorkspaceRecord>; }
 export class WorkspaceGeneration {
   private envelopes = new Map<string, GenerationEnvelope>();
   private sessions = new Map<string, Session>();
   constructor(private store: ScriptStore, private capture: (selectors?: string[]) => Promise<CapturedPage>,
-    private configuration: () => Promise<ProviderConfig>, private clientFactory: () => GenerationTransport) {}
+    private configuration: () => Promise<ProviderConfig>, private clientFactory: (workspaceId?:string) => GenerationTransport) {}
   async prepare(workspaceId: string, expectedRevision: number, selectors?: string[], repairAllowed=true): Promise<GenerationEnvelope> {
     const ws = await this.store.workspaces.get(workspaceId);
     if (!ws || ws.draftRevision !== expectedRevision) throw new DataError('REVISION_CONFLICT', '工作区已变化，请重载后重新预览请求。');
@@ -75,12 +76,14 @@ export class WorkspaceGeneration {
     if (!ws || ws.draftRevision !== envelope.draftRevision) throw new DataError('REVISION_CONFLICT', '草稿已经变化，请重新预览请求。');
     if (workspaceLocked(workspaceId)||this.sessions.has(workspaceId)) throw new DataError('GENERATION_BUSY', '当前工作区已有请求。');
     this.envelopes.delete(envelopeId);
-    const release=lockWorkspace(workspaceId);
-    const session: Session = {release, requestId, cancelled: false, client: this.clientFactory(), started: this.store.workspaces.saveDraft(workspaceId, envelope.draftRevision,
-      { status: 'generating', activeRequestId: requestId }, [{ role: 'user', text: ws.input, createdAt: Date.now(),...(ws.codeReference?{codeReference:ws.codeReference}:{}),...(envelope.scriptAttachment?{scriptAttachment:envelope.scriptAttachment}:{}) }]) };
+    const client=this.clientFactory(workspaceId);
+    const workflow:Workflow=envelope.workflow??await getWorkflow(this.store,workspaceId);
+    const release=await lockWorkspace(workspaceId,this.store.db,'generate');
+    const session: Session = {release, requestId, cancelled: false, client, started: this.store.workspaces.saveDraft(workspaceId, envelope.draftRevision,
+      { status: 'generating', activeRequestId: requestId }, [{ role: 'user', text: ws.input, createdAt: Date.now(),...(ws.codeReference?{codeReference:ws.codeReference}:{}),...(envelope.scriptAttachment?{scriptAttachment:envelope.scriptAttachment}:{}) }],undefined,release.owner) };
     this.sessions.set(workspaceId, session);
-    let started: WorkspaceRecord | undefined;
-    const workflow:Workflow=envelope.workflow??await getWorkflow(this.store,workspaceId);let requests=0,firstPassed=false,repaired=false;const reasoning:ReasoningStage[]=[];
+    let started: WorkspaceRecord | undefined;let completed=false;
+    let requests=0,firstPassed=false,repaired=false;const reasoning:ReasoningStage[]=[];
     const assertContext=async()=>{const live=await getWorkflow(this.store,workspaceId);if(live.revision!==workflow.revision)throw new DataError('REVISION_CONFLICT','目标策略已变化。');const c=await this.configuration();if(c.model!==config.model||c.baseUrl!==config.baseUrl||c.apiKey!==config.apiKey||c.timeoutMs!==config.timeoutMs||(c.thinkingEnabled!==false)!==(config.thinkingEnabled!==false)||thinkingProtocol(c)!==thinkingProtocol(config))throw new DataError('SETTINGS_CHANGED','模型配置已变化，原草稿保留。');const page=await this.capture(workflow.selectors);if(page.binding.tabId!==envelope.binding.tabId||page.binding.documentId!==envelope.binding.documentId||page.binding.url!==envelope.binding.url)throw new DataError('PAGE_CHANGED','页面已变化，原草稿保留。');if(workflow.targetFingerprint&&page.context.target?.targetContext?.candidates[0]?.fingerprint!==workflow.targetFingerprint)throw new DataError('TARGET_STALE','目标已变化，请重新点选。');};
     const assertLive = () => { if (session.cancelled || connectionClosed()) throw new DataError('CANCELLED', '生成已取消，原草稿保留。'); };
     try {
@@ -128,24 +131,25 @@ export class WorkspaceGeneration {
       const assistant={role:'assistant' as const,text:(repaired?'已修复基础问题。':'')+parsed.data.explanation,createdAt:Date.now(),...(reasoning.length?{reasoning:reasoning.filter(Boolean)}:{})};
       if(byteSize({id:workspaceId,messages:[...await this.store.workspaces.conversation(workspaceId),assistant]})>this.store.db.limits.conversationBytes){delete assistant.reasoning;Object.assign(assistant,{reasoningOmitted:true});}
       const updated = await this.store.workspaces.saveDraft(workspaceId, started.draftRevision,
-        { draft, input:'',codeReference:null,status: 'idle', activeRequestId: null }, [assistant],workflow);
-      return { workspace: updated, result: { requestId, ...parsed.data, safety: report, model: config.model, tokensUsed: tokens } };
+        { draft, input:'',codeReference:null,status: 'idle', activeRequestId: null }, [assistant],workflow,release.owner);
+      completed=true;return { workspace: updated, result: { requestId, ...parsed.data, safety: report, model: config.model, tokensUsed: tokens } };
     } catch(e){
       const live=await this.store.workspaces.get(workspaceId);
       if(started&&live?.activeRequestId===requestId&&live.draftRevision===started.draftRevision&&!session.cancelled&&!connectionClosed()){
         workflow.outcome={requestId,requests,firstPassed,repaired,state:'failed',message:e instanceof Error?e.message:'生成失败'};
-        await this.store.workspaces.saveDraft(workspaceId,started.draftRevision,{status:'interrupted',activeRequestId:null},[],workflow);
+        await this.store.workspaces.saveDraft(workspaceId,started.draftRevision,{status:'interrupted',activeRequestId:null},[],workflow,release.owner);
       }
       throw e;
     } finally {
-      try{await this.store.workspaces.endGeneration(workspaceId, requestId, 'interrupted');}finally{if (this.sessions.get(workspaceId) === session) this.sessions.delete(workspaceId);release();}
+      try{await this.store.workspaces.endGeneration(workspaceId, requestId, 'interrupted',release.owner);}finally{if (this.sessions.get(workspaceId) === session) this.sessions.delete(workspaceId);await release(session.cancelled?'cancelled':completed?'completed':'failed');}
     }
   }
   async cancel(workspaceId: string): Promise<void> {
     const session = this.sessions.get(workspaceId); if (!session) return;
     session.cancelled = true; session.client.cancel();
+    if(session.client.waitForStop)await session.client.waitForStop();
     await session.started.catch(() => undefined);
-    await this.store.workspaces.endGeneration(workspaceId, session.requestId, 'idle');
-    if (this.sessions.get(workspaceId) === session) this.sessions.delete(workspaceId);session.release();
+    await this.store.workspaces.endGeneration(workspaceId, session.requestId, 'idle',session.release.owner);
+    if (this.sessions.get(workspaceId) === session) this.sessions.delete(workspaceId);await session.release('cancelRequested');
   }
 }

@@ -37,21 +37,21 @@ export class CodePreviewService {
   if(!session||sender.id!==chrome.runtime.id||sender.frameId!==0||sender.tab?.id!==session.tabId||sender.documentId!==session.documentId)throw new DataError('PREVIEW_EXPIRED','代码浮层已失效，请重新打开。');
   const s=session.snapshot;
   if(!['reference','edit','name'].includes(m.action))throw new DataError('INVALID_MESSAGE','代码操作无效。');
-  return withWorkspaceLock(s.workspaceId,async()=>{
+  return withWorkspaceLock(s.workspaceId,async owner=>{
    const ws=await this.store.workspaces.get(s.workspaceId);const record=ws?.scriptId?await this.store.record(ws.scriptId):undefined;const baseline=ws?.draft??record?.current;
    if(!ws||!baseline||ws.status==='generating'||baseline.versionId!==s.current.versionId||await versionHash(baseline)!==await versionHash(s.current))throw new DataError('PREVIEW_STALE','当前脚本已变化，请关闭浮层后重新打开。');
    if(m.action==='reference'){
     const version=[s.current,s.saved,s.previous].find(v=>v?.versionId===m.versionId);if(!version||!Array.isArray(m.lines))throw new DataError('INVALID_REFERENCE','请选择有效代码行。');
-    const reference=await createReference(ws.id,version,s.name,m.lines);await this.store.workspaces.saveDraft(ws.id,ws.draftRevision,{codeReference:reference});s.hasReference=true;
+    const reference=await createReference(ws.id,version,s.name,m.lines);await this.store.workspaces.saveDraft(ws.id,ws.draftRevision,{codeReference:reference},[],undefined,owner);s.hasReference=true;
    }else if(m.action==='edit'){
     if(typeof m.code!=='string'||!m.code.trim())throw new DataError('INVALID_DRAFT','代码不能为空。');
     const draft={...baseline,code:m.code,versionId:crypto.randomUUID(),hash:'unverified-edit',explanation:'代码已手动修改，请重新检查并试运行。'};
-    await this.store.workspaces.saveDraft(ws.id,ws.draftRevision,{draft});s.current=draft;
+    await this.store.workspaces.saveDraft(ws.id,ws.draftRevision,{draft},[],undefined,owner);s.current=draft;
    }else{
     if(typeof m.name!=='string'||!m.name.trim()||m.name.length>100||/[\r\n\x00-\x1f]/.test(m.name))throw new DataError('INVALID_NAME','名称须为 1–100 字的单行文字。');s.name=m.name;
    }
    await this.persist(session);
    await this.notify({type:'CODE_PREVIEW_UPDATED',requestId:m.requestId,sessionId:s.sessionId,workspaceId:s.workspaceId,action:m.action,name:s.name});return structuredClone(s);
-  });
+  },this.store.db);
  }
 }

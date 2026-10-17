@@ -1,4 +1,8 @@
 import {CodePreviewService} from './services/code-preview';
+import {handleBridgeMessage, isBridgeMessage,bridgeConnection} from './services/bridge-connection';
+import {PageGrants} from './services/page-grants';
+import {ExternalDispatcher} from './services/external-dispatcher';
+import {SavedRunner} from './services/saved-runner';
 import {workflowCommand} from './services/workspace-workflow';
 import { PageAnalysis } from './services/page-analysis';
 import { exportCurrent } from './services/userscript-export';
@@ -6,15 +10,16 @@ import { verifyAutoSource } from './services/auto-origin';
 import { AutoRuntime } from './services/auto-runtime';
 import { ChromeAutoAdapter } from './services/auto-adapter';
 import { VersionService } from './services/version-service';
-import { executeTrial, validateTrial } from './services/trial-runner';
+import { executeTrial } from './services/trial-runner';
 import { WorkspaceGeneration } from './services/workspace-generation';
-import { acceptCapture, captureCurrentPage, currentSite } from './services/page-capture';
+import {AgentTransport} from './services/agent-transport';
+import { acceptCapture, captureCurrentPage, captureBoundPage,currentSite } from './services/page-capture';
 import { DataError } from './repositories/database';
 import { assertExtensionPage, handleWorkspaceCommand, isWorkspaceCommand } from './repositories/workspace-router';
 // Service Worker 入口：顶层同步注册所有监听（MV3 强制），消息按 type 路由到 handler。
 // Content Script 通过 activeTab + chrome.scripting 按需注入（不声明 content_scripts）。
 
-import type { GenerationCompleteMsg, GenerationFailedMsg, GenerationProgressMsg, InjectViaScriptTagMsg, LubanMessage, LubanResponse } from '../shared/messages';
+import type { GenerationCompleteMsg, GenerationFailedMsg, GenerationProgressMsg, LubanMessage, LubanResponse } from '../shared/messages';
 import { ErrorFactory, ErrorLayer, LubanError, makeError } from '../shared/errors';
 import { getProvider } from './ai-providers/base';
 import './ai-providers/openai-compatible';
@@ -22,19 +27,24 @@ import { AiClient } from './ai-client';
 import type { AiCaller } from './prompt-builder';
 import { generateWithFallback } from './prompt-builder';
 import { scanCode } from './safety-scanner';
-import { injectScript } from './injection-dispatcher';
-import { getScriptStore, pageMatchesScript } from './script-store';
+import { getScriptStore } from './script-store';
 import { readUiSnapshot, saveUiSnapshot } from './state-recovery';
 import { getApiKey, getSettings, toProviderConfig } from '../shared/settings-store';
 import { MIMO, PORT_NAMES } from '../shared/constants';
 import { StreamKeepAlive } from './keepalive';
-import type { GenerationResult, InjectionResult, PageContext } from '../shared/types';
+import type { GenerationResult, PageContext } from '../shared/types';
 import contentScriptPath from '../content/index.ts?script&iife';
 
 /** 记录最近一次点击图标时授予 activeTab 的标签页（存 session，随浏览器关闭清除）。 */
 const ACTIVE_TAB_KEY = 'luban:activeTabId';
 
 type Responder<T = unknown> = (r: LubanResponse<T>) => void;
+let browserSession:Promise<string>|undefined;
+function getBrowserSession():Promise<string>{return browserSession??=(async()=>{const key='luban:v3:browser-session';const existing=(await chrome.storage.session.get(key))[key];if(typeof existing==='string')return existing;const session=crypto.randomUUID();await chrome.storage.session.set({[key]:session});return session;})();}
+const pageGrants=new PageGrants(getScriptStore(),bridgeConnection,getBrowserSession,captureCurrentPage,captureBoundPage);
+bridgeConnection.setInvalidationHandler(()=>pageGrants.invalidateAll());
+chrome.tabs.onRemoved?.addListener(tabId=>{void pageGrants.invalidateTab(tabId).catch(()=>{});});
+chrome.tabs.onUpdated?.addListener((tabId,change)=>{if(change.url||change.status==='loading')void pageGrants.invalidateTab(tabId).catch(()=>{});});
 type Handler = (
   msg: LubanMessage,
   sender: chrome.runtime.MessageSender,
@@ -42,10 +52,20 @@ type Handler = (
 ) => void | Promise<void>;
 
 const workspaceGeneration = new WorkspaceGeneration(getScriptStore(), captureCurrentPage, async () => {
+  if((await chrome.storage.local.get('luban:v3:executor'))['luban:v3:executor']==='codex'){
+    if((await bridgeConnection.run('status')).status!=='connected')throw new DataError('BRIDGE_DISCONNECTED','请先在连接设置中连接 Bridge，再使用本地 Codex。');
+    return {id:'local-codex',baseUrl:'https://local.codex.invalid',apiKey:'',model:'本地 Codex',billing:'onDemand' as const,customEndpoint:true,thinkingEnabled:false,thinkingProtocol:'none' as const};
+  }
   const settings = await getSettings(); const key = await getApiKey(!!settings.customEndpoint);
   if (!key) throw ErrorFactory.keyInvalid();
   return toProviderConfig(settings, key);
-}, () => new AiClient());
+}, workspaceId => {
+  let transport:import('./services/workspace-generation').GenerationTransport;
+  return {cancel:()=>transport?.cancel(),waitForStop:async()=>{await transport?.waitForStop?.();},generate:(config,messages,options,callbacks)=>{
+    transport=config.id==='local-codex'?new AgentTransport((method,params)=>bridgeConnection.rpc(method,params),workspaceId!):new AiClient();
+    return transport.generate(config,messages,options,callbacks);
+  }};
+});
 
 const pageAnalysis = new PageAnalysis(captureCurrentPage, async()=>{
   const settings=await getSettings();const key=await getApiKey(!!settings.customEndpoint);
@@ -56,9 +76,21 @@ const pageAnalysis = new PageAnalysis(captureCurrentPage, async()=>{
 const autoRuntime = new AutoRuntime(getScriptStore(), new ChromeAutoAdapter(), verifyAutoSource);
 const codePreview=new CodePreviewService(getScriptStore(),async m=>{await chrome.runtime.sendMessage(m).catch(()=>{});});
 const versions = new VersionService(getScriptStore(), captureCurrentPage, executeTrial, autoRuntime.coordinate);
+const savedRunner=new SavedRunner(getScriptStore(),captureCurrentPage,executeTrial);
+const externalDispatcher=new ExternalDispatcher(getScriptStore(),pageGrants,(method,params)=>bridgeConnection.rpc(method,params),async(approval,command)=>{
+  const scoped=new VersionService(getScriptStore(),selectors=>pageGrants.read(approval.grantId,selectors),async(binding,version,namespace,hash,values)=>{
+    const grant=await pageGrants.require(approval.grantId,'trial.request');
+    if(grant.binding.documentId!==binding.documentId||grant.navigationEpoch!==approval.navigationEpoch||hash!==approval.codeHash)throw new DataError('APPROVAL_BINDING_CHANGED','页面或代码已变化。');
+    await bridgeConnection.rpc('tasks.check',{taskId:command.taskId,epoch:command.epoch,revision:command.revision});
+    return executeTrial(binding,version,namespace,hash,values);
+  },undefined,async()=>{await bridgeConnection.rpc('tasks.check',{taskId:command.taskId,epoch:command.epoch,revision:command.revision});});
+  return scoped.trial(approval.workspaceId,approval.draftRevision,approval.id,command.source);
+});
+bridgeConnection.setTaskHandlers(command=>externalDispatcher.handle(command),(id,epoch)=>externalDispatcher.cancel(id,epoch),()=>externalDispatcher.reconcile());
+externalDispatcher.setUpdateHandler(async(workspaceId,receipt)=>{await chrome.runtime.sendMessage({type:'V3_WORKSPACE_CHANGED',workspaceId,receipt}).catch(()=>{});});
 void autoRuntime.ready().catch(e=>console.error('[luban] auto recovery',e));
 chrome.runtime.onStartup?.addListener(()=>{void autoRuntime.retry().catch(console.error);});
-chrome.permissions?.onRemoved?.addListener(()=>{void autoRuntime.retry().catch(console.error);});
+chrome.permissions?.onRemoved?.addListener(()=>{void autoRuntime.retry().catch(console.error);void pageGrants.invalidateAll().catch(()=>{});});
 
 // ── 顶层同步注册 ────────────────────────────────────────────
 chrome.runtime.onInstalled.addListener(() => {
@@ -79,6 +111,39 @@ chrome.action.onClicked.addListener((tab) => {
 
 // 消息路由：始终返回 true 表示异步应答。
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if(msg?.type==='V3_CHANNEL_SEND'){
+    void(async()=>{try{assertExtensionPage(sender);if(sender.url!==chrome.runtime.getURL('src/sidepanel/index.html')||!['preview','confirm','cancelPreview'].includes(msg.method))throw new DataError('FORBIDDEN_SOURCE','只能从鲁班结果区预览并确认发送。');sendResponse({ok:true,data:await bridgeConnection.rpc('channel.'+msg.method,msg.params??{})});}catch(e){sendResponse({ok:false,error:e instanceof Error?e.message:'飞书发送失败。'});}})();return true;
+  }
+  if(msg?.type==='V3_EXTERNAL_APPROVAL'||msg?.type==='V3_BRIDGE_ADMIN'){
+    void(async()=>{try{assertExtensionPage(sender);let data;
+      if(msg.type==='V3_EXTERNAL_APPROVAL'){
+        if(msg.action==='list')data={approvals:await externalDispatcher.list(),conflicts:await externalDispatcher.conflicts()};
+        else if(['approve','reject','review'].includes(msg.action)&&typeof msg.id==='string'){await externalDispatcher.decide(msg.id,msg.action);data={approvals:await externalDispatcher.list(),conflicts:await externalDispatcher.conflicts()};}
+        else throw new DataError('INVALID_MESSAGE','确认操作无效。');
+      }else{
+        if(sender.url!==chrome.runtime.getURL('src/options/index.html'))throw new DataError('FORBIDDEN_SOURCE','请从连接设置发起。');
+        if(msg.action==='channel'&&['status','connect','disconnect','bind','preview','confirm','cancelPreview','retry'].includes(msg.method))data=await bridgeConnection.rpc('channel.'+msg.method,msg.params??{});
+        else if(msg.action==='agentStatus')data=await bridgeConnection.rpc('agent.status');
+        else if(msg.action==='enroll'&&typeof msg.name==='string')data=await bridgeConnection.rpc('clients.enroll',{name:msg.name});
+        else if(msg.action==='clients')data=await bridgeConnection.rpc('clients.list');
+        else if(msg.action==='revokeClient'&&typeof msg.clientId==='string')data=await bridgeConnection.rpc('clients.revoke',{clientId:msg.clientId});
+        else if(msg.action==='maintenance')data=await bridgeConnection.rpc('maintenance.run');
+        else if(msg.action==='diagnostics')data=await bridgeConnection.rpc('diagnostics.export');
+        else if(msg.action==='bridgeTasks')data=await bridgeConnection.rpc('tasks.list');
+        else if(msg.action==='reviewBridgeTask'&&typeof msg.taskId==='string'&&msg.reviewed===true){await bridgeConnection.rpc('tasks.review',{taskId:msg.taskId});data=await bridgeConnection.rpc('tasks.list');}
+        else throw new DataError('INVALID_MESSAGE','管理操作无效。');
+      }sendResponse({ok:true,data});
+    }catch(e){sendResponse({ok:false,error:e instanceof Error?e.message:'操作失败。'});}})();return true;
+  }
+  if(msg?.type==='V3_PAGE_GRANT'){
+    void(async()=>{try{assertExtensionPage(sender);if(msg.action==='grant'&&sender.url!==chrome.runtime.getURL('src/sidepanel/index.html'))throw new DataError('FORBIDDEN_SOURCE','请从网页侧栏明确授权。');let grants;
+      if(msg.action==='list')grants=await pageGrants.list();
+      else if(msg.action==='grant'&&Number.isInteger(msg.tabId)&&typeof msg.url==='string'&&(msg.allowDrafts===undefined||typeof msg.allowDrafts==='boolean'))grants=await pageGrants.create(msg.tabId,msg.url,msg.allowDrafts===true,typeof msg.workspaceId==='string'?msg.workspaceId:undefined);
+      else if(msg.action==='revoke'&&(msg.id===undefined||typeof msg.id==='string'))grants=await pageGrants.revoke(msg.id);
+      else throw new DataError('INVALID_MESSAGE','页面授权操作无效。');sendResponse({ok:true,data:{grants}});
+    }catch(e){sendResponse({ok:false,error:e instanceof Error?e.message:'页面授权失败。'});}})();return true;
+  }
+  if (isBridgeMessage(msg)) { void handleBridgeMessage(msg, sender).then(sendResponse); return true; }
   void route(msg as LubanMessage, sender, sendResponse as Responder);
   return true;
 });
@@ -135,7 +200,7 @@ async function route(msg: LubanMessage, sender: chrome.runtime.MessageSender, re
       assertExtensionPage(sender);
       if (typeof msg.workspaceId !== 'string' || !Number.isInteger(msg.expectedDraftRevision)) throw new DataError('INVALID_MESSAGE', '工作区参数无效。');
       if(msg.type==='COMMIT_DRAFT'&&msg.effectAcknowledged!==true)throw new DataError('EFFECT_CONFIRM_REQUIRED','请点击效果符合保存。');
-      const data = msg.type === 'TRIAL_DRAFT' ? await versions.trial(msg.workspaceId, msg.expectedDraftRevision)
+      const data = msg.type === 'TRIAL_DRAFT' ? await versions.trial(msg.workspaceId, msg.expectedDraftRevision,msg.requestId)
         : msg.type === 'COMMIT_DRAFT' ? await versions.commit(msg.workspaceId, msg.expectedDraftRevision, msg.receiptId, msg.name, msg.opId,msg.effectAcknowledged)
         : await versions.restore(msg.workspaceId, msg.expectedDraftRevision, msg.expectedRevision, msg.discardDraft, msg.opId);
       respond({ok:true,data});
@@ -167,7 +232,7 @@ async function route(msg: LubanMessage, sender: chrome.runtime.MessageSender, re
     return;
   }
   try {
-    if (['SAVE_SCRIPT', 'DELETE_SCRIPT', 'LIST_SCRIPTS', 'RUN_SAVED_SCRIPT'].includes(msg.type)) assertExtensionPage(sender);
+    if (!['ELEMENT_PICKED','PICK_CANCELLED','FOCUS_PANEL'].includes(msg.type)) assertExtensionPage(sender);
     await handler(msg, sender, respond);
   } catch (e) {
     respond(errorResponse(toLubanError(e)));
@@ -297,27 +362,9 @@ async function handleSaveScript(msg: LubanMessage, _sender: chrome.runtime.Messa
 }
 
 async function handleRunSavedScript(msg: LubanMessage, _sender: chrome.runtime.MessageSender, respond: Responder): Promise<void> {
-  if (msg.type !== 'RUN_SAVED_SCRIPT') return;
-  const script = await getScriptStore().get(msg.scriptId);
-  if (!script) {
-    throw makeError(ErrorLayer.RUNTIME, 'SCRIPT_MISSING', '脚本不存在或已被删除。', [{ type: 'DISMISS' }]);
-  }
-  const record=await getScriptStore().record(msg.scriptId);
-  if(record?.host){
-    const page=await captureCurrentPage();if(page.binding.host!==record.host)throw new DataError('WRONG_PAGE','请先打开工具适用网站。');
-    validateTrial(record.current);const started=Date.now();const result=await executeTrial(page.binding,record.current,record.id,record.current.hash,await getScriptStore().readGm(record.id));
-    await getScriptStore().workspaces.writeGm(record.id,result.changes);
-    respond({ok:true,data:{ok:result.ok&&!result.timedOut,method:1,timingMs:Date.now()-started,scriptError:result.error}});return;
-  }
-  const tabId = await resolveActiveTabId();
-  const tab = await chrome.tabs.get(tabId).catch((e: unknown) => {
-    throw toActiveTabError(e);
-  });
-  if (!tab.url || !pageMatchesScript(tab.url, script.matches)) {
-    throw makeError(ErrorLayer.RUNTIME, 'WRONG_PAGE', '请先打开目标页面', [{ type: 'DISMISS' }]);
-  }
-  const result = await runInjected(msg.requestId, script.code, script.gmGrants, script.id, {});
-  respond({ ok: true, data: result });
+  if(msg.type!=='RUN_SAVED_SCRIPT')return;
+  const started=Date.now(),result=await savedRunner.run(msg.scriptId,msg.requestId);
+  respond({ok:true,data:{ok:result.ok&&!result.timedOut,method:1,timingMs:Date.now()-started,scriptError:result.error}});
 }
 
 async function handleListScripts(_msg: LubanMessage, _sender: chrome.runtime.MessageSender, respond: Responder): Promise<void> {
@@ -349,46 +396,7 @@ function handleFocusPanel(_msg: LubanMessage, sender: chrome.runtime.MessageSend
   respond({ ok: true, data: undefined });
 }
 
-async function runInjected(
-  requestId: string,
-  code: string,
-  gmGrants: string[],
-  scriptId: string | undefined,
-  storageSnapshot: Record<string, unknown>,
-): Promise<InjectionResult> {
-  const tabId = await resolveActiveTabId();
-  let domain = 'unknown';
-  try {
-    const tab = await chrome.tabs.get(tabId);
-    if (tab.url) domain = new URL(tab.url).hostname;
-  } catch (e) {
-    throw toActiveTabError(e);
-  }
-  const snapshot = scriptId ? await getScriptStore().readGm(scriptId) : storageSnapshot;
-  const result = await injectScript(tabId, domain, code, gmGrants, snapshot, async (tid, method, injectedCode, grants, snap) => {
-    await ensureContentInjected(tid);
-    const injectMsg: InjectViaScriptTagMsg = {
-      type: 'INJECT_VIA_SCRIPT_TAG',
-      requestId,
-      code: injectedCode,
-      method,
-      gmGrants: grants,
-      storageSnapshot: snap,
-    };
-    const res = (await chrome.tabs.sendMessage(tid, injectMsg)) as LubanResponse<{
-      ok: boolean;
-      timedOut: boolean;
-      dirty: Record<string, unknown>;
-      scriptError?: string;
-    }>;
-    if (!res.ok) throw new Error(res.error.message);
-    return res.data;
-  });
-  if (scriptId && result.dirty && Object.keys(result.dirty).length > 0) {
-    await getScriptStore().writeGm(scriptId, result.dirty);
-  }
-  return result;
-}
+
 
 
 // ── handlers ────────────────────────────────────────────────

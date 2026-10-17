@@ -1,3 +1,5 @@
+import {ExternalApprovals} from '../shared/ExternalApprovals';
+import {SendToFeishu} from '../shared/SendToFeishu';
 import brandLogo from '../assets/logo.svg';
 import type {ScriptAttachment} from '../shared/script-attachment';
 import {scriptFilename} from '../shared/script-attachment';
@@ -20,7 +22,7 @@ import type { InjectionResult } from '../shared/types';
 import { hostPermissionOrigins } from '../shared/host-policy';
 import type { RuntimeStatus } from '../shared/p4-types';
 import type { TrialReceipt, TrialResult } from '../shared/p3-types';
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { sendToSW } from './comms';
 import { makeRequestId } from '../shared/messages';
 import type { LubanMessage } from '../shared/messages';
@@ -28,6 +30,7 @@ import { GM_P0_GRANTS, PORT_NAMES,STORAGE_KEYS } from '../shared/constants';
 import type { ScriptMeta, TargetElement } from '../shared/types';
 import type { ConversationMessage, DraftPatch, ScriptRecord, WorkspaceRecord } from '../shared/v2-types';
 import type { GenerationEnvelope } from '../shared/p2-types';
+import type {PageGrantsReply} from '../shared/bridge-types';
 import { DraftBuffer } from '../service-worker/repositories/draft-buffer';
 
 interface Site { tabId: number; host: string; url: string; title: string; }
@@ -47,6 +50,10 @@ export default function App({initialView='home',embedded=false}:{initialView?:'h
   const [artifactOpen,setArtifactOpen]=useState(false);
   const [contextOpen,setContextOpen]=useState(false);
   const [settingsOpen,setSettingsOpen]=useState(false);
+  const [pageGrantMessage,setPageGrantMessage]=useState('');
+  const [grantBusy,setGrantBusy]=useState(false);
+  const [allowExternalDrafts,setAllowExternalDrafts]=useState(false);
+  async function grantCurrentPage(){if(!site)return;setGrantBusy(true);try{const target=allowExternalDrafts?await ensureWorkspace():undefined;const result=await chrome.runtime.sendMessage({type:'V3_PAGE_GRANT',action:'grant',tabId:site.tabId,url:site.url,allowDrafts:allowExternalDrafts,...(target?{workspaceId:target.id}:{})}) as PageGrantsReply;if(!result.ok)throw Error(result.error);setPageGrantMessage(allowExternalDrafts?'已允许读取摘要、提交候选和申请试运行；执行仍需逐次确认。':'已授权本机集成读取此文档摘要。导航、断连或重启后需要重新授权。');}catch(e){setPageGrantMessage(e instanceof Error?e.message:'页面授权失败。');}finally{setGrantBusy(false);}}
   const [reference,setReference]=useState<CodeReference|null>(null);
   const [queuedText,setQueuedText]=useState('');
   const queued=useRef('');
@@ -84,6 +91,8 @@ export default function App({initialView='home',embedded=false}:{initialView?:'h
   const [notice, setNotice] = useState('');
   const [online, setOnline] = useState(navigator.onLine);
   const [envelope, setEnvelope] = useState<GenerationEnvelope|null>(null);
+  const [executor,setExecutor]=useState('provider');
+  useEffect(()=>{void chrome.storage.local.get('luban:v3:executor').then(value=>setExecutor(value['luban:v3:executor']==='codex'?'codex':'provider'));},[]);
   const [autoDiagnostics,setAutoDiagnostics]=useState('');
   const [exportArtifact,setExportArtifact]=useState<ExportArtifact|null>(null);
   const [runtimeIssues,setRuntimeIssues]=useState<RuntimeStatus[]>([]);
@@ -126,6 +135,14 @@ export default function App({initialView='home',embedded=false}:{initialView?:'h
       if(wsRef.current?.id===saved.id){wsRef.current=saved;setWorkspace(saved);}return saved;
     },fail);
   }
+  useEffect(()=>{
+    const listener=(message:{type?:string;workspaceId?:string;receipt?:TrialReceipt},sender:chrome.runtime.MessageSender)=>{
+      if(message.type!=='V3_WORKSPACE_CHANGED'||typeof message.workspaceId!=='string'||sender.id!==chrome.runtime.id||sender.tab||message.workspaceId!==wsRef.current?.id)return;
+      if(buffer.current?.hasPendingChanges||busy.current){setNotice('外部任务更新了工作区；当前未提交输入仍保留，请先处理版本冲突。');return;}
+      void loadWorkspace(message.workspaceId).then(()=>{if(message.receipt&&wsRef.current?.id===message.workspaceId)setReceipt(message.receipt);setNotice(message.receipt?'外部试运行已完成，请检查页面效果后保存。':'收到外部候选，请检查代码并确认试运行。');}).catch(fail);
+    };
+    chrome.runtime.onMessage.addListener(listener);return()=>chrome.runtime.onMessage.removeListener(listener);
+  },[]);
   async function loadWorkspace(id: string, epoch=selected.current) {
     const opened = await call<Opened>({type:'GET_WORKSPACE',requestId:rid(),workspaceId:id});
     if(epoch!==selected.current)return;
@@ -232,6 +249,7 @@ export default function App({initialView='home',embedded=false}:{initialView?:'h
   }
   async function cancel() {
     if(!wsRef.current)return;
+    setNotice('已请求停止，正在等待执行方确认…');
     try{await call({type:'CANCEL_WORKSPACE_GENERATION',requestId:rid(),workspaceId:wsRef.current.id});activeGeneration.current='';port.current?.disconnect();port.current=null;
       try{await loadWorkspace(wsRef.current.id);}finally{if(queued.current){const text=queued.current;queued.current='';setQueuedText('');inputChanged(text);}busy.current=false;setGenerating(false);setStream('');}setNotice('生成已取消，需求和原草稿已保留。');
     }catch(e){fail(e);}
@@ -279,7 +297,11 @@ export default function App({initialView='home',embedded=false}:{initialView?:'h
     };
     chrome.runtime.onMessage.addListener(onMessage);return()=>chrome.runtime.onMessage.removeListener(onMessage);
   },[site?.tabId]);
-  useEffect(()=>{const escape=(e:KeyboardEvent)=>{if(e.key==='Escape'&&picking)void clearPick();};window.addEventListener('keydown',escape);return()=>window.removeEventListener('keydown',escape);},[picking]);
+  useLayoutEffect(()=>{const escape=(e:KeyboardEvent)=>{
+    if(e.key!=='Escape'||e.isComposing||e.defaultPrevented)return;
+    if(picking){e.preventDefault();void clearPick();}
+    else if(pagePreview.current){e.preventDefault();void closePagePreview().then(()=>document.querySelector<HTMLButtonElement>('.chat-artifact-name')?.focus()).catch(fail);}
+  };window.addEventListener('keydown',escape);return()=>window.removeEventListener('keydown',escape);});
   useEffect(()=>{if(leaving&&!dialogRef.current?.open)dialogRef.current?.showModal();else if(!leaving&&dialogRef.current?.open)dialogRef.current.close();},[leaving]);
 
   async function versionAction(action: 'trial'|'save'|'restore'|'rename') {
@@ -372,7 +394,7 @@ export default function App({initialView='home',embedded=false}:{initialView?:'h
 
       if(m.type!=='CODE_PREVIEW_UPDATED'||sender.id!==chrome.runtime.id||sender.tab||m.sessionId!==pagePreview.current?.sessionId||m.workspaceId!==wsRef.current?.id)return;
       void (async()=>{setPreviewBusy(true);try{
-        if(m.action==='close'||m.action==='more'){pagePreview.current=null;const text=pagePreviewInput.current;pagePreviewInput.current=null;if(text!==null)inputChanged(text);if(m.action==='more')setArtifactOpen(true);if(previewFocusChat.current){previewFocusChat.current=false;setTimeout(()=>document.querySelector<HTMLTextAreaElement>('#intent')?.focus(),0);}}
+        if(m.action==='close'||m.action==='more'){pagePreview.current=null;const text=pagePreviewInput.current;pagePreviewInput.current=null;if(text!==null)inputChanged(text);if(m.action==='more')setArtifactOpen(true);if(previewFocusChat.current){previewFocusChat.current=false;setTimeout(()=>document.querySelector<HTMLTextAreaElement>('#intent')?.focus(),0);}else if(m.action==='close'){setTimeout(()=>document.querySelector<HTMLButtonElement>('.chat-artifact-name')?.focus(),0);}}
         else if(m.action==='name')setName(m.name);
         else{const oldReceipt=receipt;await loadWorkspace(m.workspaceId);setName(name);if(pagePreviewInput.current!==null)setInput(pagePreviewInput.current);if(m.action==='reference'){setReceipt(oldReceipt);previewFocusChat.current=true;}else{setReceipt(null);setNotice('代码已修改为未验证草稿，请重新检查并试运行。');}}
         respond({ok:true});
@@ -424,14 +446,16 @@ export default function App({initialView='home',embedded=false}:{initialView?:'h
     </div>
     {showLatest?<button class="chat-latest" onClick={latest}>↓ 回到最新</button>:null}
     {effective?<section class="chat-artifact"><button class="chat-artifact-name" title="查看脚本制品" onClick={()=>void openCode()} disabled={!editable}><b>JS</b><span><strong>{scriptFilename(record?.name??'当前草稿')}</strong><small>{workspace?.draft?receipt?'已运行 · 待确认效果':workflow.quality?.passed?'已检查 · 待运行':'草稿 · 未验证':'保存版'} · 随消息发送 · 查看代码</small></span></button><button class={!receipt?'p2-primary':''} disabled={!editable||mismatch||!workspace?.draft||quality?.passed===false} onClick={()=>void versionAction('trial')}>运行</button><button class={receipt?'p2-primary':''} disabled={!editable||!receipt||!name.trim()} onClick={()=>void versionAction('save')}>{receipt?'效果符合，保存':'保存'}</button></section>:null}
+    {receipt&&<SendToFeishu summary={`鲁班试运行已完成，请核对页面效果。草稿版本：${receipt.draftRevision}；回执：${receipt.id}。工具尚需明确保存。`}/>}
     <footer class="chat-composer">
 
       {reference?<div class="chat-reference"><details><summary>{reference.name} · 版本 {reference.versionId.slice(0,8)} · {lineLabel(reference.lines)}{reference.versionId!==effective?.versionId?' · 历史快照':''}</summary><pre>{reference.text}</pre></details><button aria-label="移除代码引用" disabled={generating} onClick={removeReference}>×</button></div>:null}
-      <div class="chat-context"><label class="chat-thinking"><input type="checkbox" aria-label="推理模式" checked={thinkingEnabled} disabled={!editable} onChange={e=>void toggleThinking(e.currentTarget.checked)}/>推理</label><button onClick={()=>setContextOpen(!contextOpen)}>{workflow.scope==='page'?'◌ 当前页面':workflow.scope==='module'?'◎ 完整模块':'◎ 已点选元素'} ⌄</button>{target?<button aria-label="清除点选" disabled={!editable} onClick={()=>void clearPick()}>×</button>:null}<button onClick={()=>void prepare(repairAllowed,false)} disabled={!editable||!input.trim()||!online}>发送范围</button></div>
+      <label>执行方 <select aria-label="执行方" value={executor} disabled={!editable} onChange={e=>{const value=e.currentTarget.value;void chrome.storage.local.set({'luban:v3:executor':value}).then(()=>{setExecutor(value);setEnvelope(null);setNotice(value==='codex'?'本地 Codex 将以最新草稿及有限历史新建专用会话；不接管其他聊天，调用计费以 Codex 账号为准。':'已切回第三方模型，最新草稿保留。');}).catch(fail);}}><option value="provider">第三方模型</option><option value="codex">本地 Codex</option></select></label>
+      <div class="chat-context"><label class="chat-thinking"><input type="checkbox" aria-label="推理模式" checked={thinkingEnabled} disabled={!editable||executor==='codex'} onChange={e=>void toggleThinking(e.currentTarget.checked)}/>推理</label><button onClick={()=>setContextOpen(!contextOpen)}>{workflow.scope==='page'?'◌ 当前页面':workflow.scope==='module'?'◎ 完整模块':'◎ 已点选元素'} ⌄</button>{target?<button aria-label="清除点选" disabled={!editable} onClick={()=>void clearPick()}>×</button>:null}<button onClick={()=>void prepare(repairAllowed,false)} disabled={!editable||!input.trim()||!online}>发送范围</button></div>
       {contextOpen?<div class="chat-context-details"><TargetCard workflow={workflow} candidates={target?.targetContext?.candidates??[]} busy={!editable} onSelect={(c,scope)=>void selectTarget(c,scope)} onPreview={()=>void previewTarget()} onConfirm={()=>{void changeWorkflow({confirmStrategy:true}).catch(fail);}} onTrigger={trigger=>{void changeWorkflow({trigger}).catch(fail);}} onEffect={expectedEffect=>{void changeWorkflow({expectedEffect}).catch(fail);}}/><label>保留范围<textarea aria-label="保留范围" value={constraints} disabled={!editable} onInput={e=>{setConstraints(e.currentTarget.value);setEnvelope(null);setReceipt(null);}}/></label></div>:null}
       <div class="chat-input-shell"><textarea id="intent" aria-label="发送需求或继续反馈" rows={2} value={generating||analysing?queuedText:input} disabled={preparing||versionBusy} onInput={e=>chatInput(e.currentTarget.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&e.keyCode!==229){e.preventDefault();void sendChat();}}} placeholder="描述想法，或继续说哪里还不理想…"/><div><button onClick={()=>void pick()} disabled={!editable||!site}>⌖ 点选元素</button><small>{generating?'可输入下一条需求':'继续说，就能继续改'}</small><button class="chat-send" aria-label={generating||analysing?'停止生成':'发送'} disabled={!(generating||analysing)&&(!editable||!online||!input.trim()||mismatch||!site)} onClick={()=>void sendChat()}>{generating||analysing?'■':'↑'}</button></div></div><p>发送需求与有限摘要 · {thinkingEnabled?'推理已开启':'推理已关闭'} · {repairAllowed?'允许修复 1 次':'不追加自动修复'}</p>
     </footer></>}
-    {settingsOpen?<section class="chat-settings"><strong>设置与快捷操作</strong><button aria-label="关闭快捷设置" onClick={()=>setSettingsOpen(false)}>×</button><label><input type="checkbox" checked={repairAllowed} disabled={!editable} onChange={e=>{setRepairAllowed(e.currentTarget.checked);setEnvelope(null);}}/>允许基础检查失败时修复一次</label><button onClick={()=>void chrome.runtime.openOptionsPage()}>打开模型与隐私设置</button><button disabled={!editable} onClick={()=>void refreshSite()}>刷新当前页面状态</button></section>:null}
+    {settingsOpen?<section class="chat-settings"><strong>设置与快捷操作</strong><button aria-label="关闭快捷设置" onClick={()=>setSettingsOpen(false)}>×</button><label><input type="checkbox" checked={repairAllowed} disabled={!editable} onChange={e=>{setRepairAllowed(e.currentTarget.checked);setEnvelope(null);}}/>允许基础检查失败时修复一次</label><button onClick={()=>void chrome.runtime.openOptionsPage()}>打开模型与连接设置</button><button disabled={!editable} onClick={()=>void refreshSite()}>刷新当前页面状态</button><label><input type="checkbox" checked={allowExternalDrafts} onChange={e=>setAllowExternalDrafts(e.currentTarget.checked)}/>允许读取此工具基线、提交候选和申请试运行（执行仍需确认）</label><button disabled={!site||grantBusy||!editable} onClick={()=>void grantCurrentPage()}>授权本机集成访问此页</button>{allowExternalDrafts&&workspace&&<p>外部请求目标：工作区 <code>{workspace.id}</code> · 草稿版本 {workspace.draftRevision}</p>}<ExternalApprovals/>{pageGrantMessage&&<p role="status">{pageGrantMessage}</p>}</section>:null}
     <CodeArtifactDialog open={artifactOpen} onClose={()=>setArtifactOpen(false)} current={effective??null} saved={record?.current} previous={record?.previous} name={name} onName={setName} onEdit={keepCode} onReference={addCodeReference} busy={!editable} hasReference={!!reference}>{artifactTools}</CodeArtifactDialog>
     {exportArtifact?<ExportDialog artifact={exportArtifact} onClose={()=>setExportArtifact(null)} onDownloaded={()=>{setExportArtifact(null);setNotice('已发起保存版下载，请在目标管理器验证效果。');}}/>:null}
     <dialog class="p2-dialog" ref={dialogRef} onCancel={()=>setLeaving(null)}><h2>保留这次修改？</h2><p>需求或草稿尚未成为新的保存版本。</p><div class="p2-row"><button autoFocus onClick={()=>setLeaving(null)}>继续编辑</button><button onClick={()=>void decideLeave(true)}>放弃修改并离开</button><button class="p2-primary" onClick={()=>void decideLeave()}>保留草稿并离开</button></div></dialog>
