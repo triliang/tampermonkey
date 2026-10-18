@@ -121,7 +121,7 @@ chrome.runtime.onInstalled.addListener(() => {
 void initializeTabPanels().catch(e=>console.error('[luban] panel initialization',e));
 chrome.tabs.onCreated?.addListener(tab=>{if(typeof tab.id==='number')void configureTabPanel(tab.id).catch(e=>console.error('[luban] configure tab panel',e));});
 chrome.tabs.onReplaced?.addListener((added,removed)=>{forgetTabPanel(removed);void configureTabPanel(added).catch(e=>console.error('[luban] configure replacement panel',e));});
-// Chrome handles toolbar clicks natively; extension callbacks must not recreate the user gesture.
+// Toolbar popup provides activeTab and calls open directly from its button gesture.
 
 // 消息路由：始终返回 true 表示异步应答。
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {

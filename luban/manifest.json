@@ -31,7 +31,8 @@
       "32": "src/assets/icon32.png",
       "48": "src/assets/icon48.png",
       "128": "src/assets/icon128.png"
-    }
+    },
+    "default_popup": "src/launcher/index.html"
   },
   "icons": {
     "16": "src/assets/icon16.png",
@@ -43,6 +44,8 @@
     "http://*/*",
     "https://*/*"
   ],
-  "optional_permissions": ["nativeMessaging"],
+  "optional_permissions": [
+    "nativeMessaging"
+  ],
   "minimum_chrome_version": "138"
 }

@@ -87,3 +87,13 @@ it('固定tab侧栏忽略其他标签激活/导航，输入与执行方只写入
  await act(async()=>harness.navigateTab(1));await vi.waitFor(()=>expect(harness.siteReads).toBe(reads+1));
  }finally{render(null,root);root.remove();await harness.close();vi.unstubAllGlobals();window.history.replaceState(null,'',previous);}
 });
+
+it('工具栏临时授权后回到侧栏恢复发送，保留输入且不自动调用模型',async()=>{
+ const previous=window.location.href;window.history.replaceState(null,'','?tabId=1');vi.stubGlobal('indexedDB',new IDBFactory());const harness=await installHarness();const root=document.createElement('div');document.body.append(root);
+ const original=chrome.runtime.sendMessage;let granted=false;
+ chrome.runtime.sendMessage=vi.fn(async(message)=>message.type==='GET_CURRENT_SITE'&&!granted?{ok:false,error:{message:'网页未授权',code:'ACTIVE_TAB_EXPIRED',layer:'capture',actions:[]}}:original(message)) as typeof original;
+ try{await act(async()=>render(h(App,{initialView:'home',embedded:false}),root));await vi.waitFor(()=>expect(root.textContent).toContain('当前网页尚不可访问'));
+ await act(async()=>{const area=root.querySelector<HTMLTextAreaElement>('#intent')!;area.value='继续保留未发送内容';area.dispatchEvent(new Event('input',{bubbles:true}));});expect(root.querySelector<HTMLButtonElement>('button[aria-label="发送"]')!.disabled).toBe(true);
+ await act(async()=>{granted=true;window.dispatchEvent(new Event('focus'));});await vi.waitFor(()=>expect(root.querySelector<HTMLButtonElement>('button[aria-label="发送"]')!.disabled).toBe(false));expect(root.querySelector<HTMLTextAreaElement>('#intent')!.value).toBe('继续保留未发送内容');expect(harness.sent).toHaveLength(0);
+ }finally{await act(async()=>render(null,root));root.remove();await harness.close();vi.unstubAllGlobals();window.history.replaceState(null,'',previous);}
+});

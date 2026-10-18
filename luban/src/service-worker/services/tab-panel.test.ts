@@ -4,7 +4,7 @@ import {panelTabId,executorKey} from '../../shared/panel-tab';
 afterEach(()=>{for(const id of [11,22,33,44])forgetTabPanel(id);vi.unstubAllGlobals();});
 it('default disabled, only clicked tab is enabled and opened; failed configuration never opens a global panel',async()=>{
  const setOptions=vi.fn(async()=>{}),open=vi.fn(async()=>{}),setPanelBehavior=vi.fn(async()=>{});vi.stubGlobal('chrome',{sidePanel:{setOptions,open,setPanelBehavior},tabs:{query:vi.fn(async()=>[{id:11},{id:22}])}});
- await initializeTabPanels();expect(setOptions).toHaveBeenCalledWith({enabled:false});expect(setPanelBehavior).toHaveBeenCalledWith({openPanelOnActionClick:true});expect(open).not.toHaveBeenCalled();
+ await initializeTabPanels();expect(setOptions).toHaveBeenCalledWith({enabled:false});expect(setPanelBehavior).toHaveBeenCalledWith({openPanelOnActionClick:false});expect(open).not.toHaveBeenCalled();
  await openTabPanel(11);await openTabPanel(22);expect(open.mock.calls).toEqual([[{tabId:11}],[{tabId:22}]]);expect(setOptions).toHaveBeenCalledWith({tabId:11,path:'src/sidepanel/index.html?tabId=11',enabled:true});
  setOptions.mockRejectedValueOnce(Error('blocked'));await expect(configureTabPanel(33)).rejects.toThrow('blocked');expect(open).toHaveBeenCalledTimes(2);
 });

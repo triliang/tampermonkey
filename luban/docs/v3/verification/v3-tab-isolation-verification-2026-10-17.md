@@ -4,14 +4,14 @@
 
 ## 行为
 
-- 为标签页提前配置独立侧栏路径，点击鲁班图标时由Chrome原生行为打开当前tab的侧栏；全局默认侧栏关闭。切到未打开鲁班的标签不会跟随展示，已分别打开的标签拥有各自实例。
+- 为标签页提前配置独立侧栏路径，点击鲁班图标显示启动小窗口，再点“在当前页打开鲁班”打开当前tab侧栏；全局默认侧栏关闭。切到未打开鲁班的标签不会跟随展示，已分别打开的标签拥有各自实例。
 - 每个实例的URL绑定tabId。页面摘要、点选、分析、生成前后检查、代码预览、保存版运行与试运行都从该固定tab解析；原tab关闭或失去权限时失败，不回退到另一个活动tab。
 - 同一网站、同一个保存工具在两个tab下拥有独立工作区、草稿和对话，执行方选择按tab存入session。后台校验workspace所属tab，跨tab读写/取消/运行会被拒绝；外部确认卡只列出当前tab，不能从A批准B的任务。
 - 其他标签的激活、导航和取消点选广播不再刷新或取消当前实例。自身页面导航仍使旧引用/试运行回执失效。
 - 历史未绑定草稿不删除：明确打开时原子归属到第一个打开它的tab；关闭tab后释放归属但保留内容；新浏览器会话可明确重新打开历史工作区。并发打开由事务阻止两tab占用同一草稿。
 - 已保存工具库及全局模型设置仍共享；明确开启的保存工具自动运行保留原先匹配网站的规则。本次修复隔离会话、草稿和手动页面操作，不将工具库改成每tab副本。
 
-Chrome的窗口级open会打开全局侧栏；仅改为open(tabId)也不足以隔离尚未配置独立侧栏的tab。因此同时使用全局disabled、setOptions(tabId,path)和Chrome原生openPanelOnActionClick行为。依据：[Chrome sidePanel官方文档](https://developer.chrome.com/docs/extensions/reference/api/sidePanel)。
+Chrome的窗口级open会打开全局侧栏；仅改为open(tabId)也不足以隔离尚未配置独立侧栏的tab。当前使用全局disabled、setOptions(tabId,path)和启动小窗口的显式按钮手势；原生toggle关闭，以恢复普通action的activeTab授予流程。依据：[Chrome sidePanel官方文档](https://developer.chrome.com/docs/extensions/reference/api/sidePanel)。
 
 ## 自动验收
 
@@ -43,3 +43,27 @@ Chrome的窗口级open会打开全局侧栏；仅改为open(tabId)也不足以�
 用户再次重载后，在正式扩展上完成同域A/B界面验收：A点击图标正常打开，URL绑定A的tabId；切B侧栏隐藏；B独立打开后输入为空，URL绑定B的tabId；分别输入LUBAN_TAB_A_ONLY和LUBAN_TAB_B_ONLY，往返后各自保留，清空A不影响B。以上均真实通过。
 
 本轮界面仍提示网页未授权，故页面读取/修改、点选、模型生成及执行方切换未计真实通过；固定tab采集和跨tab工作区拒绝已有自动回归覆盖。未发送模型请求、飞书消息或新增权限。测试输入已清空，A/B测试标签已关闭，本机静态服务已停止。截图a-restored-proof.png、b-restored-proof.png、b-hidden-proof.png保留在本机忽略目录。
+
+## 2026-10-18 网页授权回归修复
+
+用户反馈输入后发送按钮禁用。确认原生侧栏打开不会授予activeTab（Chromium ExtensionActionRunner::RunAction在原生toggle分支提前返回），上一轮侧栏显示验收未覆盖网页访问，是此回归漏检。保留原生tab侧栏，在页面不可读时提供“授权当前网站”和“重新检查页面”入口；通过Chrome133+ permissions.addHostAccessRequest({tabId})由浏览器解析当前tab站点，用户确认后授予该站点的持久访问，界面明确说明可撤销且不启用自动运行。未请求所有网站权限，未更改manifest。监听权限新增/撤销以重新检查固定tab，保留未发送输入，不自动发模型请求。
+
+390项测试、类型检查、lint和生产构建通过；新增UI回归覆盖未授权禁用、仅指定tab发起请求、请求本身不视为授权、授权后恢复发送且保留输入、撤权禁用及监听清理。真实Chrome授权提示待用户重载后验收，不计通过。
+
+参考：[Chromium action权限分支](https://github.com/chromium/chromium/blob/main/chrome/browser/extensions/extension_action_runner.cc)、[Chrome permissions API](https://developer.chrome.com/docs/extensions/reference/api/permissions#method-addHostAccessRequest)。
+
+## 2026-10-18 访问请求入口澄清
+
+用户反馈授权点击后没有弹窗。真实Chrome可见：侧栏已显示请求发起消息；工具栏“扩展程序”菜单内存在“Access requested”，其说明为点击扩展以授予当前网站访问，下面列出“鲁班 Luban”。API成功仅代表登记请求，不代表弹出对话框或已授权。此前把地址栏提示描述为确认弹窗不准确。
+
+界面现改为就地显示拼图菜单→请求访问→鲁班的具体路径，并将按钮改为“重新发起访问请求”；窗口重新聚焦和本tab重新激活会复查固定tab的页面状态，支持没有permissions.onAdded事件的临时activeTab授权。390项回归、类型/lint/构建通过。已验证Chrome菜单有请求入口，尚未代用户点击网站授权，也未将真正恢复发送计为真实通过。
+
+## 2026-10-18 临时授权启动入口（当前实现）
+
+用户完成菜单步骤后仍未恢复，addHostAccessRequest方案不计可用闭环，已移除。当前action.default_popup为src/launcher/index.html，openPanelOnActionClick=false。Chrome普通action授予activeTab；小窗口仅查询一次活动tab并绑定，setOptions成功后启用“在当前页打开鲁班”。按钮DOM点击内同步open({tabId})，之前不await或经过后台消息。成功关闭小窗口，失败保留重试；受限页和配置失败不打开全局侧栏。不再请求持久网站访问，不新增manifest权限。代价是工具栏点击后多一次打开按钮点击；跨源导航后需要重新操作。侧栏聚焦及本tab激活复查固定tab，保留输入、不自动发送。
+
+54文件393项、类型检查、lint、生产构建通过。新增启动器测试覆盖配置就绪前禁用、同步open、绑定起始tab、受限页、配置与打开失败；UI测试覆盖临时授权后恢复发送、保留输入及零模型调用。产物已含启动页，真实Chrome闭环待用户重载后验证，尚不计通过。
+
+## 2026-10-18 用户确认与提交前检查
+
+装入启动小窗口构建后，用户反馈“可以了”，据此将用户报告的发送不可用问题标为已恢复。此项为用户确认，未声称代理在该构建上重跑真实A/B或模型生成。提交前重新执行393项全量测试、类型检查、lint与生产构建，均通过；无新增权限，无原始本机界面记录或凭据入库。

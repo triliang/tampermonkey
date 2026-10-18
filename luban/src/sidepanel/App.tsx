@@ -287,13 +287,15 @@ export default function App({initialView='home',embedded=false}:{initialView?:'h
     void refreshSite();void refreshLists().catch(fail);
     const updateSite=()=>{void closePagePreview().catch(fail);cancelAnalysis();setReceipt(null);if(activeGeneration.current)void cancel();setEnvelope(null);setSelectors([]);setTarget(null);void refreshSite();};
     const changed=(id:number,change:{url?:string})=>{if(change.url&&(boundTabId===undefined||id===boundTabId))updateSite();};
-    const activated=()=>{if(boundTabId===undefined)updateSite();};
+    const activated=(info:{tabId:number})=>{if(boundTabId===undefined)updateSite();else if(info?.tabId===boundTabId)void refreshSite();};
+    const checkAccess=()=>{void refreshSite();};
+    window.addEventListener('focus',checkAccess);
     const on=()=>setOnline(true),off=()=>setOnline(false);
     chrome.tabs.onActivated?.addListener(activated);chrome.tabs.onUpdated?.addListener(changed);
     const settingsChanged=(changes:Record<string,chrome.storage.StorageChange>,area:string)=>{if(area==='sync'&&changes[STORAGE_KEYS.SETTINGS]){setThinkingEnabled(changes[STORAGE_KEYS.SETTINGS].newValue?.thinkingEnabled!==false);setEnvelope(null);cancelAnalysis();}};
     chrome.storage.onChanged?.addListener(settingsChanged);
     window.addEventListener('online',on);window.addEventListener('offline',off);
-    return()=>{chrome.storage.onChanged?.removeListener(settingsChanged);chrome.tabs.onActivated?.removeListener(activated);chrome.tabs.onUpdated?.removeListener(changed);window.removeEventListener('online',on);window.removeEventListener('offline',off);buffer.current?.dispose();port.current?.disconnect();cancelAnalysis();};
+    return()=>{window.removeEventListener('focus',checkAccess);chrome.storage.onChanged?.removeListener(settingsChanged);chrome.tabs.onActivated?.removeListener(activated);chrome.tabs.onUpdated?.removeListener(changed);window.removeEventListener('online',on);window.removeEventListener('offline',off);buffer.current?.dispose();port.current?.disconnect();cancelAnalysis();};
   },[]);
   useEffect(()=>{
     const onMessage=(m:LubanMessage,sender:chrome.runtime.MessageSender)=>{
@@ -450,6 +452,7 @@ export default function App({initialView='home',embedded=false}:{initialView?:'h
       {runtimeIssues.length?<details><summary>有工具的运行或清理需要处理</summary>{runtimeIssues.map(issue=><p>{issue.message}</p>)}<button disabled={!editable} onClick={()=>void retryAuto()}>重试清理与注册</button></details>:null}
     </div>
     {showLatest?<button class="chat-latest" onClick={latest}>↓ 回到最新</button>:null}
+    {!site?<div class="chat-warning" role="status">当前网页尚不可访问。请点击工具栏的鲁班图标，再点“在当前页打开鲁班”，获取本页临时访问权限。<button onClick={()=>void refreshSite()}>重新检查页面</button>未发送输入会保留；Chrome 内部页面不支持。</div>:null}
     {effective?<section class="chat-artifact"><button class="chat-artifact-name" title="查看脚本制品" onClick={()=>void openCode()} disabled={!editable}><b>JS</b><span><strong>{scriptFilename(record?.name??'当前草稿')}</strong><small>{workspace?.draft?receipt?'已运行 · 待确认效果':workflow.quality?.passed?'已检查 · 待运行':'草稿 · 未验证':'保存版'} · 随消息发送 · 查看代码</small></span></button><button class={!receipt?'p2-primary':''} disabled={!editable||mismatch||!workspace?.draft||quality?.passed===false} onClick={()=>void versionAction('trial')}>运行</button><button class={receipt?'p2-primary':''} disabled={!editable||!receipt||!name.trim()} onClick={()=>void versionAction('save')}>{receipt?'效果符合，保存':'保存'}</button></section>:null}
     {receipt&&<SendToFeishu summary={`鲁班试运行已完成，请核对页面效果。草稿版本：${receipt.draftRevision}；回执：${receipt.id}。工具尚需明确保存。`}/>}
     <footer class="chat-composer">
