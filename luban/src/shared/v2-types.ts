@@ -29,6 +29,7 @@ export interface ScriptRecord {
   updatedAt: number;
 }
 export interface WorkspaceRecord {
+  panelScope?:string;
   codeReference?:CodeReference|null;
   id: string;
   scriptId: string | null;

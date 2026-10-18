@@ -144,6 +144,7 @@ export class WorkspaceGeneration {
       try{await this.store.workspaces.endGeneration(workspaceId, requestId, 'interrupted',release.owner);}finally{if (this.sessions.get(workspaceId) === session) this.sessions.delete(workspaceId);await release(session.cancelled?'cancelled':completed?'completed':'failed');}
     }
   }
+  async cancelAll(){this.envelopes.clear();await Promise.all([...this.sessions.keys()].map(id=>this.cancel(id)));}
   async cancel(workspaceId: string): Promise<void> {
     const session = this.sessions.get(workspaceId); if (!session) return;
     session.cancelled = true; session.client.cancel();

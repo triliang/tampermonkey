@@ -1,3 +1,6 @@
+import {workspaceAvailableToPanel} from './repositories/workspace-store';
+import {panelTabId,executorKey,PANEL_PATH} from '../shared/panel-tab';
+import {initializeTabPanels,openTabPanel,configureTabPanel,forgetTabPanel} from './services/tab-panel';
 import {CodePreviewService} from './services/code-preview';
 import {handleBridgeMessage, isBridgeMessage,bridgeConnection} from './services/bridge-connection';
 import {PageGrants} from './services/page-grants';
@@ -35,8 +38,13 @@ import { StreamKeepAlive } from './keepalive';
 import type { GenerationResult, PageContext } from '../shared/types';
 import contentScriptPath from '../content/index.ts?script&iife';
 
-/** 记录最近一次点击图标时授予 activeTab 的标签页（存 session，随浏览器关闭清除）。 */
-const ACTIVE_TAB_KEY = 'luban:activeTabId';
+function isPanelSender(sender:chrome.runtime.MessageSender){try{const url=new URL(sender.url??'');return sender.id===chrome.runtime.id&&url.protocol==='chrome-extension:'&&url.hostname===chrome.runtime.id&&url.pathname==='/'+PANEL_PATH;}catch{return false;}}
+function sourceTab(sender:chrome.runtime.MessageSender):number|undefined{
+ if(!isPanelSender(sender))return;const id=panelTabId(sender.url??'');if(id===undefined)throw new DataError('TAB_SCOPE_REQUIRED','请关闭旧侧栏，在目标标签页重新点击鲁班图标。');return id;
+}
+async function panelScope(sender:chrome.runtime.MessageSender){const id=sourceTab(sender);return id===undefined?undefined:`${await getBrowserSession()}:${id}`;}
+async function assertWorkspaceScope(sender:chrome.runtime.MessageSender,id:unknown,allowLegacy=false){if(typeof id!=='string')return;const scope=await panelScope(sender);const ws=scope?await getScriptStore().workspaces.get(id):undefined;if(scope&&ws?.panelScope!==scope&&!(allowLegacy&&ws&&workspaceAvailableToPanel(ws,scope)))throw new DataError('WRONG_TAB_WORKSPACE','此草稿属于其他标签页，请在当前标签页重新打开工具。');}
+
 
 type Responder<T = unknown> = (r: LubanResponse<T>) => void;
 let browserSession:Promise<string>|undefined;
@@ -51,8 +59,11 @@ type Handler = (
   respond: Responder,
 ) => void | Promise<void>;
 
-const workspaceGeneration = new WorkspaceGeneration(getScriptStore(), captureCurrentPage, async () => {
-  if((await chrome.storage.local.get('luban:v3:executor'))['luban:v3:executor']==='codex'){
+function createTabServices(tabId?:number){
+const capture=(selectors?:string[])=>captureCurrentPage(selectors,tabId);
+const workspaceGeneration = new WorkspaceGeneration(getScriptStore(), capture, async () => {
+  const selectionKey=executorKey(tabId);const choice=tabId===undefined?(await chrome.storage.local.get(selectionKey))[selectionKey]:(await chrome.storage.session.get(selectionKey))[selectionKey]??(await chrome.storage.local.get('luban:v3:executor'))['luban:v3:executor'];
+  if(choice==='codex'){
     if((await bridgeConnection.run('status')).status!=='connected')throw new DataError('BRIDGE_DISCONNECTED','请先在连接设置中连接 Bridge，再使用本地 Codex。');
     return {id:'local-codex',baseUrl:'https://local.codex.invalid',apiKey:'',model:'本地 Codex',billing:'onDemand' as const,customEndpoint:true,thinkingEnabled:false,thinkingProtocol:'none' as const};
   }
@@ -67,16 +78,25 @@ const workspaceGeneration = new WorkspaceGeneration(getScriptStore(), captureCur
   }};
 });
 
-const pageAnalysis = new PageAnalysis(captureCurrentPage, async()=>{
+const pageAnalysis = new PageAnalysis(capture, async()=>{
   const settings=await getSettings();const key=await getApiKey(!!settings.customEndpoint);
   if(!settings.pageAnalysisEnabled)throw new DataError('ANALYSIS_DISABLED','请先在设置中启用分析此页。');
   if(!key)throw ErrorFactory.keyInvalid();
   return toProviderConfig(settings,key);
 },()=>new AiClient(),(id,content,truncated)=>{void chrome.runtime.sendMessage({type:'ANALYSIS_REASONING',requestId:id,content,truncated,attempt:1}).catch(()=>{});});
+const versions = new VersionService(getScriptStore(), capture, executeTrial, autoRuntime.coordinate);
+const savedRunner=new SavedRunner(getScriptStore(),capture,executeTrial);
+return {workspaceGeneration,pageAnalysis,versions,savedRunner,capture};
+}
+const tabServices=new Map<number,ReturnType<typeof createTabServices>>();
+function servicesFor(sender:chrome.runtime.MessageSender){const id=sourceTab(sender),key=id??0;let services=tabServices.get(key);if(!services){services=createTabServices(id);tabServices.set(key,services);}return services;}
+chrome.tabs.onRemoved?.addListener(tabId=>{forgetTabPanel(tabId);void(async()=>{
+ const services=tabServices.get(tabId);if(services){await services.workspaceGeneration.cancelAll();services.pageAnalysis.cancelAll();tabServices.delete(tabId);}
+ await getScriptStore().workspaces.releasePanel(`${await getBrowserSession()}:${tabId}`);
+ await chrome.storage.session.remove(executorKey(tabId));
+})().catch(e=>console.error('[luban] close tab cleanup',e));});
 const autoRuntime = new AutoRuntime(getScriptStore(), new ChromeAutoAdapter(), verifyAutoSource);
 const codePreview=new CodePreviewService(getScriptStore(),async m=>{await chrome.runtime.sendMessage(m).catch(()=>{});});
-const versions = new VersionService(getScriptStore(), captureCurrentPage, executeTrial, autoRuntime.coordinate);
-const savedRunner=new SavedRunner(getScriptStore(),captureCurrentPage,executeTrial);
 const externalDispatcher=new ExternalDispatcher(getScriptStore(),pageGrants,(method,params)=>bridgeConnection.rpc(method,params),async(approval,command)=>{
   const scoped=new VersionService(getScriptStore(),selectors=>pageGrants.read(approval.grantId,selectors),async(binding,version,namespace,hash,values)=>{
     const grant=await pageGrants.require(approval.grantId,'trial.request');
@@ -97,26 +117,21 @@ chrome.runtime.onInstalled.addListener(() => {
   console.log('[luban sw] installed');
 });
 
-// 点击图标：记住当前标签页（此刻拿到 activeTab 授权）并打开侧栏。
-chrome.action.onClicked.addListener((tab) => {
-  const url = tab.url ?? '';
-  const scriptable = url.startsWith('http://') || url.startsWith('https://') || url.startsWith('file://');
-  if (typeof tab.id === 'number' && scriptable) {
-    void chrome.storage.session.set({ [ACTIVE_TAB_KEY]: tab.id });
-  }
-  void chrome.sidePanel.open({ windowId: tab.windowId }).catch(() => {
-    /* 老版本无 open()，忽略 */
-  });
-});
+// Global default stays disabled; each explicitly opened tab receives its own panel instance.
+void initializeTabPanels().catch(e=>console.error('[luban] panel initialization',e));
+chrome.tabs.onCreated?.addListener(tab=>{if(typeof tab.id==='number')void configureTabPanel(tab.id).catch(e=>console.error('[luban] configure tab panel',e));});
+chrome.tabs.onReplaced?.addListener((added,removed)=>{forgetTabPanel(removed);void configureTabPanel(added).catch(e=>console.error('[luban] configure replacement panel',e));});
+// Chrome handles toolbar clicks natively; extension callbacks must not recreate the user gesture.
 
 // 消息路由：始终返回 true 表示异步应答。
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if(msg?.type==='V3_CHANNEL_SEND'){
-    void(async()=>{try{assertExtensionPage(sender);if(sender.url!==chrome.runtime.getURL('src/sidepanel/index.html')||!['preview','confirm','cancelPreview'].includes(msg.method))throw new DataError('FORBIDDEN_SOURCE','只能从鲁班结果区预览并确认发送。');sendResponse({ok:true,data:await bridgeConnection.rpc('channel.'+msg.method,msg.params??{})});}catch(e){sendResponse({ok:false,error:e instanceof Error?e.message:'飞书发送失败。'});}})();return true;
+    void(async()=>{try{assertExtensionPage(sender);sourceTab(sender);if(!isPanelSender(sender)||!['preview','confirm','cancelPreview'].includes(msg.method))throw new DataError('FORBIDDEN_SOURCE','只能从鲁班结果区预览并确认发送。');sendResponse({ok:true,data:await bridgeConnection.rpc('channel.'+msg.method,msg.params??{})});}catch(e){sendResponse({ok:false,error:e instanceof Error?e.message:'飞书发送失败。'});}})();return true;
   }
   if(msg?.type==='V3_EXTERNAL_APPROVAL'||msg?.type==='V3_BRIDGE_ADMIN'){
     void(async()=>{try{assertExtensionPage(sender);let data;
       if(msg.type==='V3_EXTERNAL_APPROVAL'){
+        const tabId=sourceTab(sender);if(tabId!==undefined&&msg.action!=='list'){const row=(await externalDispatcher.list()).find(r=>r.id===msg.id);if(!row||row.binding.tabId!==tabId)throw new DataError('WRONG_TAB_APPROVAL','只能处理当前标签页的确认请求。');}
         if(msg.action==='list')data={approvals:await externalDispatcher.list(),conflicts:await externalDispatcher.conflicts()};
         else if(['approve','reject','review'].includes(msg.action)&&typeof msg.id==='string'){await externalDispatcher.decide(msg.id,msg.action);data={approvals:await externalDispatcher.list(),conflicts:await externalDispatcher.conflicts()};}
         else throw new DataError('INVALID_MESSAGE','确认操作无效。');
@@ -132,15 +147,21 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         else if(msg.action==='bridgeTasks')data=await bridgeConnection.rpc('tasks.list');
         else if(msg.action==='reviewBridgeTask'&&typeof msg.taskId==='string'&&msg.reviewed===true){await bridgeConnection.rpc('tasks.review',{taskId:msg.taskId});data=await bridgeConnection.rpc('tasks.list');}
         else throw new DataError('INVALID_MESSAGE','管理操作无效。');
+      }if(msg.type==='V3_EXTERNAL_APPROVAL'){
+        const tabId=sourceTab(sender);if(tabId!==undefined){
+          const scope=await panelScope(sender),approvals=await externalDispatcher.list(),conflicts=await externalDispatcher.conflicts();
+          const visible=[];for(const row of conflicts)if(row.workspaceId&&(await getScriptStore().workspaces.get(row.workspaceId))?.panelScope===scope)visible.push(row);
+          data={approvals:approvals.filter(row=>row.binding.tabId===tabId),conflicts:visible};
+        }
       }sendResponse({ok:true,data});
     }catch(e){sendResponse({ok:false,error:e instanceof Error?e.message:'操作失败。'});}})();return true;
   }
   if(msg?.type==='V3_PAGE_GRANT'){
-    void(async()=>{try{assertExtensionPage(sender);if(msg.action==='grant'&&sender.url!==chrome.runtime.getURL('src/sidepanel/index.html'))throw new DataError('FORBIDDEN_SOURCE','请从网页侧栏明确授权。');let grants;
+    void(async()=>{try{assertExtensionPage(sender);if(msg.action==='grant'&&!isPanelSender(sender))throw new DataError('FORBIDDEN_SOURCE','请从网页侧栏明确授权。');let grants;const scopedTab=sourceTab(sender);await assertWorkspaceScope(sender,msg.workspaceId);if(scopedTab!==undefined&&msg.action==='grant'&&msg.tabId!==scopedTab)throw new DataError('WRONG_TAB','只能授权当前标签页。');
       if(msg.action==='list')grants=await pageGrants.list();
-      else if(msg.action==='grant'&&Number.isInteger(msg.tabId)&&typeof msg.url==='string'&&(msg.allowDrafts===undefined||typeof msg.allowDrafts==='boolean'))grants=await pageGrants.create(msg.tabId,msg.url,msg.allowDrafts===true,typeof msg.workspaceId==='string'?msg.workspaceId:undefined);
-      else if(msg.action==='revoke'&&(msg.id===undefined||typeof msg.id==='string'))grants=await pageGrants.revoke(msg.id);
-      else throw new DataError('INVALID_MESSAGE','页面授权操作无效。');sendResponse({ok:true,data:{grants}});
+      else if(msg.action==='grant'&&Number.isInteger(msg.tabId)&&typeof msg.url==='string'&&(msg.allowDrafts===undefined||typeof msg.allowDrafts==='boolean'))grants=await pageGrants.create(msg.tabId,msg.url,msg.allowDrafts===true,typeof msg.workspaceId==='string'?msg.workspaceId:undefined,servicesFor(sender).capture);
+      else if(msg.action==='revoke'&&(msg.id===undefined||typeof msg.id==='string')){if(scopedTab!==undefined){const ids=(await pageGrants.list()).filter(g=>g.binding.tabId===scopedTab&&(!msg.id||g.id===msg.id));for(const g of ids)await pageGrants.revoke(g.id);grants=await pageGrants.list();}else grants=await pageGrants.revoke(msg.id);}
+      else throw new DataError('INVALID_MESSAGE','页面授权操作无效。');sendResponse({ok:true,data:{grants:scopedTab===undefined?grants:grants.filter(g=>g.binding.tabId===scopedTab)}});
     }catch(e){sendResponse({ok:false,error:e instanceof Error?e.message:'页面授权失败。'});}})();return true;
   }
   if (isBridgeMessage(msg)) { void handleBridgeMessage(msg, sender).then(sendResponse); return true; }
@@ -168,23 +189,24 @@ async function route(msg: LubanMessage, sender: chrome.runtime.MessageSender, re
     respond(errorResponse(makeError(ErrorLayer.RUNTIME, 'INVALID_MESSAGE', '消息结构无效。', [{ type: 'DISMISS' }])));
     return;
   }
+  try{sourceTab(sender);await assertWorkspaceScope(sender,(msg as unknown as {workspaceId?:string}).workspaceId,msg.type==='GET_WORKSPACE');}catch(e){respond(errorResponse(toLubanError(e)));return;}
   if(msg.type==='OPEN_CODE_PREVIEW'||msg.type==='CLOSE_CODE_PREVIEW'||msg.type==='CODE_PREVIEW_ACTION'){
     try{
       if(msg.type==='CODE_PREVIEW_ACTION'){respond({ok:true,data:await codePreview.action(msg,sender)});return;}
       assertExtensionPage(sender);
       if(msg.type==='CLOSE_CODE_PREVIEW'){
-        const target=await codePreview.location(msg.sessionId);if(target){let ack;try{ack=await chrome.tabs.sendMessage(target.tabId,{type:'DISMISS_CODE_PREVIEW',requestId:msg.requestId,sessionId:msg.sessionId},{documentId:target.documentId});}catch{/* navigation removed the overlay */}if(ack?.ok===false)throw Error(ack.error);await codePreview.forget(msg.sessionId);}respond({ok:true,data:undefined});return;
+        const target=await codePreview.location(msg.sessionId);if(target){const tabId=sourceTab(sender);if(tabId!==undefined&&target.tabId!==tabId)throw new DataError('WRONG_TAB','不能关闭其他标签页的预览。');let ack;try{ack=await chrome.tabs.sendMessage(target.tabId,{type:'DISMISS_CODE_PREVIEW',requestId:msg.requestId,sessionId:msg.sessionId},{documentId:target.documentId});}catch{/* navigation removed the overlay */}if(ack?.ok===false)throw Error(ack.error);await codePreview.forget(msg.sessionId);}respond({ok:true,data:undefined});return;
       }
-      const site=await currentSite();const ws=await getScriptStore().workspaces.get(msg.workspaceId);if(!ws||ws.host!==site.host)throw Error('当前网页与脚本不匹配。');
+      const site=await currentSite(sourceTab(sender));const ws=await getScriptStore().workspaces.get(msg.workspaceId);if(!ws||ws.host!==site.host)throw Error('当前网页与脚本不匹配。');
       const injected=await chrome.scripting.executeScript({target:{tabId:site.tabId},files:[contentScriptPath]});const documentId=injected[0]?.documentId;if(!documentId)throw Error('当前网页不能展示代码浮层。');
       const snapshot=await codePreview.create(msg.workspaceId,msg.name,site.tabId,documentId);
       try{const ack=await chrome.tabs.sendMessage(site.tabId,{type:'RENDER_CODE_PREVIEW',requestId:msg.requestId,snapshot},{documentId});if(!ack?.ok)throw Error(ack?.error??'网页浮层不可用。');respond({ok:true,data:{sessionId:snapshot.sessionId,tabId:site.tabId,documentId}});}catch(e){await codePreview.forget(snapshot.sessionId);throw e;}
     }catch(e){respond(errorResponse(toLubanError(e)));}return;
   }
-  if(['GET_WORKFLOW','UPDATE_WORKFLOW','CHECK_DRAFT','EDIT_FAILURE'].includes(msg.type)){try{assertExtensionPage(sender);respond({ok:true,data:await workflowCommand(getScriptStore(),msg as Extract<LubanMessage,{type:'GET_WORKFLOW'|'UPDATE_WORKFLOW'|'CHECK_DRAFT'|'EDIT_FAILURE'}>,captureCurrentPage)});}catch(e){respond(errorResponse(toLubanError(e)));}return;}
-  if(msg.type==='V21_PREVIEW_TARGET'||msg.type==='V21_CLEAR_PREVIEW'){try{assertExtensionPage(sender);const site=await currentSite();respond({ok:true,data:await chrome.tabs.sendMessage(site.tabId,msg)});}catch(e){respond(errorResponse(toLubanError(e)));}return;}
+  if(['GET_WORKFLOW','UPDATE_WORKFLOW','CHECK_DRAFT','EDIT_FAILURE'].includes(msg.type)){try{assertExtensionPage(sender);respond({ok:true,data:await workflowCommand(getScriptStore(),msg as Extract<LubanMessage,{type:'GET_WORKFLOW'|'UPDATE_WORKFLOW'|'CHECK_DRAFT'|'EDIT_FAILURE'}>,servicesFor(sender).capture)});}catch(e){respond(errorResponse(toLubanError(e)));}return;}
+  if(msg.type==='V21_PREVIEW_TARGET'||msg.type==='V21_CLEAR_PREVIEW'){try{assertExtensionPage(sender);const site=await currentSite(sourceTab(sender));respond({ok:true,data:await chrome.tabs.sendMessage(site.tabId,msg)});}catch(e){respond(errorResponse(toLubanError(e)));}return;}
   if(msg.type==='PREPARE_PAGE_ANALYSIS'||msg.type==='RUN_PAGE_ANALYSIS'||msg.type==='CANCEL_PAGE_ANALYSIS'){
-    try{assertExtensionPage(sender);const data=msg.type==='PREPARE_PAGE_ANALYSIS'?await pageAnalysis.prepare():msg.type==='RUN_PAGE_ANALYSIS'?await pageAnalysis.run(msg.previewId):pageAnalysis.cancel(msg.previewId);respond({ok:true,data});}catch(e){respond(errorResponse(toLubanError(e)));}return;
+    try{assertExtensionPage(sender);const data=msg.type==='PREPARE_PAGE_ANALYSIS'?await servicesFor(sender).pageAnalysis.prepare():msg.type==='RUN_PAGE_ANALYSIS'?await servicesFor(sender).pageAnalysis.run(msg.previewId):servicesFor(sender).pageAnalysis.cancel(msg.previewId);respond({ok:true,data});}catch(e){respond(errorResponse(toLubanError(e)));}return;
   }
   if(msg.type==='EXPORT_CURRENT'){
     try{assertExtensionPage(sender);if(typeof msg.scriptId!=='string')throw new DataError('INVALID_MESSAGE','工具编号无效。');respond({ok:true,data:await exportCurrent(getScriptStore(),msg.scriptId)});}catch(e){respond(errorResponse(toLubanError(e)));}return;
@@ -200,9 +222,9 @@ async function route(msg: LubanMessage, sender: chrome.runtime.MessageSender, re
       assertExtensionPage(sender);
       if (typeof msg.workspaceId !== 'string' || !Number.isInteger(msg.expectedDraftRevision)) throw new DataError('INVALID_MESSAGE', '工作区参数无效。');
       if(msg.type==='COMMIT_DRAFT'&&msg.effectAcknowledged!==true)throw new DataError('EFFECT_CONFIRM_REQUIRED','请点击效果符合保存。');
-      const data = msg.type === 'TRIAL_DRAFT' ? await versions.trial(msg.workspaceId, msg.expectedDraftRevision,msg.requestId)
-        : msg.type === 'COMMIT_DRAFT' ? await versions.commit(msg.workspaceId, msg.expectedDraftRevision, msg.receiptId, msg.name, msg.opId,msg.effectAcknowledged)
-        : await versions.restore(msg.workspaceId, msg.expectedDraftRevision, msg.expectedRevision, msg.discardDraft, msg.opId);
+      const data = msg.type === 'TRIAL_DRAFT' ? await servicesFor(sender).versions.trial(msg.workspaceId, msg.expectedDraftRevision,msg.requestId)
+        : msg.type === 'COMMIT_DRAFT' ? await servicesFor(sender).versions.commit(msg.workspaceId, msg.expectedDraftRevision, msg.receiptId, msg.name, msg.opId,msg.effectAcknowledged)
+        : await servicesFor(sender).versions.restore(msg.workspaceId, msg.expectedDraftRevision, msg.expectedRevision, msg.discardDraft, msg.opId);
       respond({ok:true,data});
     } catch(e) { respond(errorResponse(toLubanError(e))); } return;
   }
@@ -214,15 +236,15 @@ async function route(msg: LubanMessage, sender: chrome.runtime.MessageSender, re
   if (['GET_CURRENT_SITE', 'GET_SCRIPT_RECORD', 'PREPARE_GENERATION', 'CANCEL_WORKSPACE_GENERATION'].includes(msg.type)) {
     try {
       assertExtensionPage(sender);
-      if (msg.type === 'GET_CURRENT_SITE') respond({ ok: true, data: await currentSite() });
+      if (msg.type === 'GET_CURRENT_SITE') respond({ ok: true, data: await currentSite(sourceTab(sender)) });
       else if (msg.type === 'GET_SCRIPT_RECORD') respond({ ok: true, data: await getScriptStore().record(msg.scriptId) });
-      else if (msg.type === 'PREPARE_GENERATION') respond({ ok: true, data: await workspaceGeneration.prepare(msg.workspaceId, msg.expectedDraftRevision, msg.selectors,msg.repairAllowed) });
-      else if (msg.type === 'CANCEL_WORKSPACE_GENERATION') { await workspaceGeneration.cancel(msg.workspaceId); respond({ ok: true, data: undefined }); }
+      else if (msg.type === 'PREPARE_GENERATION') respond({ ok: true, data: await servicesFor(sender).workspaceGeneration.prepare(msg.workspaceId, msg.expectedDraftRevision, msg.selectors,msg.repairAllowed) });
+      else if (msg.type === 'CANCEL_WORKSPACE_GENERATION') { await servicesFor(sender).workspaceGeneration.cancel(msg.workspaceId); respond({ ok: true, data: undefined }); }
     } catch (e) { respond(errorResponse(toLubanError(e))); }
     return;
   }
   if (isWorkspaceCommand(msg.type)) {
-    try { respond({ ok: true, data: await handleWorkspaceCommand(msg, sender, getScriptStore()) }); }
+    try { respond({ ok: true, data: await handleWorkspaceCommand(msg, sender, getScriptStore(),await panelScope(sender)) }); }
     catch (e) { respond(errorResponse(toLubanError(e))); }
     return;
   }
@@ -262,11 +284,11 @@ async function handleGenerateWorkspace(port: chrome.runtime.Port, msg: Extract<L
   let finished = false;
   let connectionClosed = false;
   const post = (message: unknown) => { try { port.postMessage(message); } catch { /* 面板关闭；数据仍由仓储保护 */ } };
-  const disconnected = () => { connectionClosed = true; if (!finished) void workspaceGeneration.cancel(msg.workspaceId); };
+  const disconnected = () => { connectionClosed = true; if (!finished) void servicesFor(port.sender??{}).workspaceGeneration.cancel(msg.workspaceId); };
   port.onDisconnect.addListener(disconnected);
   try {
-    assertExtensionPage(port.sender ?? {}); keepAlive.start();
-    const result = await workspaceGeneration.generate(msg.workspaceId, msg.envelopeId, msg.requestId,
+    assertExtensionPage(port.sender ?? {});await assertWorkspaceScope(port.sender??{},msg.workspaceId);keepAlive.start();
+    const result = await servicesFor(port.sender??{}).workspaceGeneration.generate(msg.workspaceId, msg.envelopeId, msg.requestId,
       content => post({ type: 'GENERATION_PROGRESS', requestId: msg.requestId, content, done: false }), () => connectionClosed,stage=>post({type:'GENERATION_REASONING',requestId:msg.requestId,content:stage.text,truncated:stage.truncated,attempt:stage.attempt}));
     finished = true; post({ type: 'GENERATION_COMPLETE', requestId: msg.requestId, result: result.result });
   } catch (e) { finished = true; post({ type: 'GENERATION_FAILED', requestId: msg.requestId, error: toLubanError(e).serialize() }); }
@@ -363,7 +385,7 @@ async function handleSaveScript(msg: LubanMessage, _sender: chrome.runtime.Messa
 
 async function handleRunSavedScript(msg: LubanMessage, _sender: chrome.runtime.MessageSender, respond: Responder): Promise<void> {
   if(msg.type!=='RUN_SAVED_SCRIPT')return;
-  const started=Date.now(),result=await savedRunner.run(msg.scriptId,msg.requestId);
+  const started=Date.now(),result=await servicesFor(_sender).savedRunner.run(msg.scriptId,msg.requestId);
   respond({ok:true,data:{ok:result.ok&&!result.timedOut,method:1,timingMs:Date.now()-started,scriptError:result.error}});
 }
 
@@ -392,7 +414,7 @@ async function handleSetUiState(msg: LubanMessage, _sender: chrome.runtime.Messa
 
 function handleFocusPanel(_msg: LubanMessage, sender: chrome.runtime.MessageSender, respond: Responder): void {
   const tabId = sender.tab?.id;
-  if (typeof tabId === 'number') void chrome.sidePanel.open({ tabId }).catch(() => undefined);
+  if (typeof tabId === 'number') void openTabPanel(tabId).catch(() => undefined);
   respond({ ok: true, data: undefined });
 }
 
@@ -405,7 +427,7 @@ function handleFocusPanel(_msg: LubanMessage, sender: chrome.runtime.MessageSend
 //  - to:'main'    → executeScript world:MAIN 直接探针 → 回 PONG(main)（浏览器级注入，绕过页面 CSP）。
 async function handlePing(msg: LubanMessage, _sender: chrome.runtime.MessageSender, respond: Responder): Promise<void> {
   if (msg.type !== 'PING') return;
-  const tabId = await resolveActiveTabId();
+  const tabId = await resolveActiveTabId(_sender);
   if (msg.to === 'main') {
     try {
       const [result] = await chrome.scripting.executeScript({
@@ -438,7 +460,7 @@ function mainWorldProbe(requestId: string): { type: 'PONG'; from: 'main'; reques
 
 // 启动元素选择：Phase 1 仅打通「注入 content 并转发指令」，采集逻辑随 Phase 2 落地。
 async function handleStartPicker(_msg: LubanMessage, _sender: chrome.runtime.MessageSender, respond: Responder): Promise<void> {
-  const tabId = await resolveActiveTabId();
+  const tabId = await resolveActiveTabId(_sender);
   await ensureContentInjected(tabId);
   try {
     const ack = (await chrome.tabs.sendMessage(tabId, { ..._msg })) as unknown;
@@ -450,7 +472,7 @@ async function handleStartPicker(_msg: LubanMessage, _sender: chrome.runtime.Mes
 
 async function handleCollectPageContext(msg: LubanMessage, _sender: chrome.runtime.MessageSender, respond: Responder): Promise<void> {
   if (msg.type !== 'COLLECT_PAGE_CONTEXT') return;
-  const tabId = await resolveActiveTabId();
+  const tabId = await resolveActiveTabId(_sender);
   await ensureContentInjected(tabId);
   try {
     const data = (await chrome.tabs.sendMessage(tabId, msg)) as { context: PageContext };
@@ -468,7 +490,7 @@ function handleElementPicked(_msg: LubanMessage, _sender: chrome.runtime.Message
 
 // 侧栏「取消选择」：转发给 content 真正停止选择器（之前只改侧栏状态，页面监听器未清理，已修复）。
 async function handleCancelPicker(_msg: LubanMessage, _sender: chrome.runtime.MessageSender, respond: Responder): Promise<void> {
-  const tabId = await resolveActiveTabId();
+  const tabId = await resolveActiveTabId(_sender);
   try {
     await chrome.tabs.sendMessage(tabId, { ..._msg });
   } catch {
@@ -508,13 +530,9 @@ async function handleTestConnection(msg: LubanMessage, _sender: chrome.runtime.M
 // 若在此处用 tabs.query 兜底，会把一个未授权的 tabId 传给 executeScript，
 // 最终在注入时才抛出 Chrome 原生的「Cannot access contents of the page」错误，
 // 而不是我们设计好的友好提示。因此没有存量 tabId 时必须直接报错，不做虚假兜底。
-async function resolveActiveTabId(): Promise<number> {
-  const stored = await chrome.storage.session.get(ACTIVE_TAB_KEY);
-  const id = stored[ACTIVE_TAB_KEY] as number | undefined;
-  if (typeof id === 'number') return id;
-  throw makeError(ErrorLayer.CAPTURE, 'NO_ACTIVE_TAB', '请先点击扩展图标以授权当前页面。', [
-    { type: 'DISMISS' },
-  ]);
+async function resolveActiveTabId(sender:chrome.runtime.MessageSender): Promise<number> {
+ const id=sourceTab(sender);if(id!==undefined)return id;
+ throw new DataError('TAB_SCOPE_REQUIRED','请在目标标签页点击鲁班图标。');
 }
 
 // 即使存有 tabId，activeTab 授权也可能已失效（标签页跳转/刷新/关闭），

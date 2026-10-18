@@ -112,9 +112,9 @@ describe('SAVE_SCRIPT · handleSaveScript', () => {
         onConnect: { addListener: vi.fn() },
       },
       action: { onClicked: { addListener: vi.fn() } },
-      tabs: { get: vi.fn().mockRejectedValue(new Error('no tab')), sendMessage: vi.fn() },
+      tabs: { query:vi.fn(async()=>[]),get: vi.fn().mockRejectedValue(new Error('no tab')), sendMessage: vi.fn() },
       scripting: { executeScript: vi.fn() },
-      sidePanel: { open: vi.fn() },
+      sidePanel: { open: vi.fn(async()=>{}),setOptions:vi.fn(async()=>{}),setPanelBehavior:vi.fn(async()=>{}) },
     };
     await import('./index');
   });
@@ -124,7 +124,7 @@ describe('SAVE_SCRIPT · handleSaveScript', () => {
     const saved = script('s-save-handler');
     const respond = vi.fn();
     await new Promise<void>((resolve) => {
-      onMessage({ type: 'SAVE_SCRIPT', requestId: 'req-save', script: saved }, { id: 'test-extension', url: 'chrome-extension://test-extension/src/sidepanel/index.html' }, (r) => {
+      onMessage({ type: 'SAVE_SCRIPT', requestId: 'req-save', script: saved }, { id: 'test-extension', url: 'chrome-extension://test-extension/src/sidepanel/index.html?tabId=1' }, (r) => {
         respond(r);
         resolve();
       });
@@ -135,6 +135,19 @@ describe('SAVE_SCRIPT · handleSaveScript', () => {
     expect(stored).toBeUndefined();
     expect(saveLocal._data[STORAGE_KEYS.script('s-save-handler')]).toBeUndefined();
     expect(register).not.toHaveBeenCalled();
+  });
+
+  it('真实后台路由以侧栏URL绑定tab，同域标签的读取/草稿/授权不能串到另一页',async()=>{
+    vi.mocked(chrome.tabs.get).mockImplementation(async(id:number)=>({id,url:'https://example.com/same',title:'tab '+id} as chrome.tabs.Tab));
+    const send=(tab:number|undefined,type:string,params:object={})=>new Promise<{ok:boolean;data:any;error:any}>(resolve=>onMessage({type,requestId:crypto.randomUUID(),...params},{id:'test-extension',url:'chrome-extension://test-extension/src/sidepanel/index.html'+(tab===undefined?'':'?tabId='+tab)},r=>resolve(r as {ok:boolean;data:any;error:any})));
+    const site=await send(11,'GET_CURRENT_SITE');expect(site.data.tabId).toBe(11);
+    expect((await send(undefined,'GET_CURRENT_SITE')).error.code).toBe('RUN_TAB_SCOPE_REQUIRED');
+    const a=await send(11,'CREATE_WORKSPACE',{scriptId:null,host:'example.com'}),b=await send(22,'CREATE_WORKSPACE',{scriptId:null,host:'example.com'});expect(a.ok&&b.ok).toBe(true);
+    expect((await send(11,'SAVE_DRAFT',{workspaceId:a.data.id,expectedDraftRevision:0,patch:{input:'A only'}})).ok).toBe(true);
+    expect((await send(22,'GET_WORKSPACE',{workspaceId:a.data.id})).error.code).toBe('RUN_WRONG_TAB_WORKSPACE');
+    expect((await send(22,'LIST_WORKSPACES')).data.map((w:{id:string})=>w.id)).not.toContain(a.data.id);
+    expect((await send(22,'V3_PAGE_GRANT',{action:'grant',tabId:11,url:'https://example.com/same'})).ok).toBe(false);
+    expect((await send(11,'GET_WORKSPACE',{workspaceId:a.data.id})).data.workspace.input).toBe('A only');
   });
 });
 

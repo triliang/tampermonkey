@@ -9,6 +9,8 @@ import type {Workflow} from '../../shared/v21-types';
 import type { ConversationMessage, DraftPatch, OperationRecord, ScriptRecord, ScriptVersion, WorkspaceRecord, GmDelta } from '../../shared/v2-types';
 import { byteSize, DataError, Database, request } from './database';
 
+export function workspaceAvailableToPanel(ws:WorkspaceRecord,scope:string){return !ws.panelScope||ws.panelScope===scope||ws.panelScope.slice(0,ws.panelScope.lastIndexOf(':'))!==scope.slice(0,scope.lastIndexOf(':'));}
+
 export function validateVersion(v: unknown): asserts v is ScriptVersion {
   const x = v as ScriptVersion | null;
   if (!x || typeof x !== 'object' || typeof x.versionId !== 'string' || !x.versionId || typeof x.hash !== 'string'
@@ -27,20 +29,24 @@ export class WorkspaceStore {
     if (ops.some(op => op.scriptId === id)) throw new DataError('RECOVERY_REQUIRED', '脚本有未完成的注册操作，恢复前禁止覆盖。');
     return s;
   }
-  async create(scriptId: string | null = null, host: string | null = null): Promise<WorkspaceRecord> {
+  async create(scriptId: string | null = null, host: string | null = null,panelScope?:string): Promise<WorkspaceRecord> {
     await this.initialize();
     if (host !== null && (typeof host !== 'string' || !/^[a-z\d.-]+$/i.test(host))) throw new DataError('INVALID_HOST', '主机名无效。');
     const id = crypto.randomUUID();
     return this.db.mutate(async tx => {
       const s = scriptId ? await request<ScriptRecord | undefined>(tx.objectStore('scripts').get(scriptId)) : undefined;
       if (scriptId && (!s || s.tombstone)) throw new DataError('SCRIPT_MISSING', '脚本不存在。');
-      const workspace: WorkspaceRecord = { id, scriptId, host: s?.host ?? host, baseRevision: s?.recordRevision ?? null,
+      const workspace: WorkspaceRecord = { id, ...(panelScope?{panelScope}:{}),scriptId, host: s?.host ?? host, baseRevision: s?.recordRevision ?? null,
         draftRevision: 0, input: '', draft: null, activeRequestId: null, status: 'idle', updatedAt: Date.now() };
       await request(tx.objectStore('workspaces').add(workspace));
       await request(tx.objectStore('conversations').add({ id, messages: [] }));
       return workspace;
     });
   }
+  async claimPanel(id:string,panelScope:string):Promise<WorkspaceRecord>{
+    await this.initialize();return this.db.mutate(async tx=>{const ws=await request<WorkspaceRecord|undefined>(tx.objectStore('workspaces').get(id));if(!ws)throw new DataError('WORKSPACE_MISSING','草稿不存在。');if(!workspaceAvailableToPanel(ws,panelScope))throw new DataError('WRONG_TAB_WORKSPACE','此草稿已由其他标签页打开，请重新选择工具。');if(ws.panelScope!==panelScope){ws.panelScope=panelScope;await request(tx.objectStore('workspaces').put(ws));}return ws;});
+  }
+  async releasePanel(panelScope:string){await this.initialize();await this.db.mutate(async tx=>{const store=tx.objectStore('workspaces');for(const ws of await request<WorkspaceRecord[]>(store.getAll()))if(ws.panelScope===panelScope){delete ws.panelScope;await request(store.put(ws));}});}
   async get(id: string): Promise<WorkspaceRecord | undefined> { await this.initialize(); return this.db.get('workspaces', id); }
   async list(): Promise<WorkspaceRecord[]> { await this.initialize(); return this.db.all('workspaces'); }
   async conversation(id: string): Promise<ConversationMessage[]> {

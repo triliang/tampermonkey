@@ -7,16 +7,16 @@ import contentScriptPath from '../../content/index.ts?script&iife';
 
 interface Pending { tabId: number; documentId?:string; accept: (result: CapturedPage) => void; reject: (e: unknown) => void; }
 const pending = new Map<string, Pending>();
-export async function currentSite(): Promise<{ tabId: number; host: string; url: string; title: string }> {
-  const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+export async function currentSite(tabId?:number): Promise<{ tabId: number; host: string; url: string; title: string }> {
+  const tab = tabId===undefined?(await chrome.tabs.query({ active: true, lastFocusedWindow: true }))[0]:await chrome.tabs.get(tabId).catch(()=>undefined);
   if (!tab?.id || !tab.url) throw new DataError('ACTIVE_TAB_EXPIRED', '请切回目标网页并点击鲁班图标授权。');
   const url = new URL(tab.url);
   if (!['http:', 'https:'].includes(url.protocol)) throw new DataError('RESTRICTED_PAGE', '当前页面不支持创建工具，请打开普通网页。');
   return { tabId: tab.id, host: url.hostname, url: sanitizePageUrl(tab.url), title: tab.title ?? '' };
 }
-export async function captureCurrentPage(selectors?: string[]): Promise<CapturedPage> {
+export async function captureCurrentPage(selectors?: string[],tabId?:number): Promise<CapturedPage> {
   if (selectors && (!Array.isArray(selectors) || selectors.length > 4 || !selectors.every(s => typeof s === 'string' && s.length < 1000))) throw new DataError('INVALID_SELECTION', '点选信息无效。');
-  const site = await currentSite();
+  const site = await currentSite(tabId);
   try { await chrome.scripting.executeScript({ target: { tabId: site.tabId }, files: [contentScriptPath] }); }
   catch { throw new DataError('ACTIVE_TAB_EXPIRED', '当前网页未授权，请重新点击鲁班图标。'); }
   const requestId = makeRequestId();

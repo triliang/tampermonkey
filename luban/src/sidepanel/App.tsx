@@ -1,3 +1,4 @@
+import {panelTabId,executorKey} from '../shared/panel-tab';
 import {ExternalApprovals} from '../shared/ExternalApprovals';
 import {SendToFeishu} from '../shared/SendToFeishu';
 import brandLogo from '../assets/logo.svg';
@@ -40,6 +41,9 @@ async function call<T>(message: LubanMessage): Promise<T> {
 }
 const rid = () => makeRequestId();
 export default function App({initialView='home',embedded=false}:{initialView?:'home'|'library';embedded?:boolean}={}) {
+  const boundTabId=useRef(panelTabId(window.location.href)).current;
+  const executorStorage=boundTabId===undefined?chrome.storage.local:chrome.storage.session;
+  const currentExecutorKey=executorKey(boundTabId);
   const pagePreview=useRef<{sessionId:string;workspaceId:string}|null>(null);
   const previewFocusChat=useRef(false);
   const pagePreviewInput=useRef<string|null>(null);
@@ -92,7 +96,7 @@ export default function App({initialView='home',embedded=false}:{initialView?:'h
   const [online, setOnline] = useState(navigator.onLine);
   const [envelope, setEnvelope] = useState<GenerationEnvelope|null>(null);
   const [executor,setExecutor]=useState('provider');
-  useEffect(()=>{void chrome.storage.local.get('luban:v3:executor').then(value=>setExecutor(value['luban:v3:executor']==='codex'?'codex':'provider'));},[]);
+  useEffect(()=>{void(async()=>{const value=(await executorStorage.get(currentExecutorKey))[currentExecutorKey]??(await chrome.storage.local.get('luban:v3:executor'))['luban:v3:executor'];setExecutor(value==='codex'?'codex':'provider');})().catch(fail);},[]);
   const [autoDiagnostics,setAutoDiagnostics]=useState('');
   const [exportArtifact,setExportArtifact]=useState<ExportArtifact|null>(null);
   const [runtimeIssues,setRuntimeIssues]=useState<RuntimeStatus[]>([]);
@@ -282,18 +286,19 @@ export default function App({initialView='home',embedded=false}:{initialView?:'h
     void getSettings().then(s=>{setAnalysisEnabled(!!s.pageAnalysisEnabled);setThinkingEnabled(s.thinkingEnabled!==false);});
     void refreshSite();void refreshLists().catch(fail);
     const updateSite=()=>{void closePagePreview().catch(fail);cancelAnalysis();setReceipt(null);if(activeGeneration.current)void cancel();setEnvelope(null);setSelectors([]);setTarget(null);void refreshSite();};
-    const changed=(_id:number,change:{url?:string})=>{if(change.url)updateSite();};
+    const changed=(id:number,change:{url?:string})=>{if(change.url&&(boundTabId===undefined||id===boundTabId))updateSite();};
+    const activated=()=>{if(boundTabId===undefined)updateSite();};
     const on=()=>setOnline(true),off=()=>setOnline(false);
-    chrome.tabs.onActivated?.addListener(updateSite);chrome.tabs.onUpdated?.addListener(changed);
+    chrome.tabs.onActivated?.addListener(activated);chrome.tabs.onUpdated?.addListener(changed);
     const settingsChanged=(changes:Record<string,chrome.storage.StorageChange>,area:string)=>{if(area==='sync'&&changes[STORAGE_KEYS.SETTINGS]){setThinkingEnabled(changes[STORAGE_KEYS.SETTINGS].newValue?.thinkingEnabled!==false);setEnvelope(null);cancelAnalysis();}};
     chrome.storage.onChanged?.addListener(settingsChanged);
     window.addEventListener('online',on);window.addEventListener('offline',off);
-    return()=>{chrome.storage.onChanged?.removeListener(settingsChanged);chrome.tabs.onActivated?.removeListener(updateSite);chrome.tabs.onUpdated?.removeListener(changed);window.removeEventListener('online',on);window.removeEventListener('offline',off);buffer.current?.dispose();port.current?.disconnect();cancelAnalysis();};
+    return()=>{chrome.storage.onChanged?.removeListener(settingsChanged);chrome.tabs.onActivated?.removeListener(activated);chrome.tabs.onUpdated?.removeListener(changed);window.removeEventListener('online',on);window.removeEventListener('offline',off);buffer.current?.dispose();port.current?.disconnect();cancelAnalysis();};
   },[]);
   useEffect(()=>{
     const onMessage=(m:LubanMessage,sender:chrome.runtime.MessageSender)=>{
       if(m.type==='ELEMENT_PICKED'&&m.requestId===pickerId.current&&sender.id===chrome.runtime.id&&sender.frameId===0&&sender.tab?.id===site?.tabId){setReceipt(null);setTarget(m.context.target);void changeWorkflow({scope:'element',selectors:m.context.target?.selectorCandidates??[]}).catch(fail);setSelectors(m.context.target?.selectorCandidates??[]);setEnvelope(null);setPicking(false);}
-      if(m.type==='PICK_CANCELLED'){setPicking(false);pickerId.current='';}
+      if(m.type==='PICK_CANCELLED'&&sender.id===chrome.runtime.id&&sender.frameId===0&&sender.tab?.id===site?.tabId){setPicking(false);pickerId.current='';}
     };
     chrome.runtime.onMessage.addListener(onMessage);return()=>chrome.runtime.onMessage.removeListener(onMessage);
   },[site?.tabId]);
@@ -450,7 +455,7 @@ export default function App({initialView='home',embedded=false}:{initialView?:'h
     <footer class="chat-composer">
 
       {reference?<div class="chat-reference"><details><summary>{reference.name} · 版本 {reference.versionId.slice(0,8)} · {lineLabel(reference.lines)}{reference.versionId!==effective?.versionId?' · 历史快照':''}</summary><pre>{reference.text}</pre></details><button aria-label="移除代码引用" disabled={generating} onClick={removeReference}>×</button></div>:null}
-      <label>执行方 <select aria-label="执行方" value={executor} disabled={!editable} onChange={e=>{const value=e.currentTarget.value;void chrome.storage.local.set({'luban:v3:executor':value}).then(()=>{setExecutor(value);setEnvelope(null);setNotice(value==='codex'?'本地 Codex 将以最新草稿及有限历史新建专用会话；不接管其他聊天，调用计费以 Codex 账号为准。':'已切回第三方模型，最新草稿保留。');}).catch(fail);}}><option value="provider">第三方模型</option><option value="codex">本地 Codex</option></select></label>
+      <label>执行方 <select aria-label="执行方" value={executor} disabled={!editable} onChange={e=>{const value=e.currentTarget.value;void executorStorage.set({[currentExecutorKey]:value}).then(()=>{setExecutor(value);setEnvelope(null);setNotice(value==='codex'?'本地 Codex 将以最新草稿及有限历史新建专用会话；不接管其他聊天，调用计费以 Codex 账号为准。':'已切回第三方模型，最新草稿保留。');}).catch(fail);}}><option value="provider">第三方模型</option><option value="codex">本地 Codex</option></select></label>
       <div class="chat-context"><label class="chat-thinking"><input type="checkbox" aria-label="推理模式" checked={thinkingEnabled} disabled={!editable||executor==='codex'} onChange={e=>void toggleThinking(e.currentTarget.checked)}/>推理</label><button onClick={()=>setContextOpen(!contextOpen)}>{workflow.scope==='page'?'◌ 当前页面':workflow.scope==='module'?'◎ 完整模块':'◎ 已点选元素'} ⌄</button>{target?<button aria-label="清除点选" disabled={!editable} onClick={()=>void clearPick()}>×</button>:null}<button onClick={()=>void prepare(repairAllowed,false)} disabled={!editable||!input.trim()||!online}>发送范围</button></div>
       {contextOpen?<div class="chat-context-details"><TargetCard workflow={workflow} candidates={target?.targetContext?.candidates??[]} busy={!editable} onSelect={(c,scope)=>void selectTarget(c,scope)} onPreview={()=>void previewTarget()} onConfirm={()=>{void changeWorkflow({confirmStrategy:true}).catch(fail);}} onTrigger={trigger=>{void changeWorkflow({trigger}).catch(fail);}} onEffect={expectedEffect=>{void changeWorkflow({expectedEffect}).catch(fail);}}/><label>保留范围<textarea aria-label="保留范围" value={constraints} disabled={!editable} onInput={e=>{setConstraints(e.currentTarget.value);setEnvelope(null);setReceipt(null);}}/></label></div>:null}
       <div class="chat-input-shell"><textarea id="intent" aria-label="发送需求或继续反馈" rows={2} value={generating||analysing?queuedText:input} disabled={preparing||versionBusy} onInput={e=>chatInput(e.currentTarget.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&e.keyCode!==229){e.preventDefault();void sendChat();}}} placeholder="描述想法，或继续说哪里还不理想…"/><div><button onClick={()=>void pick()} disabled={!editable||!site}>⌖ 点选元素</button><small>{generating?'可输入下一条需求':'继续说，就能继续改'}</small><button class="chat-send" aria-label={generating||analysing?'停止生成':'发送'} disabled={!(generating||analysing)&&(!editable||!online||!input.trim()||mismatch||!site)} onClick={()=>void sendChat()}>{generating||analysing?'■':'↑'}</button></div></div><p>发送需求与有限摘要 · {thinkingEnabled?'推理已开启':'推理已关闭'} · {repairAllowed?'允许修复 1 次':'不追加自动修复'}</p>

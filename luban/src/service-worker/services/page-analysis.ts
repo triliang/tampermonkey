@@ -43,5 +43,6 @@ export class PageAnalysis {
       live();await check();return parseSuggestions(result.text);
     }finally{if(this.running.get(id)===client)this.running.delete(id);}
   }
+  cancelAll(){for(const id of [...this.running.keys(),...this.previews.keys()])this.cancel(id);}
   cancel(id:string){this.previews.delete(id);this.running.get(id)?.cancel();this.running.delete(id);}
 }

@@ -8,9 +8,9 @@ export class PageGrants {
  constructor(private store:ScriptStore,private connection:Connection,private session:()=>Promise<string>,private capture:()=>Promise<CapturedPage>,private boundCapture:(binding:PageBinding,selectors?:string[])=>Promise<CapturedPage>){}
  private serialize<T>(work:()=>Promise<T>):Promise<T>{const next=this.queue.then(work);this.queue=next.catch(()=>undefined);return next;}
  async list():Promise<PageGrant[]>{await this.store.ready();const session=await this.session();return(await this.store.db.all<PageGrant>('pageGrants')).filter(g=>g.workerId===workerId&&g.browserSession===session);}
- create(tabId:number,url:string,allowDrafts=false,workspaceId?:string):Promise<PageGrant[]>{return this.serialize(async()=>{
+ create(tabId:number,url:string,allowDrafts=false,workspaceId?:string,capture=this.capture):Promise<PageGrant[]>{return this.serialize(async()=>{
   const status=await this.connection.run('status');if(status.status!=='connected'||!status.profileId)throw new DataError('BRIDGE_DISCONNECTED','请先在设置中连接本机 Bridge。');
-  const page=await this.capture();if(page.binding.tabId!==tabId||page.binding.url!==url)throw new DataError('PAGE_CHANGED','展示的页面已变化，请刷新页面状态后重新授权。');
+  const page=await capture();if(page.binding.tabId!==tabId||page.binding.url!==url)throw new DataError('PAGE_CHANGED','展示的页面已变化，请刷新页面状态后重新授权。');
   const session=await this.session();await this.store.ready();
   if(allowDrafts){const ws=workspaceId?await this.store.workspaces.get(workspaceId):undefined;if(!ws||ws.host!==page.binding.host)throw new DataError('WORKSPACE_NOT_GRANTED','请先选择当前页面的工具工作区。');}
   const grant:PageGrant={id:crypto.randomUUID(),profileId:status.profileId,browserSession:session,workerId,navigationEpoch:Date.now(),binding:page.binding,title:page.context.meta.title.slice(0,160),createdAt:Date.now(),...(allowDrafts?{workspaceId}:{}),capabilities:allowDrafts?['context.read','tool.read','draft.submit','trial.request']:['context.read']};

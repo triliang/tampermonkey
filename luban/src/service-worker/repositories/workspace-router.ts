@@ -1,3 +1,4 @@
+import {workspaceAvailableToPanel} from './workspace-store';
 import {workspaceLocked} from '../services/workspace-lock';
 import type { ConversationMessage, DraftPatch } from '../../shared/v2-types';
 import { DataError } from './database';
@@ -15,7 +16,7 @@ export function assertExtensionPage(sender: chrome.runtime.MessageSender): void 
 export function isWorkspaceCommand(type: unknown): boolean {
   return typeof type === 'string' && ['CREATE_WORKSPACE', 'GET_WORKSPACE', 'LIST_WORKSPACES', 'SAVE_DRAFT', 'DISCARD_DRAFT', 'RENAME_SCRIPT'].includes(type);
 }
-export async function handleWorkspaceCommand(raw: unknown, sender: chrome.runtime.MessageSender, store: ScriptStore): Promise<unknown> {
+export async function handleWorkspaceCommand(raw: unknown, sender: chrome.runtime.MessageSender, store: ScriptStore,panelScope?:string): Promise<unknown> {
   assertExtensionPage(sender);
   if (!raw || typeof raw !== 'object') throw new DataError('INVALID_MESSAGE', '消息无效。');
   const msg = raw as Record<string, unknown>;
@@ -24,14 +25,16 @@ export async function handleWorkspaceCommand(raw: unknown, sender: chrome.runtim
   const ws = store.workspaces;
   if (msg.type === 'CREATE_WORKSPACE') {
     if ((msg.scriptId !== null && typeof msg.scriptId !== 'string') || (msg.host !== null && typeof msg.host !== 'string')) throw new DataError('INVALID_MESSAGE', '网站或脚本编号无效。');
-    return ws.create(msg.scriptId, msg.host);
+    return ws.create(msg.scriptId, msg.host,panelScope);
   }
-  if (msg.type === 'LIST_WORKSPACES') return ws.list();
+  if (msg.type === 'LIST_WORKSPACES') return (await ws.list()).filter(w=>!panelScope||workspaceAvailableToPanel(w,panelScope));
   if (msg.type === 'RENAME_SCRIPT') {
     if (typeof msg.scriptId !== 'string' || !Number.isInteger(msg.expectedRevision) || typeof msg.name !== 'string') throw new DataError('INVALID_MESSAGE', '修改名称消息无效。');
     return ws.rename(msg.scriptId, msg.expectedRevision as number, msg.name);
   }
   if (typeof msg.workspaceId !== 'string' || !msg.workspaceId) throw new DataError('INVALID_MESSAGE', '缺少工作区编号。');
+  if(panelScope&&msg.type==='GET_WORKSPACE')await ws.claimPanel(msg.workspaceId,panelScope);
+  if(panelScope&&(await ws.get(msg.workspaceId))?.panelScope!==panelScope)throw new DataError('WRONG_TAB_WORKSPACE','此草稿属于其他标签页，请在当前标签页重新打开工具。');
   if (msg.type === 'GET_WORKSPACE') return { workspace: await ws.get(msg.workspaceId), messages: await ws.conversation(msg.workspaceId) };
   if(workspaceLocked(msg.workspaceId))throw new DataError('WORKSPACE_BUSY','当前工作区正在处理，请等待或取消。');
   if (!Number.isInteger(msg.expectedDraftRevision)) throw new DataError('INVALID_MESSAGE', '缺少草稿版本。');
