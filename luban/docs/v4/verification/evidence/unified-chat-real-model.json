@@ -1,0 +1,27 @@
+{
+  "checkedAt": "2026-10-18T11:04:42.639Z",
+  "workspaceId": "4c1d747f-bbf0-4a53-ab88-a1d678fc3a7f",
+  "conversationId": "a467ec2c-adb6-4c41-ac6a-deca0d974397",
+  "status": "candidate",
+  "questionCount": 1,
+  "answerCount": 1,
+  "events": [
+    {
+      "sequence": 20,
+      "type": "run.started",
+      "revision": 4,
+      "epoch": 6,
+      "time": 1792321339490
+    },
+    {
+      "sequence": 21,
+      "type": "run.finished",
+      "revision": 4,
+      "epoch": 6,
+      "time": 1792321348087
+    }
+  ],
+  "artifactOperationId": "33ae397b-8818-4b6d-9d4e-1936e61e554e",
+  "artifactCreatedBeforeQuestion": true,
+  "ordinaryChatNoPageOrGeneration": true
+}

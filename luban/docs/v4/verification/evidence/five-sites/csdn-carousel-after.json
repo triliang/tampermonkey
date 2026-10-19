@@ -1,0 +1,29 @@
+[
+  {
+    "class": "banner-img-active",
+    "display": "none",
+    "frames": 1,
+    "r": {
+      "h": 0,
+      "w": 0
+    }
+  },
+  {
+    "class": "home-project-cont-swiper el-carousel el-carousel--horizontal",
+    "display": "block",
+    "frames": 0,
+    "r": {
+      "h": 271,
+      "w": 1232
+    }
+  },
+  {
+    "class": "el-carousel el-carousel--horizontal",
+    "display": "block",
+    "frames": 2,
+    "r": {
+      "h": 380,
+      "w": 320
+    }
+  }
+]

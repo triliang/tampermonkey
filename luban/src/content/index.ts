@@ -1,3 +1,4 @@
+import {TargetRegistry} from './annotations/registry';
 import {showCodePreview,dismissCodePreview} from './code-preview';
 import {clearRangePreview,previewRange,ownElement} from './target-context';
 // Content Script（ISOLATED world，按需注入）。
@@ -24,8 +25,22 @@ function boot(): void {
   g[LOADED_FLAG] = true;
 
   const pickerSession = createPickerSession();
+  const targets = new TargetRegistry();
 
   chrome.runtime.onMessage.addListener((msg: LubanMessage, _sender, sendResponse) => {
+    if((msg as {type:string}).type==='V4_TARGETS'){
+      try {const raw=msg as unknown as {action:string;ids?:string[];excluded?:string[];color?:string;offset?:number};
+        if(raw.action==='scan')sendResponse({ok:true,data:targets.scan(raw.offset)});
+        else if(raw.action==='show')sendResponse({ok:true,data:targets.show(raw.ids??[],raw.excluded??[],raw.color)});
+        else if(raw.action==='check')sendResponse({ok:true,data:targets.check(raw.ids??[],raw.color??'hide')});
+        else if(raw.action==='prepare')sendResponse({ok:true,data:targets.prepare(raw.ids??[])});
+        else if(raw.action==='resolve')sendResponse({ok:true,data:targets.resolve(raw.ids??[])});
+        else if(raw.action==='clear'){targets.clear();sendResponse({ok:true});}
+        else if(raw.action==='locate'){targets.locate(raw.ids?.[0]??'');sendResponse({ok:true});}
+        else if(raw.action==='manual'){pickerSession.cancel();pickerSession.start(el=>{try{sendResponse({ok:true,data:targets.manual(el,raw.ids??[])});}catch(e){sendResponse({ok:false,error:String(e)});}},()=>sendResponse({ok:false,error:'已取消点选'}));return true;}
+        else sendResponse({ok:false,error:'INVALID_TARGET_ACTION'});
+      }catch(e){sendResponse({ok:false,error:String(e)});}return;
+    }
     switch (msg.type) {
       case 'RENDER_CODE_PREVIEW':{void showCodePreview(msg.snapshot).then(sendResponse).catch(e=>sendResponse({ok:false,error:String(e)}));return true;}
       case 'DISMISS_CODE_PREVIEW':{sendResponse(dismissCodePreview(msg.sessionId));return;}

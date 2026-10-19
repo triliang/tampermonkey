@@ -1,0 +1,2 @@
+import {it,expect} from 'vitest';import {harnessHistory} from './harness-history';
+it('bounds original transcript context by bytes and count without mutating stored history',()=>{const history=Array.from({length:60},(_,i)=>({role:'user' as const,text:'汉'.repeat(10000),createdAt:i}));const result=harnessHistory(history);expect(result.length).toBeLessThanOrEqual(40);expect(new TextEncoder().encode(JSON.stringify(result)).length).toBeLessThan(100*1024);expect(result.at(-1)?.createdAt).toBe(59);expect(history[59].text.length).toBe(10000);});

@@ -1,0 +1,23 @@
+{
+  "time": "2026-10-19T02:23:30.613832+00:00",
+  "bridgeVersion": "0.6.6",
+  "liveBridgeVersion": "0.6.6",
+  "checks": {
+    "passed": 12,
+    "total": 12
+  },
+  "tests": {
+    "extension": 453,
+    "bridge": 88,
+    "harness": 17,
+    "total": 558
+  },
+  "sourceSha256": {
+    "bridge/src/harness-service.mjs": "ffdc68e69ad101b59a9c00ab54ecfb1c1da17abdd5753ad58b568eadf4c819c9",
+    "bridge/src/protocol-contract.json": "1a6b6be946c18f34e6a8c0249cb8ed542961a0b26dd2b0d5569f0b9a473ffe70",
+    "src/service-worker/index.ts": "68901ee412cc85d0d291a9791ab0fb9d4e6ddd7bc9bd7c6429abcdc1e24697cb",
+    "src/service-worker/services/harness-model-config.ts": "937d8fe98262c799b115a773f66d32a7018cf4ebd6fc0a3303ab63caec8b4ddc",
+    "src/service-worker/services/bridge-connection.ts": "9ad9b5ed39ba7ef4d86334d81de57e76a43f5ef7c88666e68aead3f72a5543c3",
+    "src/shared/harness-errors.ts": "0a70d28ec206c3effe926501f91bc9b24b4777df6bf11ce3b7ff90ecba6467b3"
+  }
+}

@@ -1,3 +1,4 @@
+import {HarnessService} from './harness-service.mjs';
 import {ClientStore} from './store/client-store.mjs';import {TaskCoordinator} from './task-coordinator.mjs';import {ClientGateway} from './client-gateway.mjs';
 import {TaskStore} from './store/task-store.mjs';import {DiagnosticStore} from './store/diagnostic-store.mjs';
 import {createServer,createConnection} from 'node:net';
@@ -30,11 +31,12 @@ export function startDaemon({dir,allowedOrigins,idleMs=60000}){
  try{profiles=new ProfileStore(join(dir,'profiles.sqlite'));profiles.resetPages();chmodSync(join(dir,'profiles.sqlite'),0o600);tasks=new TaskStore(join(dir,'tasks.sqlite'));diagnostics=new DiagnosticStore(join(dir,'diagnostics.sqlite'));for(const file of ['tasks.sqlite','diagnostics.sqlite'])chmodSync(join(dir,file),0o600);}catch(e){profiles?.close();tasks?.close();diagnostics?.close();releaseStartup();try{if(JSON.parse(readFileSync(paths.lock,'utf8')).token===token)unlinkSync(paths.lock);}catch{/* preserve another owner */}throw e;}
  const clientsStore=new ClientStore(profiles);const coordinator=new TaskCoordinator(tasks,profiles);
  const agent=new AgentService(tasks,dir);
- const services={agent,profiles,clients:clientsStore,coordinator,tasks,diagnostics,maintain:()=>({tasks:tasks.maintain(),diagnostics:diagnostics.maintain()})};
+ const harness=new HarnessService(profiles,dir);
+ const services={harness,agent,profiles,clients:clientsStore,coordinator,tasks,diagnostics,maintain:()=>({tasks:tasks.maintain(),diagnostics:diagnostics.maintain(),harness:harness.maintain()})};
  services.channel=new FeishuChannel(services,dir);
  const maintenanceTimer=setInterval(()=>{try{services.maintain();}catch{/* read-only health/export remains available for recovery */}},5*60000);maintenanceTimer.unref();
  const clients=new Set();let timer,closed=false;
- const cleanup=async()=>{if(closed)return;closed=true;clearTimeout(timer);clearInterval(maintenanceTimer);releaseStartup();for(const socket of clients)socket.destroy();if(services.channel.state==='connected')await services.channel.disconnect({profileId:services.channel.profileId});await agent.close();profiles.close();tasks.close();diagnostics.close();try{const owner=JSON.parse(readFileSync(paths.lock,'utf8'));if(owner.token===token){unlinkSync(paths.lock);if(existsSync(paths.socket))unlinkSync(paths.socket);}}catch{/* preserve a different owner */}};
+ const cleanup=async()=>{if(closed)return;closed=true;clearTimeout(timer);clearInterval(maintenanceTimer);releaseStartup();for(const socket of clients)socket.destroy();if(services.channel.state==='connected')await services.channel.disconnect({profileId:services.channel.profileId});await agent.close();harness.close();profiles.close();tasks.close();diagnostics.close();try{const owner=JSON.parse(readFileSync(paths.lock,'utf8'));if(owner.token===token){unlinkSync(paths.lock);if(existsSync(paths.socket))unlinkSync(paths.socket);}}catch{/* preserve a different owner */}};
  const server=createServer(socket=>{
   clients.add(socket);clearTimeout(timer);const decoder=new FrameDecoder();let gateway;
   const handshakeTimer=setTimeout(()=>socket.destroy(),5000);

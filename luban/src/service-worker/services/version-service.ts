@@ -13,7 +13,7 @@ type Executor=(binding:PageBinding,v:ScriptVersion,namespace:string,hash:string,
 const samePage=(a:PageBinding,b:PageBinding)=>a.tabId===b.tabId&&a.documentId===b.documentId&&a.url===b.url&&a.host===b.host;
 export class VersionService {
   private running=new Set<string>();
-  constructor(private store:ScriptStore,private capture:(selectors?:string[])=>Promise<CapturedPage>,private execute:Executor,private coordinate?: (id:string,revision:number,candidate:ScriptVersion,opId:string,commit:()=>Promise<ScriptRecord>)=>Promise<ScriptRecord>,private verifyLive?:()=>Promise<void>){}
+  constructor(private store:ScriptStore,private capture:(selectors?:string[])=>Promise<CapturedPage>,private execute:Executor,private coordinate?: (id:string,revision:number,candidate:ScriptVersion,opId:string,commit:()=>Promise<ScriptRecord>)=>Promise<ScriptRecord>,private verifyLive?:()=>Promise<void>,private verifyTarget?:(id:string,version:ScriptVersion)=>Promise<void>){}
   private async workspace(id:string,revision:number){
     const ws=await this.store.workspaces.get(id);
     if(!ws||ws.draftRevision!==revision)throw new DataError('REVISION_CONFLICT','草稿已变化，请重新打开。');
@@ -39,6 +39,7 @@ export class VersionService {
       if(!ws.host||page.binding.host!==ws.host)throw new DataError('WRONG_PAGE','请切回工具适用网站。');
       const namespace=ws.scriptId??'workspace:'+id;
       const values=await this.store.workspaces.readGm(namespace);
+      await this.verifyTarget?.(id,ws.draft);
       await this.store.db.mutate(async tx=>{await assertWorkspaceOwner(tx,id,owner);const current=await request<WorkspaceRecord>(tx.objectStore('workspaces').get(id));if(current.draftRevision!==revision)throw new DataError('REVISION_CONFLICT','草稿已变化。');const operation:TrialOperation={id:operationKey,workspaceId:id,ownerToken:owner.token,workerId:owner.workerId,draftRevision:revision,codeHash:hash,binding:page.binding,state:'executing',createdAt:Date.now(),updatedAt:Date.now()};await request(tx.objectStore('approvals').add(operation));});
       executing=true;
       const result=await this.execute(page.binding,ws.draft,ws.scriptId??id,hash,values);

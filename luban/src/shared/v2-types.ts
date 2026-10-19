@@ -43,6 +43,7 @@ export interface WorkspaceRecord {
   updatedAt: number;
 }
 export interface ConversationMessage {
+  agentMessageId?:string;
   scriptAttachment?:import('./script-attachment').ScriptAttachment;
   reasoning?:import('./reasoning').ReasoningStage[];
   reasoningOmitted?:boolean;

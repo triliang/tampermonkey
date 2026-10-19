@@ -1,0 +1,556 @@
+Window: "博客园 - 开发者的网上家园", App: Google Chrome.
+0 standard window 博客园 - 开发者的网上家园 - Google Chrome, URL: …, Secondary Actions: Raise
+	1 container 博客园 - 开发者的网上家园 - Google Chrome, URL: …
+		2 container
+			3 toolbar
+				4 button (disabled) Back
+				5 button (disabled) Forward
+				6 button Reload
+				7 button Home
+				8 container
+					9 pop up button View site information
+					10 text field (settable) Address and search bar, Value: cnblogs.com, Placeholder: Ask Google or type a URL
+					11 button Bookmark this tab
+				12 container
+					13 pop up button Chrono Download Manager
+Has access to this site
+					14 pop up button Immersive Translate: AI Web, PDF & Video Translator
+Has access to this site
+					15 pop up button Pin-It
+					16 pop up button FeHelper(前端助手)
+Has access to this site
+					17 pop up button Instant tools
+					18 pop up button Video Donwloader
+Has access to this site
+					19 pop up button video downloader - CocoCut
+Has access to this site
+					20 pop up button Bookmarks
+Has access to this site
+					21 pop up button Cookie Editor
+Has access to this site
+					22 pop up button Tampermonkey
+Has access to this site
+					23 pop up button Open Nanobrowser
+Has access to this site
+					24 pop up button Web Clipper
+Has access to this site
+					25 pop up button cat-catch
+Has access to this site
+					26 pop up button 书签管理器
+Has access to this site
+					27 pop up button ChatGPT
+Has access to this site
+					28 pop up button Customaise: Click to open (Alt+Shift+C)
+Has access to this site
+					29 pop up button 鲁班 S0 Native 验证
+					30 pop up button 鲁班 Luban
+Has access to this site
+					31 pop up button Extensions
+					32 button Close Side Panel
+				33 button kinson
+				34 pop up button Chrome
+			35 container
+				36 scroll area
+					37 HTML content 博客园 - 开发者的网上家园, URL: …
+						38 container
+							39 container
+								40 content list
+									41 container 开发者的网上家园
+										42 image 博客园Logo
+									43 link 会员, Value: cnblogs.vip/
+									44 link 周边, Value: cnblogs.vip/store
+									45 link 新闻, Value: news.cnblogs.com/
+									46 link 博问, Value: q.cnblogs.com/
+									47 link 闪存, Value: ing.cnblogs.com/
+									48 link 班级, Value: edu.cnblogs.com/
+									49 link 赞助商, Value: cnblogs.com/cmt/p/19316348
+									50 link HarmonyOS, Value: harmonyos.cnblogs.com/
+									51 link Chat2DB, Value: chat2db-ai.com/
+									52 container
+										53 image /pulldown-light.svg
+										54 link 怀旧, Value: cnblogs.com/legacy
+										55 link 园子, Value: home.cnblogs.com/
+										56 link 收藏, Value: wz.cnblogs.com/
+								57 content list
+									58 container
+										59 text field (settable) 代码改变世界
+										60 button 搜索
+									61 container
+										62 link 注册, Value: account.cnblogs.com/signup
+										63 link 登录, Value: account.cnblogs.com/signin
+							64 link click.ctyun.cn/
+							65 container
+								66 content list
+									67 link 分类, Help: 网站分类, Value: cnblogs.com/
+									68 link 精华, Help: 精华区博文, Value: cnblogs.com/pick/
+									69 link 候选, Help: 候选区博文, Value: cnblogs.com/candidate/
+									70 link 订阅, Help: 我订阅的博客, Value: cnblogs.com/subscription
+									71 link 关注, Help: 我关注的博客, Value: cnblogs.com/following
+									72 link 我评, Help: 我评论过的博文, Value: cnblogs.com/aggsite/mycommented
+									73 link 我赞, Help: 我推荐过的博文, Value: cnblogs.com/aggsite/mydigged
+									74 link 足迹, Help: 我的足迹, Value: cnblogs.com/aggsite/myhistory
+									75 container
+										76 link  更多, Value: javascript:void(0)
+										77 link 所有随笔, Value: cnblogs.com/cate/all
+										78 link 所有文章, Value: cnblogs.com/cate/articles
+										79 link 最新评论, Value: cnblogs.com/comment/
+										80 link 官方博客, Value: cnblogs.com/cmt/
+										81 link 博客皮肤, Value: cnblogs.com/skins.aspx
+									82 link 反馈, Value: group.cnblogs.com/forum/public/
+									83 link javascript:void(0)
+								84 content list
+									85 container
+										86 link 【编辑推荐】Linux桌面端应用向鸿蒙PC迁移适配纪实(7/6/1693) , Help: 评论7, 推荐6, 阅读1693, Value: cnblogs.com/KBin/p/23219928
+										87 link », Help: 查看更多编辑推荐, Value: cnblogs.com/aggsite/headline
+									88 container
+										89 link 【最多推荐】使用 .NET 和 Avalonia 构建高性能 Agent 桌面客户端(7/4/532) , Help: 评论7, 推荐4, 阅读532, Value: cnblogs.com/token-ai/p/23350452/tkcode-dotnet-avalonia-agent
+										90 link », Help: 查看24小时推荐排行, Value: cnblogs.com/aggsite/topdigged24h
+									91 container
+										92 link 【新闻头条】一旦你理解了神经可塑性，人生将彻底不同(2/6/297) , Help: 评论2, 推荐6, 阅读297, Value: news.cnblogs.com/n/841523/
+										93 link », Help: 查看更多新闻, Value: news.cnblogs.com/
+									94 container
+										95 link 【推荐新闻】特斯拉会飞了！马斯克把火箭装进汽车，奥特曼惊呼(5/4/312) , Help: 评论5, 推荐4, 阅读312, Value: news.cnblogs.com/n/841518/
+										96 link », Help: 查看更多推荐新闻, Value: news.cnblogs.com/n/recommend
+								97 container
+									98 container
+										99 link 技术思考问题29：Discord能下令，谁敢放权限？, Value: cnblogs.com/snidget/p/23354606
+										100 link 博主头像, Value: cnblogs.com/snidget
+										101 text 01、痛点 + + + + + + | Discord 用户 | > | 适配器进程 | > | DeepSeek Harness | | （聊天窗口） | | （消息转发） | | （执行引擎） | + + + + + + | | | | 一条 thread 很顺手 | 消息能到达 = 有权限？ ...
+										102 link 李福春, Value: cnblogs.com/snidget
+										103 text 2026-10-19 11:25
+										104 link 0, Help: 评论 0, Value: cnblogs.com/snidget/p/23354606
+										105 link 0, Help: 推荐 0, Value: javascript:void(0)
+										106 link 0, Help: 阅读 0, Value: cnblogs.com/snidget/p/23354606
+									107 container
+										108 link 什么是长连接, Value: cnblogs.com/zjdxr-up/p/23320234
+										109 link 博主头像, Value: cnblogs.com/zjdxr-up
+										110 text 一句话定义 长连接是指 TCP 连接建立后不立即关闭，后续多次通信复用同一条连接的机制。 对应的短连接是：每次通信都新建 TCP 连接，用完就关。 短连接的问题 HTTP/1.0 时代默认就是短连接。一次请求的完整流程是： 三次握手 → 发请求 → 收响应 → 四次挥手 → 连接关闭 下次再请求，重 ...
+										111 link FutureAI-Zeng, Value: cnblogs.com/zjdxr-up
+										112 text 2026-10-19 11:24
+										113 link 0, Help: 评论 0, Value: cnblogs.com/zjdxr-up/p/23320234
+										114 link 0, Help: 推荐 0, Value: javascript:void(0)
+										115 link 0, Help: 阅读 0, Value: cnblogs.com/zjdxr-up/p/23320234
+									116 container
+										117 link 技术方案怎么用AI写？四段Prompt链加3个可抄模板, Value: cnblogs.com/uniqueDong/p/23354526
+										118 link 博主头像, Value: cnblogs.com/uniqueDong
+										119 text 我在 V2EX 看到过一个让很多人共鸣的帖子：楼主说自己「下午开完需求评审，明天下午就要开技术评审」，而且每次都是开发到一半才发现技术细节有遗漏，方案文档里压根没写。楼下高赞回复更直接：能让你棘手的问题，大概率是开发过程中才暴露的，能提前评估出来的少之又少，成熟的做法是「提出问题，解决问题，然后更新 ...
+										120 link 码哥字节, Value: cnblogs.com/uniqueDong
+										121 text 2026-10-19 11:23
+										122 link 0, Help: 评论 0, Value: cnblogs.com/uniqueDong/p/23354526
+										123 link 0, Help: 推荐 0, Value: javascript:void(0)
+										124 link 0, Help: 阅读 0, Value: cnblogs.com/uniqueDong/p/23354526
+									125 container
+										126 link PID 的花样：先看懂模糊 PID 和单神经元自适应 PID, Value: cnblogs.com/zw-awa/p/23354337
+										127 text PID 之外还有一堆名字，它们其实都在回答同一个问题：那几个数由谁、在什么时候决定？把老师傅的手感写成规则表，和让参数自己长出来，各自要付什么代价？ ...
+										128 link Zw-awa, Value: cnblogs.com/zw-awa
+										129 text 2026-10-19 11:12
+										130 link 0, Help: 评论 0, Value: cnblogs.com/zw-awa/p/23354337
+										131 link 0, Help: 推荐 0, Value: javascript:void(0)
+										132 link 4, Help: 阅读 4, Value: cnblogs.com/zw-awa/p/23354337
+									133 container
+										134 link 别再死磕 MySQL 了：向量数据库与 RAG 生产落地实录（Java 工程师专场）, Value: cnblogs.com/zrui-xyu/p/23354276
+										135 link 博主头像, Value: cnblogs.com/zrui-xyu
+										136 text MySQL LIKE 仅支持字面匹配，企业知识库 RAG 场景下性能与准确率双双拉胯。本文结合生产项目实录，讲解向量数据库 + RAG 完整落地链路，拆解向量库选型决策树、分块策略、混合检索 RRF 融合、Cross-Encoder 精排、多租户权限隔离与幻觉治理。附带 Java 生产代码、索引调优... ...
+										137 link Rain的Java大神实战圈, Value: cnblogs.com/zrui-xyu
+										138 text 2026-10-19 11:09
+										139 link 0, Help: 评论 0, Value: cnblogs.com/zrui-xyu/p/23354276
+										140 link 0, Help: 推荐 0, Value: javascript:void(0)
+										141 link 16, Help: 阅读 16, Value: cnblogs.com/zrui-xyu/p/23354276
+									142 container
+										143 link 编程语言的六十年：一部做减法的历史, Value: cnblogs.com/codigger/p/23353812
+										144 link 博主头像, Value: cnblogs.com/codigger
+										145 text 01 一部被忽略的历史：语言一直在做减法 关于编程语言，我们总习惯用 "进步" 来形容它的发展。功能越来越多，生态越来越丰富，框架越来越强大。 但换个角度看，你会发现一个反直觉的事实：编程语言的发展史，其实是一部不断做减法的历史。 它的目标从来不是 "能做更多"，而是 "让开发者需要操心的更少"—— ...
+										146 link codigger, Value: cnblogs.com/codigger
+										147 text 2026-10-19 10:49
+										148 link 0, Help: 评论 0, Value: cnblogs.com/codigger/p/23353812
+										149 link 0, Help: 推荐 0, Value: javascript:void(0)
+										150 link 39, Help: 阅读 39, Value: cnblogs.com/codigger/p/23353812
+									151 container
+										152 link 在 VS Code 里自由切换 Copilot、Claude、Codex、OpenCode、Pi、Kimi、Qwen：任何 Agent 都能接, Value: cnblogs.com/formulahendry/p/23353619
+										153 text 现在的 AI Coding Agent，已经多到让人开始犯选择困难症了。 写代码可能想用 GitHub Copilot，复杂重构想试 Claude Code，某些任务更适合 Codex，喜欢开放生态的会用 OpenCode，还有 Gemini CLI、Qwen Code、Pi、Kimi、Auggie ...
+										154 link formulahendry, Value: cnblogs.com/formulahendry
+										155 text 2026-10-19 10:38
+										156 link 0, Help: 评论 0, Value: cnblogs.com/formulahendry/p/23353619
+										157 link 0, Help: 推荐 0, Value: javascript:void(0)
+										158 link 62, Help: 阅读 62, Value: cnblogs.com/formulahendry/p/23353619
+									159 container
+										160 link 上周热点回顾（10.12-10.18）, Value: cnblogs.com/cmt/p/23353532
+										161 link 博主头像, Value: cnblogs.com/cmt
+										162 text 热点随笔： · 太猛了，一个月干到15W+，给大家推荐一个最近爆火的开源逆向工具：REA (狂师) · HyMT2Sharp 2.0：纯 C# 的混元翻译，现在能跑在显卡上了 (.NET骚操作) · 我做了个86五笔字根图解网站：哪个字忘了怎么拆，查一下就知道 (.NET骚操作) · 装了这么多年 ...
+										163 link 博客园团队, Value: cnblogs.com/cmt
+										164 image 博客园VIP会员
+										165 text 2026-10-19 10:33
+										166 link 0, Help: 评论 0, Value: cnblogs.com/cmt/p/23353532
+										167 link 0, Help: 推荐 0, Value: javascript:void(0)
+										168 link 72, Help: 阅读 72, Value: cnblogs.com/cmt/p/23353532
+									169 container
+										170 link pytest 钩子 pytest_report_teststatus 与启动参数 -n 踩坑记录, Value: cnblogs.com/exioran/p/23352135
+										171 link 博主头像, Value: cnblogs.com/exioran
+										172 text 在自动化测试项目中，我们通过 pytest_report_teststatus 钩子收集用例结果并上报服务端。本地调试一切正常，可一旦给启动命令加上 -n 参数（无论是 -n 1 还是 -n 5），同一个用例就会被上报两次——用例明明只执行了一次，服务端却收到两条一模一样的记录。本文从 pytest ...
+										173 link EXIORAN, Value: cnblogs.com/exioran
+										174 text 2026-10-19 09:15
+										175 link 0, Help: 评论 0, Value: cnblogs.com/exioran/p/23352135
+										176 link 0, Help: 推荐 0, Value: javascript:void(0)
+										177 link 31, Help: 阅读 31, Value: cnblogs.com/exioran/p/23352135
+									178 container
+										179 link 2026年安全测试工具大全，15款主流工具一次看懂, Value: cnblogs.com/jinjiangongzuoshi/p/23352143
+										180 link 博主头像, Value: cnblogs.com/jinjiangongzuoshi
+										181 text 安全测试这个领域，工具的更新换代其实很慢的，姜还是老的辣，常用的安全工具一大半都是活了十年以上的老面孔，今天用和五年前用，其实没多大区别。 2026 年真正变的东西不在工具名单上，而在玩法上。DevSecOps 早已把各类扫描器嵌进到开发流水线里，Nuclei 模板库已经成为漏洞情报的核心来源，就连 ...
+										182 link 狂师, Value: cnblogs.com/jinjiangongzuoshi
+										183 text 2026-10-19 09:13
+										184 link 0, Help: 评论 0, Value: cnblogs.com/jinjiangongzuoshi/p/23352143
+										185 link 0, Help: 推荐 0, Value: javascript:void(0)
+										186 link 0, Help: 阅读 0, Value: cnblogs.com/jinjiangongzuoshi/p/23352143
+									187 container
+										188 link Koog(6)——会话记忆、历史压缩与执行恢复, Value: cnblogs.com/joy99/p/23337615
+										189 link 博主头像, Value: cnblogs.com/joy99
+										190 text 前言 上一篇文章讲了 Strategy Graph，最后用一个天气出行建议的例子，把节点、子图、条件分支、并行执行和 storage 串了起来。到这里，我们已经能把 Agent 的流程组织清楚了。 但程序能顺着图跑完，和它能长期稳定地工作，是两回事。 比如，用户前一轮刚说完“我喜欢室内活动”，下一轮 ...
+										191 link SharpCJ, Value: cnblogs.com/joy99
+										192 text 2026-10-19 09:06
+										193 link 0, Help: 评论 0, Value: cnblogs.com/joy99/p/23337615
+										194 link 0, Help: 推荐 0, Value: javascript:void(0)
+										195 link 43, Help: 阅读 43, Value: cnblogs.com/joy99/p/23337615
+									196 container
+										197 link 字符串 题解, Value: cnblogs.com/lvwangshuOI/p/23351781
+										198 link 博主头像, Value: cnblogs.com/lvwangshuOI
+										199 text 字符串 题解 题意 设删去第 \(k\) 条记录，则要为剩下的 \(n-1\) 条记录分配串 \(s_1,s_2,\dots,s_{n-1}\)，满足： \(|s_i| = l_i\)（长度固定，跳过被删的那条）； \(s_1 < s_2 < \cdots < s_{n-1}\)（按原顺序，字典序严 ...
+										200 link lvwangshu, Value: cnblogs.com/lvwangshuOI
+										201 text 2026-10-19 08:58
+										202 link 0, Help: 评论 0, Value: cnblogs.com/lvwangshuOI/p/23351781
+										203 link 0, Help: 推荐 0, Value: javascript:void(0)
+										204 link 34, Help: 阅读 34, Value: cnblogs.com/lvwangshuOI/p/23351781
+									205 container
+										206 link 和AI一起搞事情#9. Jev不就是个 JSON 分类器？我劝你把这篇看完再说, Value: cnblogs.com/gogoSandy/p/23351507
+										207 link 博主头像, Value: cnblogs.com/gogoSandy
+										208 text BERT 的概率是假的，大模型的速度是慢的——这两件事在 AI 分类任务上困扰了工程师很多年。Jev 用一次 Forward Pass 同时解决了这两个问题，还顺手把"概率输出可信"这件事做了八成。本文从 Kev、Laya 两个开源复现出发，拆架构、拆推理、拆训练，聊应用，把 Jev 的每一个设计决... ...
+										209 link 风雨中的小七, Value: cnblogs.com/gogoSandy
+										210 text 2026-10-19 08:08
+										211 link 0, Help: 评论 0, Value: cnblogs.com/gogoSandy/p/23351507
+										212 link 1, Help: 推荐 1, Value: javascript:void(0)
+										213 link 136, Help: 阅读 136, Value: cnblogs.com/gogoSandy/p/23351507
+									214 container
+										215 link MQTT实战 - QoS 0-1-2 到底怎么选？一张图看懂（四）, Value: cnblogs.com/hugogoos/p/23349841
+										216 link 博主头像, Value: cnblogs.com/hugogoos
+										217 text QoS 选型是 IoT 架构的核心陷阱。本文基于真实项目踩坑经验，拆解 MQTT QoS 0/1/2 的本质：非可靠性档位，而是业务成本权衡。核心结论：能丢用 QoS 0，能重用 QoS 1（必做幂等），仅计费等极少数场景用 QoS 2。强调三端对齐、四次握手开销、弱网风险，提供“三问决策框架”与场... ...
+										218 link IT规划师, Value: cnblogs.com/hugogoos
+										219 text 2026-10-19 07:01
+										220 link 0, Help: 评论 0, Value: cnblogs.com/hugogoos/p/23349841
+										221 link 0, Help: 推荐 0, Value: javascript:void(0)
+										222 link 103, Help: 阅读 103, Value: cnblogs.com/hugogoos/p/23349841
+									223 container
+										224 link 使用 .NET 和 Avalonia 构建高性能 Agent 桌面客户端, Value: cnblogs.com/token-ai/p/23350452/tkcode-dotnet-avalonia-agent
+										225 link 博主头像, Value: cnblogs.com/token-ai
+										226 text 使用 .NET 11 RC2、Avalonia 与 AtomUI 构建 TKCode，介绍本机 Claude Code 与 Codex 的官方登录接入、独立 Agent Host 架构、自研 StreamMark 流式 Markdown 渲染，以及 NativeAOT 首帧和内存 CPU 的测量结果... ...
+										227 link 239573049, Value: cnblogs.com/token-ai
+										228 text 2026-10-19 01:53
+										229 link 7, Help: 评论 7, Value: cnblogs.com/token-ai/p/23350452/tkcode-dotnet-avalonia-agent
+										230 link 5, Help: 推荐 5, Value: javascript:void(0)
+										231 link 532, Help: 阅读 532, Value: cnblogs.com/token-ai/p/23350452/tkcode-dotnet-avalonia-agent
+									232 container
+										233 link GRPC连接机制---长连接分析, Value: cnblogs.com/zjdxr-up/p/23317642
+										234 link 博主头像, Value: cnblogs.com/zjdxr-up
+										235 text gRPC 建立连接后是长连接。 底层基于 HTTP/2，而 HTTP/2 本身就是多路复用的长连接协议。连接一旦建立，默认会一直保持，直到某一方主动关闭或网络中断。 核心机制 1. 连接建立过程 gRPC 客户端启动时，会通过 ClientConn 与目标服务端建立 TCP 连接。如果是 TLS，还 ...
+										236 link FutureAI-Zeng, Value: cnblogs.com/zjdxr-up
+										237 text 2026-10-18 22:50
+										238 link 0, Help: 评论 0, Value: cnblogs.com/zjdxr-up/p/23317642
+										239 link 0, Help: 推荐 0, Value: javascript:void(0)
+										240 link 72, Help: 阅读 72, Value: cnblogs.com/zjdxr-up/p/23317642
+									241 container
+										242 link 用Lean4重构《软件基础》（Software Foundations）——SF-lean4正式完工上线！, Value: cnblogs.com/SilverGo/p/23349054
+										243 link 博主头像, Value: cnblogs.com/SilverGo
+										244 text 重塑经典：用现代 Lean 4 重构《软件基础》全三卷与交互式文档 项目在线文档：https://ghost-silver.github.io/SF-lean4/ 开源代码仓库：https://github.com/Ghost-Silver/SF-lean4 作者：Ghost-Silver · SF ...
+										245 link Ghost-Face, Value: cnblogs.com/SilverGo
+										246 text 2026-10-18 22:45
+										247 link 0, Help: 评论 0, Value: cnblogs.com/SilverGo/p/23349054
+										248 link 1, Help: 推荐 1, Value: javascript:void(0)
+										249 link 56, Help: 阅读 56, Value: cnblogs.com/SilverGo/p/23349054
+									250 container
+										251 link 一文搞懂 Agent Sandbox（沙箱）：为什么 AI 不能随便操作你的电脑？, Value: cnblogs.com/Tomorrowland/p/23347321
+										252 link 博主头像, Value: cnblogs.com/Tomorrowland
+										253 text 一文搞懂 Agent Sandbox（沙箱）：为什么 AI 不能随便操作你的电脑？ 一、为什么 Agent 需要沙箱？ 假设你正在使用 Claude Code、Codex 这样的 AI 编程助手。 你让 Agent 帮忙修改代码、安装依赖、运行测试，它都能自动完成。 但问题来了： 如果 Agent ...
+										254 link Tomorrowland_D, Value: cnblogs.com/Tomorrowland
+										255 text 2026-10-18 17:50
+										256 link 0, Help: 评论 0, Value: cnblogs.com/Tomorrowland/p/23347321
+										257 link 1, Help: 推荐 1, Value: javascript:void(0)
+										258 link 239, Help: 阅读 239, Value: cnblogs.com/Tomorrowland/p/23347321
+									259 container
+										260 link Kali Linux 下使用 Metasploit Framework 进行漏洞利用的完整流程, Value: cnblogs.com/Johny-zhao/p/23346366
+										261 link 博主头像, Value: cnblogs.com/Johny-zhao
+										262 text 以下是将整个步骤说明 漏洞利用流程的全方位详细整理版；整体按“授权准备 → 信息收集 → 漏洞确认 → 模块与 Payload 选择 → 参数配置 → 执行利用 → 会话管理 → 后渗透提权 → 横向移动注意事项 → 清理与报告 → 示例 → 检查清单”展开。仅限自有靶机、本地授权靶场或书面授权范围 ...
+										263 link Johny_Zhao, Value: cnblogs.com/Johny-zhao
+										264 text 2026-10-18 13:41
+										265 link 0, Help: 评论 0, Value: cnblogs.com/Johny-zhao/p/23346366
+										266 link 1, Help: 推荐 1, Value: javascript:void(0)
+										267 link 84, Help: 阅读 84, Value: cnblogs.com/Johny-zhao/p/23346366
+									268 container
+										269 link 用一份 JSON 串起 HTTP / Dubbo / WebService / SQL / 脚本：开源服务编排引擎 service-arrange, Value: cnblogs.com/huangrenhui/p/23346166
+										270 link 博主头像, Value: cnblogs.com/huangrenhui
+										271 text 写在前面 日常业务里，一个"下单"动作背后往往要调十几个接口：HTTP 主单服务、Dubbo 库存、WebService 老物流、一段 SQL 校验、再加个 Shell 通知脚本。写死在代码里，链路看不清、改动牵一发动全身；换个顺序、加个失败补偿，就得发版。 service-arrange 想解决的 ...
+										272 link 码猿手, Value: cnblogs.com/huangrenhui
+										273 text 2026-10-18 12:46
+										274 link 2, Help: 评论 2, Value: cnblogs.com/huangrenhui/p/23346166
+										275 link 1, Help: 推荐 1, Value: javascript:void(0)
+										276 link 138, Help: 阅读 138, Value: …
+								277 container
+									278 link 1, Value: cnblogs.com/
+									279 link 2, Value: …
+									280 link 3, Value: …
+									281 text ···
+									282 link 100, Value: …
+									283 link >, Value: …
+								284 heading 48小时阅读排行, Value: 4
+									285 link 48小时阅读排行, Value: …
+								286 content list
+									287 container
+										288 text 1
+										289 link 百万数据导出 Excel 实战：从 OOM 到丝滑落地的完整演进, Value: …
+									290 container
+										291 text 2
+										292 link 使用Vibe Coding从零开发论坛（上）, Value: …
+									293 container
+										294 text 3
+										295 link 使用 .NET 和 Avalonia 构建高性能 Agent 桌面客户端, Value: …
+									296 container
+										297 text 4
+										298 link 一文搞懂 Agent Sandbox（沙箱）：为什么 AI 不能随便操作你的电脑？, Value: …
+									299 container
+										300 text 5
+										301 link MQTT实战 - Topic设计12条军规：90%的消息混乱都源于命名错误（三）, Value: …
+									302 container
+										303 text 6
+										304 link Kali Linux 密码破解实战：从字典生成到 GPU 暴力破解全流程, Value: …
+								305 heading 10天推荐排行, Value: 4
+									306 link 10天推荐排行, Value: …
+								307 content list
+									308 container
+										309 text 1
+										310 link SimdGcdrNet：纯 C# 的文档照片去阴影，3080 Ti 上 9.6 ms 一张，浏览器里也能跑, Value: …
+									311 container
+										312 text 2
+										313 link HyMT2Sharp 2.0：纯 C# 的混元翻译，现在能跑在显卡上了, Value: …
+									314 container
+										315 text 3
+										316 link 我做了个86五笔字根图解网站：哪个字忘了怎么拆，查一下就知道, Value: …
+									317 container
+										318 text 4
+										319 link MQTT实战 - 用了8年MQTT，我为什么还要重新系统啃一遍（一）, Value: …
+									320 container
+										321 text 5
+										322 link 不用 Python 也能跑 YOLO？这个 .NET 库让我扔掉了 OpenCV, Value: …
+									323 container
+										324 text 6
+										325 link 一行代码在 .NET 项目里启用 Satori GC, Value: …
+								326 link …
+								327 heading 15天热门博文, Value: 4
+									328 link 15天热门博文, Value: …
+								329 content list
+									330 container
+										331 text 1
+										332 link 太猛了，一个月干到15W+，给大家推荐一个最近爆火的开源逆向工具：REA, Value: …
+									333 container
+										334 text 2
+										335 link SimdPaddleOCR 2.0：再快15倍！见证纯C#驱动的GPU性能核弹, Value: …
+									336 container
+										337 text 3
+										338 link Linux桌面端应用向鸿蒙PC迁移适配纪实, Value: …
+									339 container
+										340 text 4
+										341 link 国庆假期我干了件事：让 Agent 平时睡大觉，数据一变就醒来干活, Value: …
+									342 container
+										343 text 5
+										344 link 2026 年 AI 工具选型实录：我把 200 多款工具试了一遍，最后留在工作流里的只有这 12 个, Value: …
+									345 container
+										346 text 6
+										347 link 我劝你别再无脑用 MySQL：PostgreSQL 这 5 个底层能力，正在拉开架构师差距, Value: …
+								348 heading 编辑推荐, Value: 4
+									349 link 编辑推荐, Value: …
+								350 content list
+									351 container
+										352 text 1
+										353 link Linux桌面端应用向鸿蒙PC迁移适配纪实, Value: …
+									354 container
+										355 text 2
+										356 link Koog Agent 的编程模型, Value: …
+									357 container
+										358 text 3
+										359 link 你把时间放在哪里，哪里就会生长 | 一个互联网人的时间配置法, Value: …
+									360 container
+										361 text 4
+										362 link 一切都会回潮-写在一个职业周期的低处, Value: …
+									363 container
+										364 text 5
+										365 link 开源：基于.Net开发的数据库自治诊断平台——DBPilot, Value: …
+									366 container
+										367 text 6
+										368 link Memory 记忆设计讨论：Agent Memory 到底应该是什么？, Value: …
+								369 link …
+								370 heading 热门新闻, Value: 4
+									371 link 热门新闻, Value: …
+								372 content list
+									373 container
+										374 text 1
+										375 link 特斯拉会飞了！马斯克把火箭装进汽车，奥特曼惊呼, Value: …
+									376 container
+										377 text 2
+										378 link 一旦你理解了神经可塑性，人生将彻底不同, Value: …
+									379 container
+										380 text 3
+										381 link DeepSeek V4.1 Flash 新版本上线：许愿式编程一键成真, Value: …
+									382 container
+										383 text 4
+										384 link 是的，特斯拉真造了一辆「飞行汽车」！, Value: …
+									385 container
+										386 text 5
+										387 link “疯狂小杨哥”过亿粉丝账号已注销，新注册“庆杨”谈反省与展望, Value: …
+									388 container
+										389 text 6
+										390 link 中产的“烧钱玩具”，杀进商场一楼, Value: …
+								391 heading 推荐新闻, Value: 4
+									392 link 推荐新闻, Value: …
+								393 content list
+									394 container
+										395 text 1
+										396 link 一旦你理解了神经可塑性，人生将彻底不同, Value: …
+									397 container
+										398 text 2
+										399 link 特斯拉会飞了！马斯克把火箭装进汽车，奥特曼惊呼, Value: …
+									400 container
+										401 text 3
+										402 link 155款App集体说「不」：豆包手机公示期结束，半个中国互联网关上了门, Value: …
+									403 container
+										404 text 4
+										405 link 刚刚，Anthropic 宣布弃用Git，统治编程20年的工具顶不住AI了, Value: …
+									406 container
+										407 text 5
+										408 link 豆包手机助手将放开第三方应用操作权限 阿里系、腾讯系、美团、拼多多、工行等拒绝, Value: …
+									409 container
+										410 text 6
+										411 link 为什么每个APP都想追着借钱给你？, Value: …
+							412 container
+								413 text 战略合作：
+								414 link Chat2DB, Value: …
+								415 link 凌霞软件, Value: …
+							416 container
+								417 text 友情链接：
+								418 link 艾思科蓝, Value: …
+								419 link 飞致云, Value: …
+								420 link 阿里云, Value: …
+								421 link 腾讯云, Value: …
+								422 link 华为云, Value: …
+								423 link 天翼云, Value: …
+								424 link 站长之家, Value: …
+								425 link 腾讯WeTest, Value: …
+								426 link IShell, Value: …
+							427 container
+								428 text Powered by .NET 10.0 on Kubernetes
+								429 link 关于博客园, Value: …
+								430 link 联系我们, Value: …
+								431 link 商务合作, Value: …
+								432 link 企业博客, Value: …
+								433 link 企业发布, Value: …
+								434 text Copyright © 2004-2026 博客园 版权所有
+								435 link 浙公网安备 33010602011771号, Value: …
+								436 link 浙ICP备2021040463号-3, Value: …
+								437 link 违法和不良信息举报中心, Value: …
+								438 text 举报邮箱：report@cnblogs.com
+								439 link 网站举报中心, Value: …
+						440 button 22 疑似目标
+			441 scroll area
+				442 HTML content 鲁班 Luban, URL: …
+					443 container
+						444 container 当前页面与工具操作
+							445 text www.cnblogs.com
+							446 button 新建工具
+							447 button 我的工具
+							448 button 分析此页面
+							449 button 设置
+						450 container 当前对话
+							451 container
+								452 text 你 检查当前页面有哪些广告元素，只提议有证据的广告范围，简要说明位置和依据。不要把导航图标、普通文章、榜单或结构节点列表当广告，不生成脚本。
+							453 container
+								454 text 鲁班 已标出候选 22：顶部导航下方的通栏图片链接，指向 click.ctyun.cn，具有推广位特征；具体图片文案仍待核对。候选 23–25 属于其内部，不重复选择。 请核对该范围。当前仅分析了部分页面，不能认定广告已全部找到；未生成脚本。
+							455 container 需求与页面方案
+								456 container 目标分析
+									457 text 待确认范围 · 1 处
+									458 text 请核对这些区域是否符合你的需求，确认后再制定处理方案。
+									459 button 重新分析目标
+									460 text 仅分析本次已读取范围；未覆盖完整页面，嵌入页面及 Shadow DOM 内部可能未读取。
+									461 container 当前选择
+										462 text 当前选择： 候选 22
+									463 container 待确认目标
+										464 container
+											465 checkbox 链接区域 候选 22 · 2147 × 32, Value: 1
+											466 text 链接区域 候选  22  · 2147 × 32
+										467 button 定位
+									468 button 确认所选目标
+									469 button 确认所选并采用隐藏方案
+									470 disclosure triangle 手动补选 / 采集详情（40 个结构节点）
+										471 text 手动补选 / 采集详情（
+										472 text 40
+										473 text  个结构节点）
+									474 container
+										475 disclosure triangle 标注与检查
+											476 text 标注与检查
+										477 button 检查页面效果
+										478 button 显示标注
+										479 button 关闭标注
+										480 button 蓝色标注
+										481 button 绿色标注
+								482 text 已标注所选 1 处范围，未选结构节点不显示。
+							483 container
+								484 text 鲁班 本地 Codex 已选中；沿用当前鲁班会话和确认流程，使用本机 Codex 登录与默认模型，额度以 Codex 账号为准。
+						485 button ↓ 回到最新
+						486 container
+							487 text 执行方
+							488 pop up button 执行方, Value: 本地 Codex
+								489 (selected) 本地 Codex
+						490 button 授权并识别当前页
+						491 button 手动补选
+						492 text entry area (settable) 发送需求或继续反馈, Placeholder: 描述想法，或继续说哪里还不理想…
+						493 text 继续说，就能继续改
+						494 button (disabled) 发送
+						495 text 发送将调用当前配置的模型 · 读取页面、生成与运行分别确认
+			496 slider Side Panel Resize Handle (draggable), Secondary Actions: Decrement, Increment
+			497 container
+				498 text 鲁班 Luban
+				499 checkbox Unpin from toolbar, Value: 1
+				500 button Close side panel
+			501 pop up button Tab search
+			502 container
+				503 tab group
+					504 tab (settable, boolean) CSDN_专业开发者社区 - Memory usage - 441 MB, Value: off
+						505 button Close
+					506 tab (settable, boolean) 极客时间-学 AI ，用极客时间 - Memory usage - 497 MB, Value: off
+						507 button Close
+					508 tab (settable, boolean) 极客时间-学 AI ，用极客时间 - Memory usage - 401 MB, Value: off
+						509 button Close
+					510 tab (settable, boolean) Kafka 核心技术与实战 - Memory usage - 155 MB, Value: off
+						511 button Close
+					512 tab (settable, boolean) Extensions - 鲁班 Luban - Memory usage - 84.8 MB, Value: off
+						513 button Close
+					514 tab (settable, boolean) 博客园_百度搜索 - Memory usage - 393 MB, Value: off
+						515 button Close
+					516 tab (selected, settable, boolean) 博客园 - 开发者的网上家园 - Memory usage - 230 MB, Value: on
+						517 button Close
+					518 tab (settable, boolean) MQTT实战 - QoS 0-1-2 到底怎么选？一张图看懂（四） - IT规划师 - 博客园 - Memory usage - 158 MB, Value: off
+						519 button Close
+					520 tab (settable, boolean) 我的风险 - Memory usage - 366 MB, Value: off
+						521 button Close
+			522 button New Tab
+			523 button Open Gemini in Chrome
+	524 close button
+	525 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	526 minimize button
+527 menu bar
+	528 Chrome
+	529 File
+	530 Edit
+	531 View
+	532 History
+	533 Bookmarks
+	534 Profiles
+	535 Tab
+	536 Window
+	537 Help
+
+The focused UI element is 442 HTML content 鲁班 Luban, URL: …

@@ -1,0 +1,16 @@
+[
+  {
+    "class": "home-project-cont-swiper el-carousel el-carousel--horizontal",
+    "display": "block",
+    "frames": 0,
+    "h": 271,
+    "w": 1232
+  },
+  {
+    "class": "el-carousel el-carousel--horizontal",
+    "display": "none",
+    "frames": 6,
+    "h": 0,
+    "w": 0
+  }
+]

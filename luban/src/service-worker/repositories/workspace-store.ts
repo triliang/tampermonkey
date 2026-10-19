@@ -52,6 +52,16 @@ export class WorkspaceStore {
   async conversation(id: string): Promise<ConversationMessage[]> {
     await this.initialize(); return (await this.db.get<{ id: string; messages: ConversationMessage[] }>('conversations', id))?.messages ?? [];
   }
+  async appendAgentMessages(id:string,messages:ConversationMessage[]):Promise<ConversationMessage[]> {
+    await this.initialize();
+    if(messages.some(m=>!m.agentMessageId||typeof m.agentMessageId!=='string'||m.agentMessageId.length>256||!['user','assistant'].includes(m.role)||typeof m.text!=='string'||m.text.length>16000||!Number.isFinite(m.createdAt)))throw new DataError('INVALID_MESSAGE','对话消息格式无效。');
+    return this.db.mutate(async tx=>{const ws=await request<WorkspaceRecord|undefined>(tx.objectStore('workspaces').get(id));if(!ws)throw new DataError('WORKSPACE_MISSING','工作区不存在。');
+      const row=await request<{id:string;messages:ConversationMessage[]}|undefined>(tx.objectStore('conversations').get(id));const all=[...(row?.messages??[])];let changed=false;
+      for(const m of messages){const old=all.find(v=>v.agentMessageId===m.agentMessageId);if(old){if(old.role!==m.role||old.text!==m.text||old.createdAt!==m.createdAt)throw new DataError('MESSAGE_CONFLICT','已保存的消息内容发生冲突。');continue;}all.push(m);changed=true;}
+      all.sort((a,b)=>a.createdAt-b.createdAt);if(byteSize({id,messages:all})>this.db.limits.conversationBytes)throw new DataError('CONVERSATION_TOO_LARGE','对话超过工作区容量，原记录保留。');
+      if(changed){await request(tx.objectStore('conversations').put({id,messages:all}));ws.updatedAt=Date.now();await request(tx.objectStore('workspaces').put(ws));}return all;
+    });
+  }
   async saveDraft(id: string, expectedRevision: number, patch: DraftPatch, messages: ConversationMessage[] = [], workflow?:Workflow, owner?:WorkspaceOwner,guard?:(tx:IDBTransaction)=>Promise<void>): Promise<WorkspaceRecord> {
     await this.initialize();
     if (!Number.isInteger(expectedRevision) || expectedRevision < 0 || !patch || typeof patch !== 'object' || Array.isArray(patch)

@@ -1,0 +1,19 @@
+{
+  "time": "2026-10-19T02:23:01.501Z",
+  "before": {
+    "pid": 80700,
+    "liveVersion": "0.6.4",
+    "packageVersion": "0.6.5"
+  },
+  "activeBeforeRestart": {
+    "externalActive": 0,
+    "harnessActive": 0
+  },
+  "after": {
+    "liveVersion": "0.6.6",
+    "packageVersion": "0.6.6"
+  },
+  "pairingFilesModifiedByScript": false,
+  "messagesReplayed": false,
+  "pageAccess": false
+}

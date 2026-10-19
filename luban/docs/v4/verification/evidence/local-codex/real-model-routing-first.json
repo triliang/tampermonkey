@@ -1,0 +1,32 @@
+{
+  "time": "2026-10-19T02:08:02.338Z",
+  "status": {
+    "installed": true,
+    "compatible": true,
+    "restrictionsApplied": true,
+    "version": "0.163.0-alpha.10.2",
+    "executor": "codex",
+    "historyMode": "latest-baseline-new-thread"
+  },
+  "checks": [
+    {
+      "name": "plain-chat-no-tools",
+      "passed": true,
+      "text": "可以先明确需求。"
+    },
+    {
+      "name": "analysis-tool-loop-no-authorization-bypass",
+      "passed": true,
+      "text": "已列出候选 7：右侧临时提示区域，供你确认。当前仅有合成证据，不代表真实页面。\n\n如确认隐藏，请点击“确认所选并采用隐藏方案”。尚未生成或执行脚本。"
+    },
+    {
+      "name": "unapproved-generation-rejected",
+      "passed": true
+    }
+  ],
+  "passed": false,
+  "syntheticOnly": true,
+  "browserExecuted": false,
+  "scriptSaved": false,
+  "error": "HARNESS_MODEL_CODEX_INCOMPATIBLE"
+}

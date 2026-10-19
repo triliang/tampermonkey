@@ -1,0 +1,29 @@
+
+> @luban/harness@0.1.0 test
+> node --test test/*.test.mjs
+
+✔ candidate validates function calls and compatible JSON-only responses (1.850542ms)
+✔ candidate rejects unknown/multiple tools, invalid JSON and expanded grants (0.40925ms)
+✔ Codex is an optional backend without API key; final text preserves messages, constraints and cleans temporary directory (2.916ms)
+✔ real Deep Agents loop executes Codex proposals through the same domain tool dispatcher (40.621834ms)
+✔ Codex generation request interrupts and resumes only through external decision dispatch (12.862917ms)
+✔ invalid JSON, unbound tool, array args and forced tool bypass are rejected; no host tool can be requested (5.092917ms)
+✔ abort signal propagates and failed compatibility never starts a process (1.473084ms)
+✔ ordinary conversation uses no domain tools (11.847792ms)
+✔ middleware wrappers retain auth, timeout and protocol classifications without exposing raw service messages (0.629375ms)
+✔ wrapped API statuses and cyclic causes are bounded (0.107709ms)
+✔ real SDK only binds domain tools; ordinary chat does not dispatch (41.060833ms)
+✔ real SDK executes allowed tool through dispatch (10.350875ms)
+✔ SQLite interrupt survives runtime reconstruction, resume does not bypass decision dispatch (23.793208ms)
+✔ endpoint rejects plaintext remote hosts and embedded credentials (0.199042ms)
+✔ malicious model call to built-in write_file cannot reach host or custom dispatch (6.252875ms)
+✔ missing page authorization is a recoverable tool result and conversation can continue (9.466167ms)
+✔ unexpected dispatch failures remain errors (4.619875ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 794.2775

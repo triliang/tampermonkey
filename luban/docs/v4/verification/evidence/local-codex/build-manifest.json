@@ -1,0 +1,36 @@
+{
+  "time": "2026-10-19T02:19:17.882735+00:00",
+  "bridgeVersion": "0.6.5",
+  "codexVersion": "0.163.0-alpha.10.2",
+  "checks": {
+    "passed": 12,
+    "total": 12
+  },
+  "tests": {
+    "extension": 451,
+    "bridge": 88,
+    "harness": 17,
+    "total": 556
+  },
+  "realModelFlow": true,
+  "installedChromeUpdated": false,
+  "sourceSha256": {
+    "bridge/src/agent-process.mjs": "25a25a359f272c381ac5ea17d9c48d7db51ed30345b283589e4edcec46c1f729",
+    "bridge/src/agent-service.mjs": "b0a55603c26ca1b5627363ee05204e22e86252afcb9db7ed8e3a18b068c3d1b5",
+    "bridge/src/codex-capabilities.mjs": "53f687e5777972f7b8e32b31a5e77c56ae92be7d3c8ed9cd1f01b22d3fb85b55",
+    "bridge/src/harness-service.mjs": "b6b00633a29a4ca89cc8e0b55c8bbd9cb526f6319cbde2fbb03d2329ef12dbd6",
+    "bridge/src/protocol-contract.json": "98bf839e7f38b2ab05ebc321d424ab7a74bfb418771ac61ab04a9edcee460428",
+    "harness/src/codex-model.ts": "5d7b325e69a8690ca5598411f5df95903f99a15959a05e316098bfd642ad1bc8",
+    "harness/src/model-errors.ts": "ea81b83c280ba31cb5c717884a0bb817b6a348e060f60a463214dec6432a0382",
+    "harness/src/runtime.ts": "23f8ec0b5c99f0c127617866eb9857caa745510c962a1e673ca29b3ec0a3b02f",
+    "harness/src/worker.ts": "4b16c9a35947eda170daaa37393662db9b65a8b244fa1e08260d2fdd2d992b34",
+    "harness/dist/codex-model.js": "2ae396c5fe7e750a6110de23114cd4acb8950ee9fb5fe0c555890363ee3ef2a7",
+    "src/service-worker/index.ts": "82fa3d373228deaf508441758935514e2686f2631e5041257eed2aed04ea56b3",
+    "src/service-worker/services/harness-model-config.ts": "4531af57fdd8671748e0bb50be2b80163242047904bcf8e172d586e7725e40d2",
+    "src/sidepanel/App.tsx": "89650a01ac0cdb811518d6d1b521c0521e20af7b515dcb16e86b5d5eb2b7457b",
+    "src/sidepanel/v4/useHarnessChat.ts": "7f39a100b56d4dd2c82b19b5732fe057682d6d13076a9e8740848f03c1097f19",
+    "src/sidepanel/v4/HarnessChat.tsx": "6903c3984dc8dd8d1e76235e3013e1db17ebac7d89a7bb2d7b6b49cacc319182",
+    "src/shared/harness-errors.ts": "7af780249f1541bf5b387467e766cf8607c8af7c13503b6a56adf6f1d0f73a18",
+    "src/options/tabs/ChannelSettings.tsx": "8c7f62d59f603e9be5a0d43fd5a6b5cd76e6370cd0fae5dbd842819f1acaf71f"
+  }
+}

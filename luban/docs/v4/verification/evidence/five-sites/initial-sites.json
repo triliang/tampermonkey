@@ -1,0 +1,880 @@
+[
+  {
+    "status": "fulfilled",
+    "value": {
+      "url": "https://www.csdn.net/",
+      "id": "2028875067",
+      "data": {
+        "frames": [
+          {
+            "class": "",
+            "id": "",
+            "rect": {
+              "height": 180,
+              "width": 296,
+              "x": 1544,
+              "y": 155
+            },
+            "src": "https://kunpeng-sc.csdnimg.cn/",
+            "title": ""
+          },
+          {
+            "class": "",
+            "id": "",
+            "rect": {
+              "height": 380,
+              "width": 320,
+              "x": 1568,
+              "y": 114
+            },
+            "src": "https://kunpeng-sc.csdnimg.cn/",
+            "title": ""
+          },
+          {
+            "class": "",
+            "id": "",
+            "rect": {
+              "height": 380,
+              "width": 320,
+              "x": 1888,
+              "y": 114
+            },
+            "src": "https://kunpeng-sc.csdnimg.cn/",
+            "title": ""
+          }
+        ],
+        "images": [
+          {
+            "alt": "",
+            "class": "",
+            "href": "https://blog.csdn.net/csdnnews/article/details/167992616",
+            "id": "",
+            "parent": {
+              "class": "banner-box",
+              "id": "banner-box",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 164.9609375,
+              "width": 296,
+              "x": 608,
+              "y": 155
+            },
+            "src": "https://img-home.csdnimg.cn/images/20241216100640.jpg"
+          },
+          {
+            "alt": "",
+            "class": "",
+            "href": "https://blog.csdn.net/csdnnews/article/details/167991551",
+            "id": "",
+            "parent": {
+              "class": "banner-box",
+              "id": "banner-box",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 164.9609375,
+              "width": 296,
+              "x": 920,
+              "y": 155
+            },
+            "src": "https://img-home.csdnimg.cn/images/20241216100640.jpg"
+          },
+          {
+            "alt": "",
+            "class": "",
+            "href": "https://blog.csdn.net/csdnnews/article/details/168010315",
+            "id": "",
+            "parent": {
+              "class": "banner-box",
+              "id": "banner-box",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 164.9609375,
+              "width": 296,
+              "x": 1232,
+              "y": 155
+            },
+            "src": "https://img-home.csdnimg.cn/images/20241216100640.jpg"
+          },
+          {
+            "alt": "",
+            "class": "",
+            "href": "",
+            "id": "",
+            "parent": {
+              "class": "banner-box",
+              "id": "banner-box",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 164.9609375,
+              "width": 296,
+              "x": 1544,
+              "y": 155
+            },
+            "src": "https://img-home.csdnimg.cn/images/20241216100640.jpg"
+          }
+        ],
+        "nodeCount": 1594,
+        "textPreview": " 搜索\n会员中心 \n消息\n创作\n首页\n博客\n下载\n学习\n社区\n模型市场\nAI搜索\nAtomGit\nInsCode\n技术会议\n墨衍 MoGrow\n订阅\n关注\n收藏\n历史\n会员中心\n创作中心\n我的算力\n联系我们\n工作时间: 8:30 - 22:00\n客服电话: 400-660-0108\nkefu@csdn.net在线客服\n关于我们招贤纳士商务合作寻求报道协议专区\n友情链接\n视觉中国\n500px\n直聘网\n优设网\nCSDN文库\nCSDN下载\nCSDN问答\n京ICP备19004658号\n经营性网站备案信息",
+        "title": "CSDN_专业开发者社区"
+      }
+    }
+  },
+  {
+    "status": "fulfilled",
+    "value": {
+      "url": "https://www.runoob.com/",
+      "id": "2028875070",
+      "data": {
+        "frames": [],
+        "images": [],
+        "nodeCount": 863,
+        "textPreview": "菜鸟教程 -- 学的不仅是技术，更是梦想！\n首页 菜鸟工具 菜鸟笔记 参考手册 用户笔记 测验/考试 本地书签\n全部教程\n  Python / 数据科学\n  AI / 智能开发\n  前端开发\n  后端开发\n  数据库\n  移动开发\n  DevOps / 工程化\n  编程语言\n  计算机基础\n  XML / Web Service\n  .NET\n  网站建设\nPython / 数据科学\n【学习 Python】\nPython3 是当前主流 Python 版本。\n【学习 Python2.x】\nPyth",
+        "title": "菜鸟教程"
+      }
+    }
+  },
+  {
+    "status": "fulfilled",
+    "value": {
+      "url": "https://www.ithome.com/",
+      "id": "2028875073",
+      "data": {
+        "frames": [],
+        "images": [
+          {
+            "alt": "零跑 A10s 上市：全新镜夜黑外观、505km 续航，9.28 万元",
+            "class": "lazyOwl owl-lazy",
+            "href": "https://www.ithome.com/1/014/460.htm",
+            "id": "",
+            "parent": {
+              "class": "",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 164,
+              "width": 410,
+              "x": -650,
+              "y": 396
+            },
+            "src": "https://img.ithome.com/newsuploadfiles/focus/2e45be4b-7bb9-42db-b6f8-f2523f7aeb9c.jpg"
+          },
+          {
+            "alt": "奇瑞智界将获批独立造车资质，内部人士确认计划独立上市",
+            "class": "lazyOwl owl-lazy",
+            "href": "https://www.ithome.com/1/014/352.htm",
+            "id": "",
+            "parent": {
+              "class": "",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 164,
+              "width": 410,
+              "x": -240,
+              "y": 396
+            },
+            "src": "https://img.ithome.com/newsuploadfiles/focus/8c3c8d45-75ad-444e-8b4e-43336e1abdef.jpg"
+          },
+          {
+            "alt": "鸿蒙智行尚界 Z9 新车再曝：消息称属于 2027 年车型，上市时间为明年 4-5 月份",
+            "class": "lazyOwl owl-lazy",
+            "href": "https://www.ithome.com/1/014/487.htm",
+            "id": "",
+            "parent": {
+              "class": "",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 164,
+              "width": 410,
+              "x": 170,
+              "y": 396
+            },
+            "src": "https://img.ithome.com/newsuploadfiles/focus/38804a6b-b3c7-48ec-a2fe-7ea9651abaaf.jpg"
+          },
+          {
+            "alt": "消息称苹果要求零售店员工劝退无预约顾客：iPhone Duo 首发日基本不卖现货",
+            "class": "lazyOwl owl-lazy",
+            "href": "https://www.ithome.com/1/014/437.htm",
+            "id": "",
+            "parent": {
+              "class": "",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 164,
+              "width": 410,
+              "x": 580,
+              "y": 396
+            },
+            "src": "https://img.ithome.com/newsuploadfiles/focus/8aeb37cf-712b-4000-b370-d8eada31275a.jpg"
+          },
+          {
+            "alt": "比亚迪第三代秦 PLUS 实车曝光，预计 10 月下旬上市",
+            "class": "lazyOwl owl-lazy",
+            "href": "https://www.ithome.com/1/014/541.htm",
+            "id": "",
+            "parent": {
+              "class": "",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 164,
+              "width": 410,
+              "x": 990,
+              "y": 396
+            },
+            "src": "https://img.ithome.com/newsuploadfiles/focus/0adffd89-a5e1-4064-bf9f-602fac540546.jpg"
+          },
+          {
+            "alt": "DOOGEE Note60 W 系列手机亮相：6.38 英寸 90Hz 阔面屏设计，撞脸华为 Pura X View",
+            "class": "lazyOwl owl-lazy",
+            "href": "https://www.ithome.com/1/014/464.htm",
+            "id": "",
+            "parent": {
+              "class": "",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 164,
+              "width": 410,
+              "x": 1400,
+              "y": 396
+            },
+            "src": "https://img.ithome.com/newsuploadfiles/focus/75caf3b8-35aa-4a0a-9de5-8d74ca3b476c.jpg"
+          },
+          {
+            "alt": "零跑 A10s 上市：全新镜夜黑外观、505km 续航，9.28 万元",
+            "class": "lazyOwl owl-lazy",
+            "href": "https://www.ithome.com/1/014/460.htm",
+            "id": "",
+            "parent": {
+              "class": "",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 164,
+              "width": 410,
+              "x": 1810,
+              "y": 396
+            },
+            "src": "https://img.ithome.com/newsuploadfiles/focus/2e45be4b-7bb9-42db-b6f8-f2523f7aeb9c.jpg"
+          },
+          {
+            "alt": "奇瑞智界将获批独立造车资质，内部人士确认计划独立上市",
+            "class": "lazyOwl owl-lazy",
+            "href": "https://www.ithome.com/1/014/352.htm",
+            "id": "",
+            "parent": {
+              "class": "",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 164,
+              "width": 410,
+              "x": 2220,
+              "y": 396
+            },
+            "src": "https://img.ithome.com/newsuploadfiles/focus/8c3c8d45-75ad-444e-8b4e-43336e1abdef.jpg"
+          },
+          {
+            "alt": "鸿蒙智行尚界 Z9 新车再曝：消息称属于 2027 年车型，上市时间为明年 4-5 月份",
+            "class": "lazyOwl owl-lazy",
+            "href": "https://www.ithome.com/1/014/487.htm",
+            "id": "",
+            "parent": {
+              "class": "",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 164,
+              "width": 410,
+              "x": 2630,
+              "y": 396
+            },
+            "src": "https://img.ithome.com/newsuploadfiles/focus/38804a6b-b3c7-48ec-a2fe-7ea9651abaaf.jpg"
+          },
+          {
+            "alt": "消息称苹果要求零售店员工劝退无预约顾客：iPhone Duo 首发日基本不卖现货",
+            "class": "lazyOwl owl-lazy",
+            "href": "https://www.ithome.com/1/014/437.htm",
+            "id": "",
+            "parent": {
+              "class": "",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 164,
+              "width": 410,
+              "x": 3040,
+              "y": 396
+            },
+            "src": "https://img.ithome.com/newsuploadfiles/focus/8aeb37cf-712b-4000-b370-d8eada31275a.jpg"
+          },
+          {
+            "alt": "【IT之家开箱】微星神影 16 魔龙姬星际套装图赏：星云白 + 魔龙姬，这套装备有点特别",
+            "class": "lazy",
+            "href": "https://www.ithome.com/1/014/143.htm",
+            "id": "",
+            "parent": {
+              "class": "img",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 180,
+              "width": 240,
+              "x": 580,
+              "y": 1593
+            },
+            "src": "https://img.ithome.com/images/v2/t.png"
+          },
+          {
+            "alt": "【视频】华为 Mate 90 Pro Max典藏版首发体验，屏幕、性能、影像全面升级",
+            "class": "lazy",
+            "href": "https://www.ithome.com/1/009/034.htm",
+            "id": "",
+            "parent": {
+              "class": "img",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 180,
+              "width": 240,
+              "x": 870.5,
+              "y": 1593
+            },
+            "src": "https://img.ithome.com/images/v2/t.png"
+          },
+          {
+            "alt": "微星流光 X32 MAG 271QPX32 OLED 显示器体验：新面板 + 旗舰调校，电竞玩家新选择",
+            "class": "lazy",
+            "href": "https://www.ithome.com/1/008/583.htm",
+            "id": "",
+            "parent": {
+              "class": "img",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 180,
+              "width": 240,
+              "x": 1161,
+              "y": 1593
+            },
+            "src": "https://img.ithome.com/images/v2/t.png"
+          },
+          {
+            "alt": "【视频】全新塔式液冷工作站，静音高能！联想 ThinkStation P4 工作站使用体验",
+            "class": "lazy",
+            "href": "https://www.ithome.com/1/008/484.htm",
+            "id": "",
+            "parent": {
+              "class": "img",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 180,
+              "width": 240,
+              "x": 1451.5,
+              "y": 1593
+            },
+            "src": "https://img.ithome.com/images/v2/t.png"
+          },
+          {
+            "alt": "【视频】华为 Mate 90 Pro Max典藏版开箱，积木壳玩法多多",
+            "class": "lazy",
+            "href": "https://www.ithome.com/1/008/481.htm",
+            "id": "",
+            "parent": {
+              "class": "img",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 180,
+              "width": 240,
+              "x": 1742,
+              "y": 1593
+            },
+            "src": "https://img.ithome.com/images/v2/t.png"
+          },
+          {
+            "alt": "一加 16 定档 10 月 12 日发布：185 FPS 极速枪神性能抢先看",
+            "class": "lazy",
+            "href": "https://www.ithome.com/1/007/730.htm",
+            "id": "",
+            "parent": {
+              "class": "img",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 180,
+              "width": 240,
+              "x": 580,
+              "y": 1863
+            },
+            "src": "https://img.ithome.com/images/v2/t.png"
+          },
+          {
+            "alt": "OPPO Find X10 Pro Max 手机体验：3 颗两亿镜头，就是这么豪横",
+            "class": "lazy",
+            "href": "https://www.ithome.com/1/007/317.htm",
+            "id": "",
+            "parent": {
+              "class": "img",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 180,
+              "width": 240,
+              "x": 870.5,
+              "y": 1863
+            },
+            "src": "https://img.ithome.com/images/v2/t.png"
+          },
+          {
+            "alt": "南京试驾 BMW 智能驾驶辅助：智驾时代，宝马依然是那台“驾驶者之车”",
+            "class": "lazy",
+            "href": "https://www.ithome.com/1/007/309.htm",
+            "id": "",
+            "parent": {
+              "class": "img",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 180,
+              "width": 240,
+              "x": 1161,
+              "y": 1863
+            },
+            "src": "https://img.ithome.com/images/v2/t.png"
+          },
+          {
+            "alt": "【IT之家开箱】小米 Watch S5 41mm 智能手表图赏：莹白陶瓷表圈 + 24 道精雕表冠，主打精致佩戴",
+            "class": "lazy",
+            "href": "https://www.ithome.com/1/007/088.htm",
+            "id": "",
+            "parent": {
+              "class": "img",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 180,
+              "width": 240,
+              "x": 1451.5,
+              "y": 1863
+            },
+            "src": "https://img.ithome.com/images/v2/t.png"
+          },
+          {
+            "alt": "【IT之家开箱】OPPO Watch X3 图赏：TC4 钛合金遇上金属竹节表带，寰月钛更显精致",
+            "class": "lazy",
+            "href": "https://www.ithome.com/1/006/967.htm",
+            "id": "",
+            "parent": {
+              "class": "img",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 180,
+              "width": 240,
+              "x": 1742,
+              "y": 1863
+            },
+            "src": "https://img.ithome.com/images/v2/t.png"
+          },
+          {
+            "alt": "古尔曼：苹果明知 iPhone Duo 折叠屏手机供应不足，却坚持周五启动预售",
+            "class": "lazy",
+            "href": "https://www.ithome.com/1/014/613.htm",
+            "id": "",
+            "parent": {
+              "class": "img",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 180,
+              "width": 240,
+              "x": 580,
+              "y": 2222
+            },
+            "src": "https://img.ithome.com/images/v2/t.png"
+          },
+          {
+            "alt": "古尔曼：苹果计划为 HomeView 智能家庭中枢配备电动机械臂，最早 2027 年推出",
+            "class": "lazy",
+            "href": "https://www.ithome.com/1/014/611.htm",
+            "id": "",
+            "parent": {
+              "class": "img",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 180,
+              "width": 240,
+              "x": 870.5,
+              "y": 2222
+            },
+            "src": "https://img.ithome.com/images/v2/t.png"
+          },
+          {
+            "alt": "荣耀 WIN2 系列部分规格参数曝光，至高搭载第六代骁龙 8 超级至尊版处理器",
+            "class": "lazy",
+            "href": "https://www.ithome.com/1/014/592.htm",
+            "id": "",
+            "parent": {
+              "class": "img",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 180,
+              "width": 240,
+              "x": 1161,
+              "y": 2222
+            },
+            "src": "https://img.ithome.com/images/v2/t.png"
+          },
+          {
+            "alt": "荣耀 WIN 2 系列手机防水性能公布，内置双风扇支持 IPX8+IPX9 级防水",
+            "class": "lazy",
+            "href": "https://www.ithome.com/1/014/495.htm",
+            "id": "",
+            "parent": {
+              "class": "img",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 180,
+              "width": 240,
+              "x": 1451.5,
+              "y": 2222
+            },
+            "src": "https://img.ithome.com/images/v2/t.png"
+          },
+          {
+            "alt": "iQOO Neo12 官宣“周一见”，新机拥有与中国美术学院联手打造的全新配色",
+            "class": "lazy",
+            "href": "https://www.ithome.com/1/014/493.htm",
+            "id": "",
+            "parent": {
+              "class": "img",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 180,
+              "width": 240,
+              "x": 1742,
+              "y": 2222
+            },
+            "src": "https://img.ithome.com/images/v2/t.png"
+          },
+          {
+            "alt": "消息称戴尔显示器已发布内部通知，本月正式开始上调出货价",
+            "class": "lazy",
+            "href": "https://www.ithome.com/1/014/596.htm",
+            "id": "",
+            "parent": {
+              "class": "img",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 180,
+              "width": 240,
+              "x": 580,
+              "y": 2966
+            },
+            "src": "https://img.ithome.com/images/v2/t.png"
+          },
+          {
+            "alt": "联想拯救者 27Q-20 电竞显示器发布：2K 320Hz 原生高刷，到手价 1149 元",
+            "class": "lazy",
+            "href": "https://www.ithome.com/1/014/585.htm",
+            "id": "",
+            "parent": {
+              "class": "img",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 180,
+              "width": 240,
+              "x": 870.5,
+              "y": 2966
+            },
+            "src": "https://img.ithome.com/images/v2/t.png"
+          },
+          {
+            "alt": "华硕工作站机箱 PRO WS702 发售：支持 E-ATX 主板，兼容 400mm 扩展卡，999 元",
+            "class": "lazy",
+            "href": "https://www.ithome.com/1/014/584.htm",
+            "id": "",
+            "parent": {
+              "class": "img",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 180,
+              "width": 240,
+              "x": 1161,
+              "y": 2966
+            },
+            "src": "https://img.ithome.com/images/v2/t.png"
+          },
+          {
+            "alt": "绿联推出新款 M.2 SSD 硬盘盒：内置 USB-C 线，可选 20Gbps/10Gbps",
+            "class": "lazy",
+            "href": "https://www.ithome.com/1/014/579.htm",
+            "id": "",
+            "parent": {
+              "class": "img",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 180,
+              "width": 240,
+              "x": 1451.5,
+              "y": 2966
+            },
+            "src": "https://img.ithome.com/images/v2/t.png"
+          },
+          {
+            "alt": "349 元起，九州风神 PK650/750/850D-V2 金牌电源上架",
+            "class": "lazy",
+            "href": "https://www.ithome.com/1/014/542.htm",
+            "id": "",
+            "parent": {
+              "class": "img",
+              "id": "",
+              "tag": "A"
+            },
+            "rect": {
+              "height": 180,
+              "width": 240,
+              "x": 1742,
+              "y": 2966
+            },
+            "src": "https://img.ithome.com/images/v2/t.png"
+          }
+        ],
+        "nodeCount": 2103,
+        "textPreview": "App\n公众号\n投稿\n首页\nIT圈\n最会买\n设置\n日夜间\n随系统\n浅色\n深色\n主题色\n黑色\n投稿\n订阅\nRSS订阅\n收藏IT之家\n软媒应用\nApp客户端\n要知App\n软媒魔方\n登录\n业界\n手机\n电脑\n测评\n视频\nAI\n苹果\niPhone\n鸿蒙\n软件\n智车\n数码\n学院\n游戏\n直播\n5G\n微软\nWin10\nWin11\n专题\n搜索\n热搜：华为deepseek小米苹果特斯拉尊界荣耀显示器三星iPhone\n三星全新 Galaxy OS 曝光    国内首款激光雷达燃油轿车上市\n京东 11.11 抢红包 购",
+        "title": "IT之家"
+      }
+    }
+  },
+  {
+    "status": "fulfilled",
+    "value": {
+      "url": "https://www.oschina.net/",
+      "id": "2028875076",
+      "data": {
+        "frames": [],
+        "images": [
+          {
+            "alt": "第四届开放原子大赛 2026开源行业解决方案创新赛",
+            "class": "",
+            "id": "",
+            "parent": {
+              "class": "carousel-image-wrapper",
+              "id": "",
+              "tag": "DIV"
+            },
+            "rect": {
+              "height": 200,
+              "width": 520,
+              "x": 141.796875,
+              "y": 117
+            },
+            "src": "https://static.oschina.net/uploads/img/202608/20171519_u0NH.png"
+          },
+          {
+            "alt": "11月北京·亦庄，GOTC 2026 全球开源技术峰会，1主舞台·4大街区·16模块·等你来",
+            "class": "",
+            "id": "",
+            "parent": {
+              "class": "carousel-image-wrapper",
+              "id": "",
+              "tag": "DIV"
+            },
+            "rect": {
+              "height": 200,
+              "width": 520,
+              "x": 661.796875,
+              "y": 117
+            },
+            "src": "https://static.oschina.net/uploads/space/2026/0917/113341_eEKb_9214603.png"
+          },
+          {
+            "alt": "Anthropic 公开反蒸馏防御战报：让推理记录更难被偷、捕获量降了九成",
+            "class": "",
+            "id": "",
+            "parent": {
+              "class": "carousel-image-wrapper",
+              "id": "",
+              "tag": "DIV"
+            },
+            "rect": {
+              "height": 200,
+              "width": 520,
+              "x": 1181.796875,
+              "y": 117
+            },
+            "src": "https://oscimg.oschina.net/oscnet/up-d15cd42b2dedeb45b2c94e33088703c5b79.png!/format/webp"
+          },
+          {
+            "alt": "90 天证书开始倒计时：Let's Encrypt 官宣 2027 年 2 月全面转向 64 天",
+            "class": "",
+            "id": "",
+            "parent": {
+              "class": "carousel-image-wrapper",
+              "id": "",
+              "tag": "DIV"
+            },
+            "rect": {
+              "height": 200,
+              "width": 520,
+              "x": 1701.796875,
+              "y": 117
+            },
+            "src": "https://static.oschina.net/uploads/space/2026/1010/104353_ZoEm_2720166.png"
+          },
+          {
+            "alt": "第四届开放原子大赛 2026开源行业解决方案创新赛",
+            "class": "",
+            "id": "",
+            "parent": {
+              "class": "carousel-image-wrapper",
+              "id": "",
+              "tag": "DIV"
+            },
+            "rect": {
+              "height": 200,
+              "width": 520,
+              "x": 2221.796875,
+              "y": 117
+            },
+            "src": "https://static.oschina.net/uploads/img/202608/20171519_u0NH.png"
+          },
+          {
+            "alt": "11月北京·亦庄，GOTC 2026 全球开源技术峰会，1主舞台·4大街区·16模块·等你来",
+            "class": "",
+            "id": "",
+            "parent": {
+              "class": "carousel-image-wrapper",
+              "id": "",
+              "tag": "DIV"
+            },
+            "rect": {
+              "height": 200,
+              "width": 520,
+              "x": 2741.796875,
+              "y": 117
+            },
+            "src": "https://static.oschina.net/uploads/space/2026/0917/113341_eEKb_9214603.png"
+          },
+          {
+            "alt": "Anthropic 公开反蒸馏防御战报：让推理记录更难被偷、捕获量降了九成",
+            "class": "",
+            "id": "",
+            "parent": {
+              "class": "carousel-image-wrapper",
+              "id": "",
+              "tag": "DIV"
+            },
+            "rect": {
+              "height": 200,
+              "width": 520,
+              "x": 3261.796875,
+              "y": 117
+            },
+            "src": "https://oscimg.oschina.net/oscnet/up-d15cd42b2dedeb45b2c94e33088703c5b79.png!/format/webp"
+          },
+          {
+            "alt": "90 天证书开始倒计时：Let's Encrypt 官宣 2027 年 2 月全面转向 64 天",
+            "class": "",
+            "id": "",
+            "parent": {
+              "class": "carousel-image-wrapper",
+              "id": "",
+              "tag": "DIV"
+            },
+            "rect": {
+              "height": 200,
+              "width": 520,
+              "x": 3781.796875,
+              "y": 117
+            },
+            "src": "https://static.oschina.net/uploads/space/2026/1010/104353_ZoEm_2720166.png"
+          },
+          {
+            "alt": "第四届开放原子大赛 2026开源行业解决方案创新赛",
+            "class": "",
+            "id": "",
+            "parent": {
+              "class": "carousel-image-wrapper",
+              "id": "",
+              "tag": "DIV"
+            },
+            "rect": {
+              "height": 200,
+              "width": 520,
+              "x": 4301.796875,
+              "y": 117
+            },
+            "src": "https://static.oschina.net/uploads/img/202608/20171519_u0NH.png"
+          },
+          {
+            "alt": "oschina.net",
+            "class": "footer-logo",
+            "id": "",
+            "parent": {
+              "class": "logo",
+              "id": "",
+              "tag": "DIV"
+            },
+            "rect": {
+              "height": 60.25,
+              "width": 200,
+              "x": 480,
+              "y": 4201.4375
+            },
+            "src": "https://static.oschina.net/oschina/web/v2/js/png/footer-logo-1-BfNlgbn9.png"
+          }
+        ],
+        "nodeCount": 4257,
+        "textPreview": "OSC开源社区Gitee代码托管模力方舟OSC私有化\nDevOps研发效能 \n媒体矩阵\n开源中国APP\n切换老版本\n首页 博客 软件 造物 \n智库 \n动弹 专区 活动 工具 培训\n登录\n注册\n综合\n开源资讯\n软件资讯\nAI & 大模型\n大前端\n软件架构\n开发技能\n硬件 & IoT\nDevOps\n程序人生\n数据库\n更 多\nHarmonyOS\n实验室\n智写平台\n造物平台\n生产力\n开源项目\n开源模型\n公司动态\nAI生成\n第四届开放原子大赛 2026开源行业解决方案创新赛\nAI生成\n11月北京·亦庄，G",
+        "title": "OSCHINA - 开源 × AI · 开发者生态社区"
+      }
+    }
+  }
+]

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>鲁班 V4 · 先看清，再改变</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="demo-v4.css">
+<script src="demo-v4.js" defer></script>
+</head>
+<body>
+<header class="masthead"><div class="brand"><span class="brand-icon">鲁</span><strong>鲁班 <span>V4</span></strong><span class="divider"></span><span class="tagline">先看清，再改变。</span></div><div class="edition">PRODUCT WALKTHROUGH <span>交互评审原型 · 模拟数据</span></div></header>
+<section class="review-tools" aria-label="评审工具"><div><span class="eyebrow">体验路径</span><button data-action="reset" class="scenario active">自由探索</button><button data-action="scenario-chat" class="scenario">01 只聊不生成</button><button data-action="scenario-ad" class="scenario">02 广告识别与改造</button></div><div><label class="fault"><input id="fail-next" type="checkbox">下次生成失败</label><button data-action="navigate" class="quiet">模拟页面变化 ↗</button><button data-action="reset" class="quiet">重置</button></div></section>
+<main class="workspace">
+<section class="web-pane" aria-label="示例网页">
+<div class="browserbar"><div class="traffic"><i></i><i></i><i></i></div><span>‹ &nbsp; › &nbsp; ↻</span><div class="address">◇ &nbsp; journal.example / stories / slow-living <span id="page-counter">文档 1</span></div></div>
+<div class="page-meta"><span><i class="status-dot"></i> 当前授权页 · 本地示例</span><button id="overlay-toggle" data-action="overlay" class="quiet" disabled>关闭标注</button></div>
+<div class="web-scroll" id="web-scroll">
+<div class="journal-nav"><strong>日常研究所<span>JOURNAL OF EVERYDAY</span></strong><div>观察 &nbsp;&nbsp; 生活 &nbsp;&nbsp; 设计 &nbsp;&nbsp; 关于</div></div>
+<section class="promo target" data-target="1" id="target-1"><button class="marker" data-focus="1" aria-label="查看目标 1">1 <span>疑似广告</span></button><span class="ad-label">推广</span><div><small>A LITTLE MORE ROOM</small><h2>给生活，留一点空白。</h2><p>年度家居灵感特刊 · 限时订阅礼遇</p></div><button class="page-button" data-action="page-link">探索订阅 ↗</button></section>
+<div class="article-grid"><article><div class="article-kicker">生活观察 &nbsp; / &nbsp; ISSUE 024</div><h1>把注意力，<br>还给真正重要的事。</h1><p class="intro">信息越来越多，阅读却可以简单一点。试着从一个更清晰的页面开始，找回自己的节奏。</p><div class="author"><span class="avatar">林</span><span>林间编辑部 <small>2026 年 10 月 18 日 · 6 分钟阅读</small></span></div><div class="landscape" role="img" aria-label="抽象山丘与日光插画"><div class="sun"></div><div class="hill one"></div><div class="hill two"></div><span>LESS, BUT BETTER.</span></div><h3>从减少干扰开始</h3><p>一个页面里，正文、推荐和推广常常挤在一起。我们需要的不是更多操作，而是知道自己正在看什么，以及哪些内容值得留下。</p><p>让工具先帮你辨认，再由你决定如何改变。保留有价值的信息，把无关的喧闹轻轻放到一边。</p><section class="editor-note target" data-target="4" id="target-4"><button class="marker" data-focus="4" aria-label="查看目标 4">4 <span>手动选择</span></button><small>编辑推荐 · 可手动补选的示例区域</small><h3>每周一封，关于更好生活的信。</h3><p>这是正文内的订阅模块，默认不参与识别。</p></section><div class="article-end">— &nbsp; 阅读到这里，已经很好。 &nbsp; —</div></article>
+<aside class="journal-aside"><section class="recommend target" data-target="2" id="target-2"><button class="marker" data-focus="2" aria-label="查看目标 2">2 <span>疑似广告</span></button><span class="ad-label">内容推荐</span><div class="book-art">慢<br>下来</div><h3>本周编辑书单</h3><p>五本值得放在床头的书，和五段属于自己的时间。</p><small>此处是演示中的误判候选，可在右侧排除。</small></section><section class="side-note"><span class="eyebrow">FIELD NOTES</span><h3>阅读可以更轻盈</h3><p>先标出页面里的干扰，再决定哪些需要处理。</p><span class="line-art">✳</span></section><section class="blocked"><span>▧ &nbsp; 外部嵌入内容</span><p>示例：跨域区域未读取，不参与判断。</p></section></aside></div>
+<section class="floating-ad target" data-target="3" id="target-3"><button class="marker" data-focus="3" aria-label="查看目标 3">3 <span>疑似广告</span></button><span class="ad-label">广告</span><div><strong>为专注，选一副好耳机。</strong><p>新一代降噪系列 · 即刻探索</p></div><span class="headphone">◖◗</span><button class="page-button" data-action="page-link">了解更多 ↗</button></section>
+<div id="page-effect" class="page-effect" hidden>✓ 已应用本次试运行效果 · 仅当前示例页 <button data-action="restore-effect">恢复页面展示</button></div>
+</div><footer class="web-footer"><span id="coverage">尚未分析页面</span><span>网页内容与标注均为本地模拟</span></footer>
+</section>
+<aside class="assistant" aria-label="鲁班聊天侧栏">
+<header class="assistant-header"><div class="assistant-title"><span class="mini-logo">鲁</span><div><strong>鲁班</strong><small>理解网页，也理解你的想法</small></div></div><button data-action="context" class="icon-button" aria-label="查看当前页面与数据范围">ⓘ</button></header>
+<div class="task-strip"><span class="status-dot"></span><span id="task-status" role="status">准备好，先聊聊你的想法</span><span class="thread-label">当前页</span></div>
+<div class="conversation" id="conversation" aria-live="polite"><div class="welcome" id="welcome"><span class="eyebrow">YOUR PAGE, YOUR WAY</span><h2>不急着写脚本。<br>先一起看清楚。</h2><p>可以问问题、标出页面重点，也可以在确认需求后，创建一个属于你的网页工具。</p><div class="suggestions"><button data-prompt="这个页面有什么可以优化？">✳ &nbsp; 这个页面有什么可以优化？ <span>↗</span></button><button data-prompt="帮我把页面上的广告标出来">⌖ &nbsp; 帮我把页面上的广告标出来 <span>↗</span></button><button data-prompt="你能做什么？">◎ &nbsp; 先了解鲁班能做什么 <span>↗</span></button></div><div class="welcome-note">对话、分析、标注，都可以是完整的结果。</div></div><div id="messages"></div><div id="task-cards"></div></div>
+<div id="artifact" class="artifact" hidden></div>
+<form id="composer" class="composer"><div class="input-wrap"><textarea id="input" rows="2" aria-label="发送给鲁班的消息" placeholder="描述想法，或告诉我页面哪里值得关注…"></textarea><div class="input-bottom"><button type="button" data-action="manual" id="manual-button" class="quiet">⌖ 手动选择</button><span>当前页 · 有限上下文</span><button id="send" type="submit" class="send" aria-label="发送消息">↑</button><button id="stop" type="button" data-action="cancel" class="send" hidden aria-label="停止处理">■</button></div></div><p>原型按示例语义响应 · 无真实模型调用 · 不读取其他网页</p></form>
+</aside>
+</main>
+<footer class="walkthrough-footer"><span>鲁班 V4 <b> / </b> 从对话到理解，从确认到改变。</span><a href="v4-product-plan.md">产品方案 ↗</a><a href="v4-technical-design.md">技术方案 ↗</a></footer>
+<dialog id="modal" aria-labelledby="modal-title"><div class="dialog-head"><h2 id="modal-title"></h2><button data-action="close-modal" class="icon-button" aria-label="关闭弹窗">×</button></div><div id="modal-body"></div><div id="modal-actions" class="actions"></div></dialog>
+<div id="toast" class="toast" role="status" hidden></div>
+</body></html>

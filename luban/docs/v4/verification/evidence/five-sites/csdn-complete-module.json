@@ -1,0 +1,26 @@
+[
+  {
+    "class": "home-project-cont-swiper el-carousel el-carousel--horizontal",
+    "display": "block",
+    "frames": 0,
+    "h": 271,
+    "id": "",
+    "w": 1232
+  },
+  {
+    "class": "www-home-silde ",
+    "display": "block",
+    "frames": 6,
+    "h": 2286,
+    "id": "www-home-silde",
+    "w": 320
+  },
+  {
+    "class": "broadcast-active kp_bos_swiper",
+    "display": "none",
+    "frames": 6,
+    "h": 0,
+    "id": "kp_box_www_swiper",
+    "w": 0
+  }
+]

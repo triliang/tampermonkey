@@ -1,0 +1,17 @@
+{
+  "time": "2026-10-19T02:07:05.530Z",
+  "status": {
+    "installed": true,
+    "compatible": true,
+    "restrictionsApplied": true,
+    "version": "0.163.0-alpha.10.2",
+    "executor": "codex",
+    "historyMode": "latest-baseline-new-thread"
+  },
+  "checks": [],
+  "passed": false,
+  "syntheticOnly": true,
+  "browserExecuted": false,
+  "scriptSaved": false,
+  "error": "HARNESS_MODEL_FAILED"
+}

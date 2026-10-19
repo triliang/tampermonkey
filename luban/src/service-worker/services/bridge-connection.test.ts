@@ -12,7 +12,7 @@ beforeEach(async()=>{
   let listener:(v:unknown)=>void=()=>undefined;
   return {disconnect:vi.fn(),onDisconnect:{addListener:vi.fn()},onMessage:{addListener:(fn:(v:unknown)=>void)=>{listener=fn;}},postMessage:(r:{method:string;requestId:string})=>{
    messages.push(r);
-   const error=r.method==='context.read'?'PAGE_NOT_GRANTED':r.method==='profile.authenticate'&&authFails?'PAIRING_REQUIRED':undefined;
+   const error=r.method==='harness.configure'?'INVALID_REQUEST':r.method==='context.read'?'PAGE_NOT_GRANTED':r.method==='profile.authenticate'&&authFails?'PAIRING_REQUIRED':undefined;
    const data=r.method==='health.get'?{service:'luban-bridge',version:'0.1.0',protocolVersion:1}:r.method==='profile.pair'?{profileId,token}:r.method==='pages.list'?{pages:[]}:{};
    queueMicrotask(()=>listener({protocolVersion:1,requestId:r.requestId,ok:!error,...(error?{error:{code:error}}:{data})}));
   }};
@@ -35,3 +35,5 @@ describe('S1 extension native connection',()=>{
   await service.run('connect');await service.run('disconnect');authFails=true;await expect(service.run('connect')).rejects.toThrow('配对已失效');expect(stored).toEqual({});expect(messages.filter(r=>r.method==='profile.pair')).toHaveLength(1);
  });
 });
+
+it('invalid requests keep diagnostic code while showing an actionable update message',async()=>{await service.run('connect');await expect(service.rpc('harness.configure',{backend:'codex'})).rejects.toMatchObject({code:'INVALID_REQUEST',message:'本机 Bridge 未接受当前请求，请检查扩展与 Bridge 是否已更新并重启。'});expect(stored['luban:v3:bridge-pairing']).toBeDefined();});

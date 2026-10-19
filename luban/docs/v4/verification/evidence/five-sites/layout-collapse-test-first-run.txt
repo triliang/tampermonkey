@@ -1,0 +1,42 @@
+
+> luban@0.1.0 test
+> vitest run
+
+
+ RUN  v5.0.3 /Users/jinxiong.yang/Code/tampermonkey/luban
+
+ ❯ src/content/annotations/registry.test.ts (29 tests | 2 failed) 13303ms
+   × allows natural empty ancestor collapse without hiding its styles 30ms
+   × natural collapse never exempts independent text, siblings, missing ancestors or opacity loss 20ms
+
+ Test Files  1 failed | 60 passed (61)
+      Tests  2 failed | 447 passed (449)
+   Start at  00:43:36
+   Duration  14.28s (tests 58%, environment 29%, transform 6%, import 6%, worker 1%)
+
+    Isolate  61 workers spawned · ~382ms startup each (spawn + environment, per file)
+             at least ~2.95s faster with isolate: false — reuses workers across files instead of one per file
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/content/annotations/registry.test.ts > allows natural empty ancestor collapse without hiding its styles
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/content/annotations/registry.test.ts:16:443
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/content/annotations/registry.test.ts > natural collapse never exempts independent text, siblings, missing ancestors or opacity loss
+TypeError: Cannot read properties of undefined (reading 'id')
+ ❯ src/content/annotations/registry.test.ts:17:817
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯

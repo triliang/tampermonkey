@@ -62,7 +62,7 @@ export class BridgeConnection {
 
   private async call(method: string, params?: Record<string, unknown>): Promise<Record<string, unknown>> {
     const reply = await this.request(method, params);
-    if (!reply.ok) throw Object.assign(new Error(reply.error?.code === 'PAIRING_REQUIRED' ? '配对已失效，请重新连接。' : reply.error?.code ?? 'Bridge 请求失败。'), {code: reply.error?.code});
+    if (!reply.ok) throw Object.assign(new Error(reply.error?.code === 'PAIRING_REQUIRED' ? '配对已失效，请重新连接。' : reply.error?.code === 'INVALID_REQUEST' ? '本机 Bridge 未接受当前请求，请检查扩展与 Bridge 是否已更新并重启。' : reply.error?.code ?? 'Bridge 请求失败。'), {code: reply.error?.code});
     return reply.data ?? {};
   }
 

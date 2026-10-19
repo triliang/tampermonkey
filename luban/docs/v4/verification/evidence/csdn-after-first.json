@@ -1,0 +1,41 @@
+{
+  "adSlots": [
+    {
+      "classes": "banner-box",
+      "display": "none",
+      "frames": 1,
+      "id": "banner-box",
+      "visible": false
+    },
+    {
+      "classes": "broadcast-active kp_bos_swiper",
+      "display": "none",
+      "frames": 2,
+      "id": "kp_box_www_swiper",
+      "visible": false
+    },
+    {
+      "classes": "csdn-common-logo-advert",
+      "display": "none",
+      "frames": 0,
+      "id": "",
+      "visible": false
+    }
+  ],
+  "communityVisible": [
+    true
+  ],
+  "mainContentVisible": true,
+  "newsCards": [
+    {
+      "visible": true
+    },
+    {
+      "visible": true
+    },
+    {
+      "visible": true
+    }
+  ],
+  "time": 1792335807166
+}

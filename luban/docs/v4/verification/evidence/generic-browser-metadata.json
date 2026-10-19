@@ -1,0 +1,17 @@
+{
+  "executedAt": "2026-10-18 23:32:06 CST",
+  "browser": "Google Chrome",
+  "origin": "http://127.0.0.1:50162",
+  "userApproved": true,
+  "passed": 8,
+  "total": 8,
+  "scope": "production TargetRegistry on synthetic page; no installed extension or real model end-to-end validation",
+  "testTabClosed": true,
+  "temporaryServerStopped": true,
+  "listenerAbsentVerified": true,
+  "sourceSha256": {
+    "luban/src/content/annotations/registry.ts": "34c090520bd8e3f3baa270d8b629b22c8b5da80a3d32c31189eee40c23e93c12",
+    "luban/scripts/generic-browser-entry.ts": "78ac92c760e5a266607544824a12ba63bbab9bd79420369ef1385eb094073eec",
+    "luban/scripts/generic-browser.html": "9e1247a478e07fa6a85782ca5e44a20a0f1d582666d74158c6f455f27475f68d"
+  }
+}

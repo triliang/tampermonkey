@@ -1,0 +1,1 @@
+{"package":"/Users/jinxiong.yang/Code/tampermonkey/luban/bridge/dist/luban-bridge-macos-arm64","registrationChanged":false,"scope":"V4-local-automatic-acceptance-real-environment-pending"}

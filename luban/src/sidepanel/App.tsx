@@ -1,3 +1,5 @@
+import {HarnessCards,HarnessActions} from './v4/HarnessChat';
+import {useHarnessChat,conversationTimeline} from './v4/useHarnessChat';
 import {panelTabId,executorKey} from '../shared/panel-tab';
 import {ExternalApprovals} from '../shared/ExternalApprovals';
 import {SendToFeishu} from '../shared/SendToFeishu';
@@ -40,10 +42,14 @@ async function call<T>(message: LubanMessage): Promise<T> {
   const r = await sendToSW<T>(message); if (!r.ok) throw Error(r.error.message); return r.data;
 }
 const rid = () => makeRequestId();
-export default function App({initialView='home',embedded=false}:{initialView?:'home'|'library';embedded?:boolean}={}) {
+export default function App({initialView='home',embedded=false,initialMode='v4'}:{initialView?:'home'|'library';embedded?:boolean;initialMode?:'v3'|'v4'}={}) {
+  const agentEnabled=initialMode!=='v3';
   const boundTabId=useRef(panelTabId(window.location.href)).current;
   const executorStorage=boundTabId===undefined?chrome.storage.local:chrome.storage.session;
   const currentExecutorKey=executorKey(boundTabId);
+  const chatWorkspaceKey='luban:chat:workspace:'+String(boundTabId??'options');
+  const restoreAttempted=useRef(false);
+  const inputRef=useRef('');
   const pagePreview=useRef<{sessionId:string;workspaceId:string}|null>(null);
   const previewFocusChat=useRef(false);
   const pagePreviewInput=useRef<string|null>(null);
@@ -116,14 +122,19 @@ export default function App({initialView='home',embedded=false}:{initialView?:'h
   const selected = useRef(0);
   const busy = useRef(false);
   const dialogRef = useRef<HTMLDialogElement|null>(null);
-  const editable = !generating && !preparing && !versionBusy && !analysing && !previewBusy && !thinkingSaving;
+  inputRef.current=input;
+  const harness=useHarnessChat({onHistory:next=>setMessages(old=>old.length===next.length&&old.at(-1)?.text===next.at(-1)?.text&&old.at(-1)?.createdAt===next.at(-1)?.createdAt?old:next),enabled:agentEnabled&&!embedded&&view!=='library',workspaceId:workspace?.id??null,ensureWorkspace:async()=>{const ws=await ensureWorkspace();await flush();return wsRef.current??ws;},onArtifact:async id=>{const epoch=selected.current;if(wsRef.current?.id!==id)return;await loadWorkspace(id,epoch);if(selected.current!==epoch||wsRef.current?.id!==id)return;setReceipt(null);setView('editor');setNotice('候选已检查并应用到当前草稿。请单独确认运行，效果符合后保存。');}});
+  const timeline=agentEnabled?conversationTimeline(messages,harness.conversation):messages;
+  const editable = !harness.busy && !generating && !preparing && !versionBusy && !analysing && !previewBusy && !thinkingSaving;
   const mismatch = !!workspace && (!site || workspace.host !== site.host);
   const effective = workspace?.draft ?? record?.current;
   const stage=workspaceStage({generating,stream,operation,preview:!!envelope,receipt:!!receipt,draft:!!workspace?.draft,failed:workflow.outcome?.state==='failed'});
 
   const fail = (e: unknown) => setNotice(e instanceof Error ? e.message : String(e));
   async function refreshSite() {
-    try { setSite(await call<Site>({ type:'GET_CURRENT_SITE', requestId:rid() })); }
+    try { const next=await call<Site>({ type:'GET_CURRENT_SITE', requestId:rid() });setSite(next);
+      if(agentEnabled&&!restoreAttempted.current&&!wsRef.current){restoreAttempted.current=true;const epoch=selected.current;try{const restored=(await executorStorage.get(chatWorkspaceKey))[chatWorkspaceKey];const list=await call<WorkspaceRecord[]>({type:'LIST_WORKSPACES',requestId:rid()});const candidate=typeof restored==='string'?list.find(w=>w.id===restored&&w.host===next.host):list.filter(w=>w.host===next.host&&w.panelScope?.endsWith(':'+next.tabId)&&(w.draft||w.input||w.scriptId)).sort((a,b)=>b.updatedAt-a.updatedAt)[0];if(candidate&&!wsRef.current&&!creating.current&&selected.current===epoch)await loadWorkspace(candidate.id);}catch{/* A missing old workspace does not revoke access to the current page. */}}
+    }
     catch(e) { setSite(null); fail(e); }
   }
   async function refreshLists() {
@@ -134,6 +145,7 @@ export default function App({initialView='home',embedded=false}:{initialView?:'h
   }
   function attach(ws: WorkspaceRecord) {
     buffer.current?.dispose(); wsRef.current=ws; setWorkspace(ws);
+    if(agentEnabled)void executorStorage.set({[chatWorkspaceKey]:ws.id}).catch(()=>{});
     buffer.current = new DraftBuffer(ws.draftRevision, async (revision,patch)=>{
       const saved = await call<WorkspaceRecord>({type:'SAVE_DRAFT',requestId:rid(),workspaceId:ws.id,expectedDraftRevision:revision,patch});
       if(wsRef.current?.id===saved.id){wsRef.current=saved;setWorkspace(saved);}return saved;
@@ -188,10 +200,11 @@ export default function App({initialView='home',embedded=false}:{initialView?:'h
     setReference(null);setArtifactOpen(false);setContextOpen(false);setSettingsOpen(false);queued.current='';setQueuedText('');
     setReasoningStages([]);setAnalysisReasoning([]);setWorkflow(emptyWorkflow());setConstraints('');setQuality(null);setFeedbackMode(false);
     setAutoDiagnostics('');setDeleteConfirm(false);setRuntimeStatus(null);setReceipt(null);setRestoreConfirm(false);selected.current++;buffer.current?.dispose();buffer.current=null;wsRef.current=null;setWorkspace(null);setRecord(null);setMessages([]);
+    if(agentEnabled){restoreAttempted.current=true;void executorStorage.remove(chatWorkspaceKey).catch(()=>{});}
     setInput('');setCode('');setTarget(null);setSelectors([]);setEnvelope(null);setNotice('');
   }
   async function leave(action: ()=>void) {
-    if(busy.current){setNotice('请先取消生成或等待操作完成。');return;}
+    if(busy.current||harness.busy){setNotice('请先停止处理或等待操作完成。');return;}
     try {await closePagePreview();await flush();}catch(e){fail(e);return;}
     if(wsRef.current && (wsRef.current.draft || wsRef.current.input)){setLeaving(()=>action);return;}
     resetActive();action();
@@ -318,7 +331,7 @@ export default function App({initialView='home',embedded=false}:{initialView?:'h
       if(action==='trial'){
         setReceipt(null);
         const response=await call<{result:TrialResult;receipt:TrialReceipt|null}>({type:'TRIAL_DRAFT',requestId:rid(),workspaceId:ws.id,expectedDraftRevision:ws.draftRevision});
-        await loadWorkspace(ws.id);setName(name);setReceipt(response.receipt);
+        await loadWorkspace(ws.id);setName(name);setReceipt(response.receipt);if(agentEnabled&&response.receipt)await harness.act('check');
         setNotice(response.receipt?(response.result.repeated?'同一内容已在本页执行，未重复运行。请检查页面效果。':'执行完成，请检查页面效果；尚未保存。'):(response.result.error??'试运行未完成，请检查代码。'));
       } else if(action==='save'){
         if(!receipt)throw Error('请先试运行。');
@@ -369,6 +382,7 @@ export default function App({initialView='home',embedded=false}:{initialView?:'h
     try{if(!workflow.targetFingerprint)return;const result=await call<{ok:boolean;error?:string}>({type:'V21_PREVIEW_TARGET',requestId:rid(),selectors:workflow.selectors,fingerprint:workflow.targetFingerprint});if(!result.ok)throw Error(result.error);setNotice('只读范围预览已显示，Esc 可清除。');}catch(e){fail(e);}
   }
   async function prepareManualRepair(){
+    if(agentEnabled){inputChanged('请先分析当前草稿的基础检查问题，保留原功能，和我确认修复方案后再生成。');return;}
     if(busy.current)return;
     try{await ensureWorkspace();await flush();const value='修复当前代码的基础检查错误，保持目标、触发方式、权限与其他功能不变。返回完整代码；不要扩大范围。';setInput(value);setFeedbackMode(false);buffer.current?.schedule({input:value});await flush();await prepare(false);}catch(e){fail(e);}
   }
@@ -419,7 +433,7 @@ export default function App({initialView='home',embedded=false}:{initialView?:'h
   async function keepCode(value:string){editCode(value);await flush();}
   function chatInput(value:string){if(generating||analysing){queued.current=value;setQueuedText(value);}else inputChanged(value);}
   async function toggleThinking(enabled:boolean){setThinkingSaving(true);try{await saveThinkingEnabled(enabled);setThinkingEnabled(enabled);setEnvelope(null);cancelAnalysis();}catch(e){fail(e);}finally{setThinkingSaving(false);}}
-  async function sendChat(){if(thinkingSaving||previewBusy)return;if(generating){await cancel();return;}if(analysing){cancelAnalysis();if(queued.current){const text=queued.current;queued.current='';setQueuedText('');inputChanged(text);}return;}await prepare(repairAllowed,true);}
+  async function sendChat(){if(thinkingSaving||previewBusy)return;if(agentEnabled){if(embedded){setNotice('请在目标网页的鲁班侧栏继续对话；脚本与草稿保留。');return;}if(harness.active){await harness.cancel();return;}if(harness.working||!input.trim())return;const sent=input;const ok=await harness.send(sent.trim());if(ok&&inputRef.current===sent){inputChanged('');await flush();}return;}if(generating){await cancel();return;}if(analysing){cancelAnalysis();if(queued.current){const text=queued.current;queued.current='';setQueuedText('');inputChanged(text);}return;}await prepare(repairAllowed,true);}
   function latest(){follow.current=true;setShowLatest(false);if(chatScroll.current)chatScroll.current.scrollTop=chatScroll.current.scrollHeight;}
   useEffect(()=>{if(follow.current&&chatScroll.current)chatScroll.current.scrollTop=chatScroll.current.scrollHeight;},[messages,stream,reasoningStages,analysisReasoning,notice,suggestions,envelope,workflow]);
   const streamingExplanation=(()=>{const match=stream.match(/"explanation"\s*:\s*"((?:\\.|[^"\\])*)/);if(!match)return '';try{return JSON.parse('"'+match[1]+'"') as string;}catch{return '';}})();
@@ -430,12 +444,14 @@ export default function App({initialView='home',embedded=false}:{initialView?:'h
     {restoreConfirm?<div role="alert"><p>恢复会放弃当前草稿；请刷新页面观察效果。</p><button onClick={()=>setRestoreConfirm(false)}>取消恢复</button><button disabled={!editable} onClick={()=>void versionAction('restore')}>确认恢复并放弃草稿</button></div>:null}
     {deleteConfirm?<div role="alert"><p>删除工具、草稿、对话与 GM 数据？无法撤销。</p><button onClick={()=>setDeleteConfirm(false)}>取消删除</button><button disabled={!editable} onClick={()=>void deleteTool()}>确认删除工具</button></div>:null}
   </>;
+
   return <div class={'panel p2-panel chat-app'+(embedded?' embedded':'')} data-workspace-stage={stage}>
-    <header class="chat-top"><div><strong class="chat-brand"><img src={brandLogo} alt="" width="26" height="26"/>鲁班 <small>Luban V2.1</small></strong><span>{site?.host??'请打开并授权普通网页'}</span></div><div class="chat-top-actions"><button title="新建工具" aria-label="新建工具" disabled={!editable} onClick={()=>void leave(()=>setView('home'))}>＋</button><button disabled={!editable} onClick={()=>void leave(()=>{setView(view==='library'?'home':'library');void refreshLists().catch(fail);})}>{view==='library'?'返回聊天':'我的工具'}</button><button aria-label="分析此页面" title="分析此页面" disabled={!editable||!online||!site||mismatch||!analysisEnabled} onClick={()=>void prepareAnalysis()}>✳</button><button aria-label="设置" title="设置" onClick={()=>setSettingsOpen(!settingsOpen)}>⚙</button></div></header>
+    <header class={'chat-top'+(embedded?'':' chat-top-compact')} aria-label="当前页面与工具操作"><div class="chat-page-context">{embedded?<strong class="chat-brand"><img src={brandLogo} alt="" width="26" height="26"/>鲁班 <small>Luban</small></strong>:null}<span title={site?.host}>{site?.host??'请打开并授权普通网页'}</span></div><div class="chat-top-actions"><button title="新建工具" aria-label="新建工具" disabled={!editable} onClick={()=>void leave(()=>setView('home'))}>＋</button><button disabled={!editable} onClick={()=>void leave(()=>{setView(view==='library'?'home':'library');void refreshLists().catch(fail);})}>{view==='library'?'返回聊天':'我的工具'}</button><button aria-label="分析此页面" title="分析此页面" disabled={!editable||!online||!site||mismatch||(!agentEnabled&&!analysisEnabled)} onClick={()=>agentEnabled?void harness.act('scan'):void prepareAnalysis()}>✳</button><button aria-label="设置" title="设置" onClick={()=>setSettingsOpen(!settingsOpen)}>⚙</button></div></header>
     {view==='library'?<main class="chat-library"><ScriptLibrary records={records} activeHost={site?.host??null} busy={!editable} onOpen={r=>void openTool(r)} onRun={r=>void runSaved(r)} onToggle={r=>void toggleAuto(r)} onExport={r=>void exportTool(r)} onDelete={r=>void deleteFromLibrary(r)}/></main>:<>
-    <div class="chat-messages" ref={chatScroll} aria-label="当前脚本对话" onScroll={()=>{const el=chatScroll.current;if(!el)return;follow.current=el.scrollHeight-el.scrollTop-el.clientHeight<65;setShowLatest(!follow.current);}}>
-      {!messages.length&&!generating?<section class="chat-welcome"><span>✳</span><h1>这个页面，<br/>你想怎么改？</h1><p>说出想法，再用几句话把效果做到位。</p><div>{['突出价格','隐藏干扰模块','改成暗色','提取当前页列表'].map(t=><button onClick={()=>inputChanged(t)}>{t} ↗</button>)}</div></section>:null}
-      {messages.map((m,i)=><article key={i} class={'chat-message '+m.role}><small>{m.role==='user'?'你':'鲁班'}</small><ReasoningDetails stages={m.reasoning??[]} omitted={m.reasoningOmitted}/><ChatMarkdown text={m.text}/>{m.scriptAttachment?<div class="chat-file-history">📄 {m.scriptAttachment.filename} · {m.scriptAttachment.source==='draft'?'草稿':'保存版'} · {m.scriptAttachment.versionId.slice(0,8)}</div>:null}{m.codeReference?<details class="chat-reference-history"><summary>引用 {m.codeReference.name} · 版本 {m.codeReference.versionId.slice(0,8)} · {lineLabel(m.codeReference.lines)}</summary><pre>{m.codeReference.text}</pre></details>:null}</article>)}
+    <div class="chat-messages" ref={chatScroll} aria-label="当前对话" onScroll={()=>{const el=chatScroll.current;if(!el)return;follow.current=el.scrollHeight-el.scrollTop-el.clientHeight<65;setShowLatest(!follow.current);}}>
+      {!timeline.length&&!generating&&!harness.active?<section class="chat-welcome"><span>✳</span><h1>这个页面，<br/>你想怎么改？</h1><p>先聊清楚需求，确认目标与方案后再生成；运行和保存由你单独确认。</p><div>{['突出价格','隐藏干扰模块','改成暗色','提取当前页列表'].map(t=><button onClick={()=>inputChanged(t)}>{t} ↗</button>)}</div></section>:null}
+      {timeline.map((m,i)=><article key={i} class={'chat-message '+m.role}><small>{m.role==='user'?'你':'鲁班'}</small><ReasoningDetails stages={m.reasoning??[]} omitted={m.reasoningOmitted}/><ChatMarkdown text={m.text}/>{m.scriptAttachment?<div class="chat-file-history">📄 {m.scriptAttachment.filename} · {m.scriptAttachment.source==='draft'?'草稿':'保存版'} · {m.scriptAttachment.versionId.slice(0,8)}</div>:null}{m.codeReference?<details class="chat-reference-history"><summary>引用 {m.codeReference.name} · 版本 {m.codeReference.versionId.slice(0,8)} · {lineLabel(m.codeReference.lines)}</summary><pre>{m.codeReference.text}</pre></details>:null}</article>)}
+      {agentEnabled?<HarnessCards controller={harness}/>:null}
       {generating?<article class="chat-message user"><small>你</small><ChatMarkdown text={input}/>{activeScriptAttachment?<div class="chat-file-history">📄 {activeScriptAttachment.filename} · {activeScriptAttachment.source==='draft'?'草稿':'保存版'} · {activeScriptAttachment.versionId.slice(0,8)}</div>:null}{reference?<details><summary>引用 {reference.name} · 版本 {reference.versionId.slice(0,8)} · {lineLabel(reference.lines)}</summary><pre>{reference.text}</pre></details>:null}</article>:null}
       {preparing?<article class="chat-message assistant" aria-live="polite">正在准备本轮上下文…</article>:null}
       {generating?<article class="chat-message assistant" aria-live="polite"><small>鲁班</small><ReasoningDetails stages={reasoningStages} live/><details><summary>{stage==='repairing'?'正在修复基础错误 · 1/1':stream.startsWith('模型正在推理')?'模型正在推理':'正在生成与检查脚本'}</summary><p>已确认本轮输入与发送范围；候选通过完整检查后才写入草稿。</p><p>完成后可查看检查结果与修改说明。</p></details>{streamingExplanation?<ChatMarkdown text={streamingExplanation}/>:<p class="chat-processing">处理中…已有保存版不变。</p>}</article>:null}
@@ -458,10 +474,11 @@ export default function App({initialView='home',embedded=false}:{initialView?:'h
     <footer class="chat-composer">
 
       {reference?<div class="chat-reference"><details><summary>{reference.name} · 版本 {reference.versionId.slice(0,8)} · {lineLabel(reference.lines)}{reference.versionId!==effective?.versionId?' · 历史快照':''}</summary><pre>{reference.text}</pre></details><button aria-label="移除代码引用" disabled={generating} onClick={removeReference}>×</button></div>:null}
-      <label>执行方 <select aria-label="执行方" value={executor} disabled={!editable} onChange={e=>{const value=e.currentTarget.value;void executorStorage.set({[currentExecutorKey]:value}).then(()=>{setExecutor(value);setEnvelope(null);setNotice(value==='codex'?'本地 Codex 将以最新草稿及有限历史新建专用会话；不接管其他聊天，调用计费以 Codex 账号为准。':'已切回第三方模型，最新草稿保留。');}).catch(fail);}}><option value="provider">第三方模型</option><option value="codex">本地 Codex</option></select></label>
-      <div class="chat-context"><label class="chat-thinking"><input type="checkbox" aria-label="推理模式" checked={thinkingEnabled} disabled={!editable||executor==='codex'} onChange={e=>void toggleThinking(e.currentTarget.checked)}/>推理</label><button onClick={()=>setContextOpen(!contextOpen)}>{workflow.scope==='page'?'◌ 当前页面':workflow.scope==='module'?'◎ 完整模块':'◎ 已点选元素'} ⌄</button>{target?<button aria-label="清除点选" disabled={!editable} onClick={()=>void clearPick()}>×</button>:null}<button onClick={()=>void prepare(repairAllowed,false)} disabled={!editable||!input.trim()||!online}>发送范围</button></div>
-      {contextOpen?<div class="chat-context-details"><TargetCard workflow={workflow} candidates={target?.targetContext?.candidates??[]} busy={!editable} onSelect={(c,scope)=>void selectTarget(c,scope)} onPreview={()=>void previewTarget()} onConfirm={()=>{void changeWorkflow({confirmStrategy:true}).catch(fail);}} onTrigger={trigger=>{void changeWorkflow({trigger}).catch(fail);}} onEffect={expectedEffect=>{void changeWorkflow({expectedEffect}).catch(fail);}}/><label>保留范围<textarea aria-label="保留范围" value={constraints} disabled={!editable} onInput={e=>{setConstraints(e.currentTarget.value);setEnvelope(null);setReceipt(null);}}/></label></div>:null}
-      <div class="chat-input-shell"><textarea id="intent" aria-label="发送需求或继续反馈" rows={2} value={generating||analysing?queuedText:input} disabled={preparing||versionBusy} onInput={e=>chatInput(e.currentTarget.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&e.keyCode!==229){e.preventDefault();void sendChat();}}} placeholder="描述想法，或继续说哪里还不理想…"/><div><button onClick={()=>void pick()} disabled={!editable||!site}>⌖ 点选元素</button><small>{generating?'可输入下一条需求':'继续说，就能继续改'}</small><button class="chat-send" aria-label={generating||analysing?'停止生成':'发送'} disabled={!(generating||analysing)&&(!editable||!online||!input.trim()||mismatch||!site)} onClick={()=>void sendChat()}>{generating||analysing?'■':'↑'}</button></div></div><p>发送需求与有限摘要 · {thinkingEnabled?'推理已开启':'推理已关闭'} · {repairAllowed?'允许修复 1 次':'不追加自动修复'}</p>
+      {<label>执行方 <select aria-label="执行方" value={executor} disabled={!editable||harness.busy} onChange={e=>{const value=e.currentTarget.value;void executorStorage.set({[currentExecutorKey]:value}).then(()=>{setExecutor(value);setEnvelope(null);setNotice(value==='codex'?'本地 Codex 已选中；沿用当前鲁班会话和确认流程，使用本机 Codex 登录与默认模型，额度以 Codex 账号为准。':'已切回第三方模型，最新草稿保留。');}).catch(fail);}}><option value="provider">第三方模型</option><option value="codex">本地 Codex</option></select></label>}
+      {!agentEnabled&&<div class="chat-context"><label class="chat-thinking"><input type="checkbox" aria-label="推理模式" checked={thinkingEnabled} disabled={!editable||executor==='codex'} onChange={e=>void toggleThinking(e.currentTarget.checked)}/>推理</label><button onClick={()=>setContextOpen(!contextOpen)}>{workflow.scope==='page'?'◌ 当前页面':workflow.scope==='module'?'◎ 完整模块':'◎ 已点选元素'} ⌄</button>{target?<button aria-label="清除点选" disabled={!editable} onClick={()=>void clearPick()}>×</button>:null}<button onClick={()=>void prepare(repairAllowed,false)} disabled={!editable||!input.trim()||!online}>发送范围</button></div>}
+      {!agentEnabled&&contextOpen?<div class="chat-context-details"><TargetCard workflow={workflow} candidates={target?.targetContext?.candidates??[]} busy={!editable} onSelect={(c,scope)=>void selectTarget(c,scope)} onPreview={()=>void previewTarget()} onConfirm={()=>{void changeWorkflow({confirmStrategy:true}).catch(fail);}} onTrigger={trigger=>{void changeWorkflow({trigger}).catch(fail);}} onEffect={expectedEffect=>{void changeWorkflow({expectedEffect}).catch(fail);}}/><label>保留范围<textarea aria-label="保留范围" value={constraints} disabled={!editable} onInput={e=>{setConstraints(e.currentTarget.value);setEnvelope(null);setReceipt(null);}}/></label></div>:null}
+      {agentEnabled?<HarnessActions controller={harness} disabled={embedded||!site||mismatch||versionBusy}/>:null}
+      <div class="chat-input-shell"><textarea id="intent" aria-label="发送需求或继续反馈" rows={2} value={generating||analysing?queuedText:input} disabled={preparing||versionBusy} onInput={e=>chatInput(e.currentTarget.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&e.keyCode!==229){e.preventDefault();void sendChat();}}} placeholder="描述想法，或继续说哪里还不理想…"/><div>{!agentEnabled?<button onClick={()=>void pick()} disabled={!editable||!site}>⌖ 点选元素</button>:null}<small>{generating?'可输入下一条需求':'继续说，就能继续改'}</small><button class="chat-send" aria-label={harness.active?'停止处理':generating||analysing?'停止生成':'发送'} disabled={!(generating||analysing||harness.active)&&(!editable||!online||!input.trim()||mismatch||!site||(agentEnabled&&embedded))} onClick={()=>void sendChat()}>{generating||analysing||harness.active?'■':'↑'}</button></div></div><p>{agentEnabled?'发送将调用当前配置的模型 · 读取页面、生成与运行分别确认':<>发送需求与有限摘要 · {thinkingEnabled?'推理已开启':'推理已关闭'} · {repairAllowed?'允许修复 1 次':'不追加自动修复'}</>}</p>
     </footer></>}
     {settingsOpen?<section class="chat-settings"><strong>设置与快捷操作</strong><button aria-label="关闭快捷设置" onClick={()=>setSettingsOpen(false)}>×</button><label><input type="checkbox" checked={repairAllowed} disabled={!editable} onChange={e=>{setRepairAllowed(e.currentTarget.checked);setEnvelope(null);}}/>允许基础检查失败时修复一次</label><button onClick={()=>void chrome.runtime.openOptionsPage()}>打开模型与连接设置</button><button disabled={!editable} onClick={()=>void refreshSite()}>刷新当前页面状态</button><label><input type="checkbox" checked={allowExternalDrafts} onChange={e=>setAllowExternalDrafts(e.currentTarget.checked)}/>允许读取此工具基线、提交候选和申请试运行（执行仍需确认）</label><button disabled={!site||grantBusy||!editable} onClick={()=>void grantCurrentPage()}>授权本机集成访问此页</button>{allowExternalDrafts&&workspace&&<p>外部请求目标：工作区 <code>{workspace.id}</code> · 草稿版本 {workspace.draftRevision}</p>}<ExternalApprovals/>{pageGrantMessage&&<p role="status">{pageGrantMessage}</p>}</section>:null}
     <CodeArtifactDialog open={artifactOpen} onClose={()=>setArtifactOpen(false)} current={effective??null} saved={record?.current} previous={record?.previous} name={name} onName={setName} onEdit={keepCode} onReference={addCodeReference} busy={!editable} hasReference={!!reference}>{artifactTools}</CodeArtifactDialog>

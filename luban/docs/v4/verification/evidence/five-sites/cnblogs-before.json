@@ -1,0 +1,82 @@
+{
+  "nodeCount": 1115,
+  "promotions": [
+    {
+      "class": "",
+      "href": "https://www.volcengine.com/activity/codingplan?utm_campaign=hw&utm_content=hw&utm_medium=devrel_tool_web&utm_source=OWO&utm_term=cnblogs",
+      "html": "<a href=\"https://www.volcengine.com/activity/codingplan?utm_campaign=hw&amp;utm_content=hw&amp;utm_medium=devrel_tool_web&amp;utm_source=OWO&amp;utm_term=cnblogs\" onclick=\"countCreativeClicks('B0-volcengine-codingplan')\" target=\"_blank\" rel=\"nofollow\">\n                <div class=\"imagebar forpc\" style=\"background-size: contain;background-color:#d0defc;\">\n                    \n                    <img src=\"https://img2024.cnblogs.com/blog/35695/202606/35695-20260609221836280-1720685857.jpg\" style=\"\" onload=\"countCreativeImpressions('B0-volcengine-codingplan')\">\n                    \n                    \n                    <span id=\"b0_impression\" style=\"display:none\"></span>\n                </div>\n            </a>",
+      "id": "",
+      "parent": {
+        "class": "flow",
+        "id": "wrapper",
+        "tag": "DIV"
+      },
+      "rect": {
+        "height": 32,
+        "width": 2162,
+        "x": 0,
+        "y": 52
+      },
+      "tag": "A",
+      "text": ""
+    },
+    {
+      "class": "",
+      "href": "https://www.trae.cn/sem/?utm_source=advertising&utm_medium=cnblogs_ug_cpa&utm_term=hw_trae_cnblogs",
+      "html": "<a href=\"https://www.trae.cn/sem/?utm_source=advertising&amp;utm_medium=cnblogs_ug_cpa&amp;utm_term=hw_trae_cnblogs\" target=\"_blank\" onclick=\"countCreativeClicks('B2-字节-trae')\">\n        <img src=\"https://img2024.cnblogs.com/blog/35695/202607/35695-20260715081632770-1485313413.webp\" onload=\"countCreativeImpressions('B2-字节-trae')\">\n    </a>",
+      "id": "",
+      "parent": {
+        "class": "sidebar-image",
+        "id": "cnblogs_b2",
+        "tag": "DIV"
+      },
+      "rect": {
+        "height": 250,
+        "width": 300,
+        "x": 1838,
+        "y": 800
+      },
+      "tag": "A",
+      "text": ""
+    },
+    {
+      "class": "",
+      "href": "https://ais.cn/u/3Qf22e",
+      "html": "<a href=\"https://ais.cn/u/3Qf22e\" target=\"_blank\"><img src=\"https://img2024.cnblogs.com/blog/35695/202610/35695-20261011145556115-1699157507.webp\"></a>",
+      "id": "",
+      "parent": {
+        "class": "sidebar-image",
+        "id": "cnblogs_b3",
+        "tag": "DIV"
+      },
+      "rect": {
+        "height": 250,
+        "width": 300,
+        "x": 1838,
+        "y": 1706
+      },
+      "tag": "A",
+      "text": ""
+    },
+    {
+      "class": "",
+      "href": "https://ais.cn/u/QjqYJr",
+      "html": "<a href=\"//ais.cn/u/QjqYJr\" target=\"_blank\">艾思科蓝</a>",
+      "id": "",
+      "parent": {
+        "class": "link-list friend-link",
+        "id": "friend_link",
+        "tag": "DIV"
+      },
+      "rect": {
+        "height": 18,
+        "width": 48,
+        "x": 877.1796875,
+        "y": 3241.5
+      },
+      "tag": "A",
+      "text": "艾思科蓝"
+    }
+  ],
+  "title": "博客园 - 开发者的网上家园"
+}

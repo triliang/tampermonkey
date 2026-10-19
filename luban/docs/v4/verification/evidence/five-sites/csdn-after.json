@@ -1,0 +1,28 @@
+{
+  "bodyVisible": true,
+  "nearbyNews": [
+    {
+      "height": 169.9609375,
+      "text": "19岁从MIT辍学，29岁执掌 Meta AI！Muse上线22天下载破500万，超越当年ChatGPT，亚历山大·王首谈7个月研发内幕",
+      "width": 296
+    },
+    {
+      "height": 169.9609375,
+      "text": "“我的整个C盘被删光了！”超100万人围观Claude「闯祸」，开发者差点崩溃：幸亏每天都有备份",
+      "width": 296
+    },
+    {
+      "height": 169.9609375,
+      "text": "昆仑万维诞生世界上第一款消费级显卡视频大模型游戏，同步开源",
+      "width": 296
+    }
+  ],
+  "otherFrames": 2,
+  "targets": [
+    {
+      "display": "none",
+      "height": 0,
+      "width": 0
+    }
+  ]
+}

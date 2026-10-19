@@ -1,0 +1,27 @@
+{
+  "time": "2026-10-19T02:13:30.658Z",
+  "status": {
+    "installed": true,
+    "compatible": true,
+    "restrictionsApplied": true,
+    "version": "0.163.0-alpha.10.2",
+    "executor": "codex",
+    "historyMode": "latest-baseline-new-thread"
+  },
+  "checks": [
+    {
+      "name": "unapproved-generation-rejected",
+      "passed": true
+    },
+    {
+      "name": "approved-structured-candidate",
+      "passed": true,
+      "code": "(() => {\n  const id = 'luban-hide-region-one';\n  if (document.getElementById(id)) return;\n  const parent = document.head || document.documentElement;\n  if (!parent) return;\n  const style = document.createElement('style');\n  style.id = id;\n  style.textContent = '#region-one { display: none !important; }';\n  parent.appendChild(style);\n})();",
+      "grants": []
+    }
+  ],
+  "passed": true,
+  "syntheticOnly": true,
+  "browserExecuted": false,
+  "scriptSaved": false
+}

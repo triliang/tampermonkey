@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1010" viewBox="0 0 1200 1010" role="img" aria-labelledby="title desc">
+<title id="title">鲁班 V4 技术架构</title><desc id="desc">浏览器扩展、Bridge 领域控制服务与独立 Deep Agents Worker 分层；执行权保留在扩展。</desc>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" viewBox="0 0 10 10"><path d="M1 2 L8 5 L1 8" fill="none" stroke="#7e9574" stroke-width="1.4"/></marker></defs>
+<rect width="1200" height="1010" fill="#f8faf5"/>
+<style>text{font-family:"PingFang SC","Microsoft YaHei",sans-serif;fill:#294332}.title{font-size:26px;font-weight:600}.sub{font-size:12px;fill:#86947b}.label{font-size:14px;font-weight:600}.small{font-size:11px;fill:#809074}.edge{fill:none;stroke:#809872;stroke-width:1.7;marker-end:url(#arrow)}.layer{fill:#fff;stroke:#dce5d4;stroke-width:1.2;rx:16}.node{fill:#f2f6ec;stroke:#dce5d4;rx:10}.special{fill:#315d47;stroke:#315d47;rx:10}.white{fill:#fff}.white-small{fill:#d3e1cb;font-size:11px}</style>
+<text x="42" y="50" class="title" text-anchor="start">鲁班 V4 · 网页任务 Harness</text>
+<text x="42" y="76" class="sub" text-anchor="start">Deep Agents 理解与规划，领域服务校验授权，扩展负责实际执行。</text>
+<rect x="30" y="100" width="1140" height="180" class="layer"/>
+<text x="50" y="131" class="label" text-anchor="start">01   浏览器扩展 · 页面与制品的执行边界</text>
+<rect x="55" y="160" width="235" height="72" class="node"/>
+<text x="172.5" y="189" class="label" text-anchor="middle">Chat / 需求与确认卡片</text>
+<text x="172.5" y="211" class="small" text-anchor="middle">问答、目标、方案、执行确认</text>
+<rect x="345" y="160" width="235" height="72" class="node"/>
+<text x="462.5" y="189" class="label" text-anchor="middle">Service Worker Gateway</text>
+<text x="462.5" y="211" class="small" text-anchor="middle">页面权限、版本校验、命令回执</text>
+<rect x="635" y="160" width="235" height="72" class="node"/>
+<text x="752.5" y="189" class="label" text-anchor="middle">Content Script / Registry</text>
+<text x="752.5" y="211" class="small" text-anchor="middle">真实节点、语义引用、标注覆盖层</text>
+<rect x="925" y="160" width="220" height="72" class="node"/>
+<text x="1035.0" y="189" class="label" text-anchor="middle">Artifact Pipeline / IDB</text>
+<text x="1035.0" y="211" class="small" text-anchor="middle">检查、试运行、保存与去重</text>
+<path d="M290 196 H345" class="edge"/>
+<path d="M580 196 H635" class="edge"/>
+<path d="M870 196 H925" class="edge"/>
+<path d="M462 232 V310" class="edge"/>
+<text x="478" y="298" class="small" text-anchor="start">Native Messaging · 受控命令与实际回执</text>
+<rect x="30" y="320" width="1140" height="170" class="layer"/>
+<text x="50" y="351" class="label" text-anchor="start">02   Bridge · 确定性领域控制</text>
+<rect x="55" y="375" width="235" height="72" class="node"/>
+<text x="172.5" y="404" class="label" text-anchor="middle">身份 / 页面 / 协议网关</text>
+<text x="172.5" y="426" class="small" text-anchor="middle">profile、授权、版本、任务归属</text>
+<rect x="345" y="375" width="235" height="72" class="special"/>
+<text x="462.5" y="404" class="label white" text-anchor="middle">Task Control / Decision</text>
+<text x="462.5" y="426" class="white-small" text-anchor="middle">需求、目标、方案、范围 hash</text>
+<rect x="635" y="375" width="235" height="72" class="node"/>
+<text x="752.5" y="404" class="label" text-anchor="middle">Operations / Outbox</text>
+<text x="752.5" y="426" class="small" text-anchor="middle">幂等键、租约、投递与状态对账</text>
+<rect x="925" y="375" width="220" height="72" class="node"/>
+<text x="1035.0" y="404" class="label" text-anchor="middle">领域 SQLite</text>
+<text x="1035.0" y="426" class="small" text-anchor="middle">决定、任务、事件、操作账本</text>
+<path d="M290 411 H345" class="edge"/>
+<path d="M580 411 H635" class="edge"/>
+<path d="M870 411 H925" class="edge"/>
+<path d="M462 447 V520" class="edge"/>
+<text x="478" y="510" class="small" text-anchor="start">带任务身份的 IPC · 工具请求始终回到领域门禁</text>
+<rect x="30" y="530" width="1140" height="260" class="layer"/>
+<text x="50" y="562" class="label" text-anchor="start">03   独立 Harness Worker · Deep Agents</text>
+<rect x="55" y="590" width="235" height="72" class="node"/>
+<text x="172.5" y="619" class="label" text-anchor="middle">Run Adapter / Stream Adapter</text>
+<text x="172.5" y="641" class="small" text-anchor="middle">线程串行、预算、取消、事件归一化</text>
+<rect x="345" y="590" width="235" height="72" class="special"/>
+<text x="462.5" y="619" class="label white" text-anchor="middle">主 Deep Agent</text>
+<text x="462.5" y="641" class="white-small" text-anchor="middle">理解、澄清、分析、工具选择</text>
+<rect x="635" y="590" width="235" height="72" class="node"/>
+<text x="752.5" y="619" class="label" text-anchor="middle">受限领域工具</text>
+<text x="752.5" y="641" class="small" text-anchor="middle">读取 / 提议 / 标注 / 请求生成</text>
+<rect x="925" y="590" width="220" height="72" class="node"/>
+<text x="1035.0" y="619" class="label" text-anchor="middle">持久化 Checkpointer</text>
+<text x="1035.0" y="641" class="small" text-anchor="middle">中断与恢复，不赋予执行权限</text>
+<path d="M290 626 H345" class="edge"/>
+<path d="M580 626 H635" class="edge"/>
+<path d="M870 626 H925" class="edge"/>
+<rect x="345" y="695" width="235" height="72" class="node"/>
+<text x="462.5" y="724" class="label" text-anchor="middle">任务虚拟文件 / Skills</text>
+<text x="462.5" y="746" class="small" text-anchor="middle">只读证据与技能、可写临时笔记</text>
+<rect x="635" y="695" width="235" height="72" class="node"/>
+<text x="752.5" y="724" class="label" text-anchor="middle">有界生成 Job</text>
+<text x="752.5" y="746" class="small" text-anchor="middle">冻结方案、一次生成、至多一次修复</text>
+<rect x="925" y="695" width="220" height="72" class="node"/>
+<text x="1035.0" y="724" class="label" text-anchor="middle">显式配置的模型</text>
+<text x="1035.0" y="746" class="small" text-anchor="middle">工具调用能力预检、无静默切换</text>
+<path d="M462 662 V695" class="edge"/>
+<path d="M752 662 V695" class="edge"/>
+<path d="M870 731 H925" class="edge"/>
+<rect x="30" y="820" width="1140" height="150" class="layer"/>
+<text x="50" y="853" class="label" text-anchor="start">关键约束</text>
+<text x="55" y="885" class="small" text-anchor="start">模型不能签发授权；目标确认、生成授权、试运行许可分别绑定对象与版本。</text>
+<text x="55" y="911" class="small" text-anchor="start">Checkpoint 恢复先对账；DOM 执行结果未知时阻止自动重放。主代理不开放 shell、eval 或自由委派。</text>
+<text x="55" y="937" class="small" text-anchor="start">绿色：Agent 核心 / 领域控制核心    浅色：受控适配与存储    箭头：主要调用或数据传递方向</text>
+<text x="42" y="994" class="sub" text-anchor="start">架构评审稿 · 2026-10-18 · 实际依赖与协议需 S0 验证</text>
+</svg>

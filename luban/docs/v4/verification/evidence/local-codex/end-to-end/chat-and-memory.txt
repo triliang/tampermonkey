@@ -1,0 +1,34 @@
+HTML content 鲁班 Luban, URL: …
+					453 container
+						454 container 当前页面与工具操作
+							455 text www.cnblogs.com
+							456 button 新建工具
+							457 button 我的工具
+							458 button 分析此页面
+							459 button 设置
+						460 container 当前对话
+							461 container
+								462 text 你 本地 Codex 链路验收：先只讨论需求，不读取页面、不生成脚本。请回复“先明确需求再生成”，并记住本轮代号“青石-731”。
+							463 container
+								464 text 鲁班 本次模型处理失败，请检查配置或重试。
+							465 container
+								466 text 你 继续同一轮链路验收。请只回复“先明确需求再生成；青石-731”，不读取页面、不生成脚本。
+							467 container
+								468 text 鲁班 先明确需求再生成；青石-731
+							469 container
+								470 text 你 刚才约定的验收代号是什么？只回复代号，不读取页面，不生成脚本。
+							471 container
+								472 text 鲁班 青石-731
+							473 container
+								474 text 鲁班 本地 Codex 已选中；沿用当前鲁班会话和确认流程，使用本机 Codex 登录与默认模型，额度以 Codex 账号为准。
+						475 container
+							476 text 执行方
+							477 pop up button 执行方, Value: 本地 Codex
+								478 (selected) 本地 Codex
+						479 button 授权并识别当前页
+						480 button (disabled) 手动补选
+						481 text entry area (settable) 发送需求或继续反馈, Placeholder: 描述想法，或继续说哪里还不理想…
+						482 text 继续说，就能继续改
+						483 button (disabled) 发送
+						484 text 发送将调用当前配置的模型 · 读取页面、生成与运行分别确认
+			485

@@ -1,0 +1,28 @@
+{
+  "time": "2026-10-19T03:11:14.862489+00:00",
+  "bridgeVersion": "0.6.7",
+  "codexVersion": "0.163.0-alpha.10.2",
+  "automaticChecks": {
+    "passed": 12,
+    "total": 12
+  },
+  "tests": {
+    "extension": 455,
+    "bridge": 89,
+    "harness": 17,
+    "total": 561
+  },
+  "actualNativePanelFlowPassed": true,
+  "testTabsClosed": true,
+  "sourceSha256": {
+    "bridge/src/agent-process.mjs": "d19a87b90820b50963fc313d5609911bd87a6b6d696b7f9387f3088ca538a900",
+    "bridge/src/harness-service.mjs": "ffdc68e69ad101b59a9c00ab54ecfb1c1da17abdd5753ad58b568eadf4c819c9",
+    "bridge/src/protocol-contract.json": "84acca0f4902d6984a5e9aaa0e91063d6aaf97bc95128cac559360381fa4943d",
+    "harness/src/codex-model.ts": "ee6fea1e09cc0075b2fa3094f0a48e6437bd3819ff98ea12afa216b87cf282b2",
+    "harness/src/worker.ts": "75d384d05c69f8fabc920e3fd170dd6d366101d74c1ca33672fc7b5d856d9367",
+    "harness/src/model-errors.ts": "ea81b83c280ba31cb5c717884a0bb817b6a348e060f60a463214dec6432a0382",
+    "src/sidepanel/v4/useHarnessChat.ts": "9c878f0b7e6020b9c6adc41d82918e6ced48400ff36af157e89eb2f940c777fa",
+    "src/shared/harness-errors.ts": "7729fb906da8429242f2f85d35d19a06edb0d3e5ac992f2ea2a3c7f85e52b82d",
+    "dist/src/sidepanel/index.html": "8cef9b007700327da9b00157b73879eae7ec4870b038a5c88d194fbc4fb03343"
+  }
+}

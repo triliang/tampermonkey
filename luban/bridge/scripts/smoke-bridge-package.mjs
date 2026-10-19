@@ -1,5 +1,5 @@
 import {mkdtempSync,cpSync,writeFileSync,readFileSync,rmSync,existsSync} from 'node:fs';
-import {join,resolve} from 'node:path';import {pathToFileURL} from 'node:url';import {spawn} from 'node:child_process';
+import {join,resolve} from 'node:path';import {pathToFileURL} from 'node:url';import {spawn,spawnSync} from 'node:child_process';
 import {encodeFrame,FrameDecoder} from '../src/native-framing.mjs';
 import {Client} from '@modelcontextprotocol/sdk/client/index.js';
 import {StdioClientTransport} from '@modelcontextprotocol/sdk/client/stdio.js';
@@ -13,6 +13,9 @@ try{
  const call=(method,params={})=>new Promise((resolveReply,reject)=>{const requestId=crypto.randomUUID();const timer=setTimeout(()=>{waiting.delete(requestId);reject(Error('PACKAGE_SMOKE_TIMEOUT'));},10000);waiting.set(requestId,reply=>{clearTimeout(timer);resolveReply(reply);});child.stdin.write(encodeFrame({protocolVersion:1,requestId,method,params}));});
  const health=await call('health.get');if(!health.ok||health.data.service!=='luban-bridge'||health.data.node!=='v24.14.1')throw Error('PACKAGE_HEALTH_FAILED');
  if(!(await call('profile.pair')).ok)throw Error('PACKAGE_PAIRING_FAILED');
+ const harnessStatus=await call('harness.status');if(!harnessStatus.ok||!harnessStatus.data.available)throw Error('PACKAGE_HARNESS_UNAVAILABLE');
+ const harnessRuntime=pathToFileURL(join(root,'harness/dist/runtime.js')).href;const codexAdapter=pathToFileURL(join(root,'harness/dist/codex-model.js')).href;const fakeModel=pathToFileURL(join(root,'harness/node_modules/@langchain/core/utils/testing.js')).href;
+ const check=spawnSync(join(root,'runtime/node'),['--input-type=module','-e',`const {createRuntime}=await import(${JSON.stringify(harnessRuntime)});const {FakeStreamingChatModel}=await import(${JSON.stringify(fakeModel)});const r=createRuntime({checkpointFile:':memory:',model:new FakeStreamingChatModel({responses:[]}),dispatch:async()=>({})});r.close();const {codexModules}=await import(${JSON.stringify(codexAdapter)});const cm=await codexModules();if(typeof cm.process.AgentProcess!=='function')throw Error('CODEX_ADAPTER_UNAVAILABLE');`],{env:{PATH:'/nonexistent',LANGSMITH_TRACING:'false'},timeout:10000,encoding:'utf8'});if(check.status!==0)throw Error('PACKAGE_HARNESS_IMPORT_FAILED');
  const pages=await call('pages.list');if(!pages.ok||pages.data.pages.length)throw Error('PACKAGE_PAGE_BOUNDARY_FAILED');
  if((await call('context.read')).error?.code!=='PAGE_NOT_GRANTED')throw Error('PACKAGE_CONTEXT_BOUNDARY_FAILED');
  // Discovery is deliberately credential-free and lazy: no production Bridge
@@ -25,7 +28,7 @@ try{
  if(!(await call('profile.revoke')).ok)throw Error('PACKAGE_REVOCATION_FAILED');
  child.stdin.end();await new Promise((resolveExit,reject)=>{child.on('exit',code=>code===0?resolveExit():reject(Error('PACKAGE_HOST_EXIT_FAILED')));});
  if(stderr)throw Error('PACKAGE_UNEXPECTED_STDERR');
- console.log(JSON.stringify({passed:true,node:health.data.node,relocated:true,globalNodeRequired:false,ipc:true,pairing:true,noPageAccess:true,revocation:true,mcpStdioTools:7,realChromeRegistration:false}));
+ console.log(JSON.stringify({passed:true,node:health.data.node,relocated:true,globalNodeRequired:false,ipc:true,pairing:true,noPageAccess:true,revocation:true,mcpStdioTools:7,harnessRuntime:true,realChromeRegistration:false}));
 }finally{
  child?.kill();const lock=join(state,'daemon.json');if(existsSync(lock)){const metadata=JSON.parse(readFileSync(lock,'utf8'));try{process.kill(metadata.pid,'SIGTERM');}catch{}}
  // Give the dedicated test daemon time to release its own resources.

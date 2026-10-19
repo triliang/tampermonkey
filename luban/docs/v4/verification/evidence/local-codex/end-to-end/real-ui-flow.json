@@ -1,0 +1,101 @@
+{
+  "time": "2026-10-19T03:06:55.801Z",
+  "bridgeVersion": "0.6.7",
+  "modelBackend": "codex",
+  "actualNativePanel": true,
+  "conversation": "215872ba-c67a-43da-bf69-a6d5d073fc75",
+  "workspaceId": "6497b48f-0e9d-4ed8-8775-d740b0e86598",
+  "checks": {
+    "sameConversationAcrossRestart": true,
+    "memoryReply": true,
+    "readContext": true,
+    "proposeTargets": true,
+    "singleGeneration": true,
+    "candidateRetained": true,
+    "lastErrorAbsent": true,
+    "effectReview": true
+  },
+  "selectedLabels": [
+    22
+  ],
+  "artifact": {
+    "code": "(() => {\n  'use strict';\n  const id = 'luban-hide-99e5b21b0aad1727';\n  if (document.getElementById(id)) return;\n  const parent = document.head || document.documentElement;\n  if (!parent) return;\n  const style = document.createElement('style');\n  style.id = id;\n  style.textContent = 'body:nth-child(3) > div:nth-child(1) > a:nth-child(2) { display: none !important; }';\n  parent.appendChild(style);\n})();",
+    "grants": [],
+    "sha256": "6a4d66d8081a4f5d3d767fdb7d1df7798b9d374eccaf7091e24eb98ee77fa717"
+  },
+  "events": [
+    {
+      "type": "run.started",
+      "time": 1792377844104
+    },
+    {
+      "type": "run.finished",
+      "time": 1792377852189
+    },
+    {
+      "type": "run.started",
+      "time": 1792378327016
+    },
+    {
+      "type": "run.finished",
+      "time": 1792378333015
+    },
+    {
+      "type": "run.started",
+      "time": 1792378363947
+    },
+    {
+      "type": "run.finished",
+      "time": 1792378384800
+    },
+    {
+      "type": "page.bound",
+      "time": 1792378503308
+    },
+    {
+      "type": "run.started",
+      "time": 1792378561704
+    },
+    {
+      "type": "tool.read_page_context",
+      "time": 1792378569123
+    },
+    {
+      "type": "tool.propose_targets",
+      "time": 1792378579944
+    },
+    {
+      "type": "run.finished",
+      "time": 1792378591470
+    },
+    {
+      "type": "decision.confirmHide",
+      "time": 1792378796911
+    },
+    {
+      "type": "decision.approve",
+      "time": 1792378836010
+    },
+    {
+      "type": "generation.started",
+      "time": 1792378837213
+    },
+    {
+      "type": "artifact.candidate",
+      "time": 1792378845770
+    },
+    {
+      "type": "run.started",
+      "time": 1792378951791
+    },
+    {
+      "type": "run.finished",
+      "time": 1792378969798
+    }
+  ],
+  "trialEvidence": "trial-effect.txt",
+  "preservationChecked": 763,
+  "preservationViolations": 0,
+  "saved": false,
+  "autoRunEnabled": false
+}

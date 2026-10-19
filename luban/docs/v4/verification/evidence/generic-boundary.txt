@@ -1,0 +1,1 @@
+Generic runtime boundary passed: no known website adapters or advertising-specific rules in the scoped runtime. This lexical check supplements code review; it cannot prove arbitrary future code is generic.

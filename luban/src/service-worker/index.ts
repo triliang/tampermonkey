@@ -1,3 +1,6 @@
+import {harnessModelConfig,requireHarnessConfiguration} from './services/harness-model-config';
+import {harnessHistory} from './services/harness-history';
+import {HarnessGateway} from './services/harness-gateway';
 import {workspaceAvailableToPanel} from './repositories/workspace-store';
 import {panelTabId,executorKey,PANEL_PATH} from '../shared/panel-tab';
 import {initializeTabPanels,openTabPanel,configureTabPanel,forgetTabPanel} from './services/tab-panel';
@@ -84,7 +87,7 @@ const pageAnalysis = new PageAnalysis(capture, async()=>{
   if(!key)throw ErrorFactory.keyInvalid();
   return toProviderConfig(settings,key);
 },()=>new AiClient(),(id,content,truncated)=>{void chrome.runtime.sendMessage({type:'ANALYSIS_REASONING',requestId:id,content,truncated,attempt:1}).catch(()=>{});});
-const versions = new VersionService(getScriptStore(), capture, executeTrial, autoRuntime.coordinate);
+const versions = new VersionService(getScriptStore(), capture, executeTrial, autoRuntime.coordinate,undefined,(id,version)=>new HarnessGateway(getScriptStore(),pageGrants,(m,p)=>bridgeConnection.rpc(m,p),capture).verifyTrial(id,version));
 const savedRunner=new SavedRunner(getScriptStore(),capture,executeTrial);
 return {workspaceGeneration,pageAnalysis,versions,savedRunner,capture};
 }
@@ -125,6 +128,32 @@ chrome.tabs.onReplaced?.addListener((added,removed)=>{forgetTabPanel(removed);vo
 
 // 消息路由：始终返回 true 表示异步应答。
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if(msg?.type==='V4_HARNESS'){
+    void(async()=>{try{
+      if(!isPanelSender(sender)||sourceTab(sender)===undefined)throw new DataError('FORBIDDEN_SOURCE','对话只允许从绑定标签页的侧栏访问。');
+      const params=msg.params??{};const method=msg.method;
+      if(!['status','configure','open','get','message','decide','resume','generate','cancel','scan','manual','show','clear','locate','submit','forget','check'].includes(method))throw new DataError('INVALID_MESSAGE','V4 操作无效。');
+      const gateway=new HarnessGateway(getScriptStore(),pageGrants,(m,p)=>bridgeConnection.rpc(m,p),servicesFor(sender).capture);
+      async function snapshot(value:unknown){const c=value as import('../shared/v4-types').V4Conversation;let stale=false;if(c.page)try{await pageGrants.require(c.page.pageRef);}catch{stale=true;}const submitted=c.artifact?!!await getScriptStore().db.get('meta','v4:submitted:'+c.artifact.operationId):false;const additions=c.messages.slice(c.historyCount??0).filter(m=>m.id&&m.createdAt!==undefined).map(m=>({agentMessageId:c.id+':'+m.id,role:m.role,text:m.text,createdAt:m.createdAt!}));const workspaceMessages=await getScriptStore().workspaces.appendAgentMessages(c.workspaceId,additions);const effect=await getScriptStore().db.get<{revision:number;operationId:string|null;report:import('../shared/v4-types').V4EffectCheck}>('meta','v4:effect:'+c.id);return {...c,stale,submitted,workspaceMessages,effectCheck:!stale&&effect?.report.checkerVersion==='generic-v1'&&effect.revision===c.revision&&effect.operationId===(c.operation?.id??null)?effect.report:undefined};}
+      let data:unknown;
+      if(method==='status')data=await bridgeConnection.rpc('harness.status');
+      else if(method==='configure'){await bridgeConnection.run('connect');const c=await gateway.conversation(params.conversationId);await assertWorkspaceScope(sender,c.workspaceId);const tabId=sourceTab(sender)!;const choice=(await chrome.storage.session.get(executorKey(tabId)))[executorKey(tabId)]??(await chrome.storage.local.get('luban:v3:executor'))['luban:v3:executor'];requireHarnessConfiguration(await bridgeConnection.rpc('harness.status'),choice);const config=await harnessModelConfig(choice,async()=>{const settings=await getSettings();const key=await getApiKey(!!settings.customEndpoint);if(!key)throw ErrorFactory.keyInvalid();const provider=toProviderConfig(settings,key);return {baseUrl:provider.baseUrl,model:provider.model,apiKey:key};});data=await bridgeConnection.rpc('harness.configure',{conversationId:c.id,...config});}
+      else if(method==='open'){await bridgeConnection.run('connect');await assertWorkspaceScope(sender,params.workspaceId);if(typeof params.workspaceId!=='string')throw new DataError('WORKSPACE_MISSING','请先创建工作区。');const old=await getScriptStore().workspaces.conversation(params.workspaceId);const history=harnessHistory(old);data=await bridgeConnection.rpc('harness.open',{workspaceId:params.workspaceId,history});}
+      else{const c=await gateway.conversation(params.conversationId);await assertWorkspaceScope(sender,c.workspaceId);
+        if(method==='scan'||method==='manual')data=await gateway.bind(c.id,params.requestKey,method==='manual',Number(params.offset??0));
+        else if(method==='show'||method==='clear')data=await gateway.show(c,method,params.color??'green');
+        else if(method==='locate'){if(!c.page||!c.targets.some(t=>t.id===params.targetId))throw new DataError('TARGET_STALE','目标不存在。');const grant=await pageGrants.require(c.page.pageRef,'draft.submit');data=await chrome.tabs.sendMessage(grant.binding.tabId,{type:'V4_TARGETS',action:'locate',ids:[params.targetId]},{documentId:grant.binding.documentId});}
+        else if(method==='check')data=await gateway.check(c);
+        else if(method==='generate')data=await gateway.generate(c,params.requestKey);
+        else if(method==='submit')data=await gateway.submit(c);
+        else if(method==='forget'){await gateway.show(c,'clear').catch(()=>undefined);data=await bridgeConnection.rpc('harness.forget',{conversationId:c.id});}
+        else if(method==='message'&&typeof params.text==='string'&&/^(请)?(?:按|按照)(?:这个|当前|刚才确认的)方案生成(?:脚本|脚本草稿)[。！!]?$/u.test(params.text.trim())&&c.plan&&c.confirmed&&!c.pending){const approved=await bridgeConnection.rpc('harness.decide',{conversationId:c.id,requestKey:params.requestKey+':decision',expectedRevision:c.revision,action:'approve',sourceMessage:params.text.trim()});data=await gateway.generate(approved as unknown as import('../shared/v4-types').V4Conversation,params.requestKey);}
+        else if(method==='get')data=c;
+        else if(method==='message'){const ws=await getScriptStore().workspaces.get(c.workspaceId);const saved=ws?.scriptId?await getScriptStore().record(ws.scriptId):null;const baseline=ws?.draft??saved?.current;let effectCheck:unknown;if(c.page&&/检查|check|还在|隐藏不|效果|复核/i.test(params.text??'')){try{effectCheck=(await gateway.check(c)).effectCheck;}catch{effectCheck={error:'页面复核不可用，请重新授权识别后检查'};}}let context=JSON.stringify({...(baseline?{code:baseline.code.slice(0,48000),truncated:baseline.code.length>48000,grants:baseline.grants,explanation:baseline.explanation.slice(0,4000),reference:ws?.codeReference?.text.slice(0,8000)??null}:{}),...(effectCheck?{effectCheck}:{}),pageBound:!!c.page});if(context&&context.length>64000)context=context.slice(0,63000)+'\n[上下文超限，已截断]';data=await bridgeConnection.rpc('harness.message',{conversationId:c.id,requestKey:params.requestKey,expectedRevision:params.expectedRevision,text:params.text,...(context?{context}:{})});}
+        else data=await bridgeConnection.rpc('harness.'+method,method==='forget'?{conversationId:c.id}:params);
+      }if(data&&typeof data==='object'&&'messages' in data&&'workspaceId' in data)data=await snapshot(data);sendResponse({ok:true,data});
+    }catch(e){sendResponse({ok:false,error:e instanceof Error?e.message:'对话请求失败。'});}})();return true;
+  }
   if(msg?.type==='V3_CHANNEL_SEND'){
     void(async()=>{try{assertExtensionPage(sender);sourceTab(sender);if(!isPanelSender(sender)||!['preview','confirm','cancelPreview'].includes(msg.method))throw new DataError('FORBIDDEN_SOURCE','只能从鲁班结果区预览并确认发送。');sendResponse({ok:true,data:await bridgeConnection.rpc('channel.'+msg.method,msg.params??{})});}catch(e){sendResponse({ok:false,error:e instanceof Error?e.message:'飞书发送失败。'});}})();return true;
   }

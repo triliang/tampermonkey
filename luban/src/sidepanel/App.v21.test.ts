@@ -9,7 +9,7 @@ it('正式工作区通过真实服务完成生成/检查/试运行/人工效果�
  vi.stubGlobal('indexedDB',new IDBFactory());const harness=await installHarness();const root=document.createElement('div');document.body.append(root);
  const button=(name:string)=>[...root.querySelectorAll('button')].find(x=>x.textContent===name)!;
  try{
- await act(async()=>render(h(App,{initialView:'home' as const,embedded:false}),root));
+ await act(async()=>render(h(App,{initialView:'home' as const,embedded:false,initialMode:'v3' as const}),root));
  await vi.waitFor(()=>expect(root.textContent).toContain('shop.example.com'));
  const thinking=root.querySelector<HTMLInputElement>('input[aria-label="推理模式"]')!;expect(thinking.checked).toBe(true);await act(async()=>thinking.click());await vi.waitFor(()=>expect(thinking.disabled).toBe(false));expect(thinking.checked).toBe(false);
  await act(async()=>{const input=root.querySelector('#intent') as HTMLTextAreaElement;input.value='调整字号并保留原功能';input.dispatchEvent(new Event('input',{bubbles:true}));});
@@ -58,7 +58,7 @@ it('左侧网页预览回传引用时保留聊天输入，关闭后可直接继�
  vi.stubGlobal('indexedDB',new IDBFactory());const harness=await installHarness(undefined,true);const root=document.createElement('div');document.body.append(root);
  const type=async(text:string)=>act(async()=>{const area=root.querySelector<HTMLTextAreaElement>('#intent')!;area.value=text;area.dispatchEvent(new Event('input',{bubbles:true}));});
  try{
- await act(async()=>render(h(App,{initialView:'home' as const,embedded:false}),root));await vi.waitFor(()=>expect(root.textContent).toContain('shop.example.com'));await type('调整字号');await act(async()=>root.querySelector<HTMLButtonElement>('button[aria-label="发送"]')!.click());await vi.waitFor(()=>expect(root.querySelector('.chat-artifact')).not.toBeNull());
+ await act(async()=>render(h(App,{initialView:'home' as const,embedded:false,initialMode:'v3' as const}),root));await vi.waitFor(()=>expect(root.textContent).toContain('shop.example.com'));await type('调整字号');await act(async()=>root.querySelector<HTMLButtonElement>('button[aria-label="发送"]')!.click());await vi.waitFor(()=>expect(root.querySelector('.chat-artifact')).not.toBeNull());
  await vi.waitFor(()=>expect(root.querySelector<HTMLButtonElement>('.chat-artifact-name')!.disabled).toBe(false));
  await act(async()=>root.querySelector<HTMLButtonElement>('.chat-artifact-name')!.click());await vi.waitFor(()=>expect(harness.preview()).not.toBeNull());expect(root.querySelector<HTMLDialogElement>('.chat-code-dialog')!.open).toBe(false);
  await type('只修改这段，保留其他功能');const preview=harness.preview()!;
@@ -79,7 +79,7 @@ it('左侧网页预览回传引用时保留聊天输入，关闭后可直接继�
 
 it('固定tab侧栏忽略其他标签激活/导航，输入与执行方只写入本tab',async()=>{
  const previous=window.location.href;window.history.replaceState(null,'','?tabId=1');vi.stubGlobal('indexedDB',new IDBFactory());const harness=await installHarness();const root=document.createElement('div');document.body.append(root);
- try{await act(async()=>render(h(App,{initialView:'home',embedded:false}),root));await vi.waitFor(()=>expect(root.textContent).toContain('shop.example.com'));
+ try{await act(async()=>render(h(App,{initialView:'home',embedded:false,initialMode:'v3' as const}),root));await vi.waitFor(()=>expect(root.textContent).toContain('shop.example.com'));
  await act(async()=>{const area=root.querySelector<HTMLTextAreaElement>('#intent')!;area.value='仅属于标签A';area.dispatchEvent(new Event('input',{bubbles:true}));});
  const reads=harness.siteReads;await act(async()=>{harness.activateOtherTab();harness.navigateTab(2);});expect(harness.siteReads).toBe(reads);expect(root.querySelector<HTMLTextAreaElement>('#intent')!.value).toBe('仅属于标签A');
  await act(async()=>{const select=root.querySelector<HTMLSelectElement>('select[aria-label="执行方"]')!;select.value='codex';select.dispatchEvent(new Event('change',{bubbles:true}));});
@@ -92,7 +92,7 @@ it('工具栏临时授权后回到侧栏恢复发送，保留输入且不自动�
  const previous=window.location.href;window.history.replaceState(null,'','?tabId=1');vi.stubGlobal('indexedDB',new IDBFactory());const harness=await installHarness();const root=document.createElement('div');document.body.append(root);
  const original=chrome.runtime.sendMessage;let granted=false;
  chrome.runtime.sendMessage=vi.fn(async(message)=>message.type==='GET_CURRENT_SITE'&&!granted?{ok:false,error:{message:'网页未授权',code:'ACTIVE_TAB_EXPIRED',layer:'capture',actions:[]}}:original(message)) as typeof original;
- try{await act(async()=>render(h(App,{initialView:'home',embedded:false}),root));await vi.waitFor(()=>expect(root.textContent).toContain('当前网页尚不可访问'));
+ try{await act(async()=>render(h(App,{initialView:'home',embedded:false,initialMode:'v3' as const}),root));await vi.waitFor(()=>expect(root.textContent).toContain('当前网页尚不可访问'));
  await act(async()=>{const area=root.querySelector<HTMLTextAreaElement>('#intent')!;area.value='继续保留未发送内容';area.dispatchEvent(new Event('input',{bubbles:true}));});expect(root.querySelector<HTMLButtonElement>('button[aria-label="发送"]')!.disabled).toBe(true);
  await act(async()=>{granted=true;window.dispatchEvent(new Event('focus'));});await vi.waitFor(()=>expect(root.querySelector<HTMLButtonElement>('button[aria-label="发送"]')!.disabled).toBe(false));expect(root.querySelector<HTMLTextAreaElement>('#intent')!.value).toBe('继续保留未发送内容');expect(harness.sent).toHaveLength(0);
  }finally{await act(async()=>render(null,root));root.remove();await harness.close();vi.unstubAllGlobals();window.history.replaceState(null,'',previous);}

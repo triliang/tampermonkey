@@ -1,0 +1,71 @@
+{
+  "communityPresent": true,
+  "slots": [
+    {
+      "classes": "banner-box",
+      "frames": 0,
+      "id": "banner-box",
+      "rect": {
+        "height": 170,
+        "width": 296,
+        "x": 359,
+        "y": 155
+      }
+    },
+    {
+      "classes": "banner-box",
+      "frames": 0,
+      "id": "banner-box",
+      "rect": {
+        "height": 170,
+        "width": 296,
+        "x": 671,
+        "y": 155
+      }
+    },
+    {
+      "classes": "banner-box",
+      "frames": 0,
+      "id": "banner-box",
+      "rect": {
+        "height": 170,
+        "width": 296,
+        "x": 983,
+        "y": 155
+      }
+    },
+    {
+      "classes": "banner-box",
+      "frames": 1,
+      "id": "banner-box",
+      "rect": {
+        "height": 170,
+        "width": 296,
+        "x": 1295,
+        "y": 155
+      }
+    },
+    {
+      "classes": "broadcast-active kp_bos_swiper",
+      "frames": 5,
+      "id": "kp_box_www_swiper",
+      "rect": {
+        "height": 380,
+        "width": 320,
+        "x": 1639,
+        "y": 114
+      }
+    },
+    {
+      "classes": "csdn-common-logo-advert",
+      "frames": 0,
+      "id": "",
+      "rect": {
+        "height": 60,
+        "width": 44,
+        "x": 1994,
+        "y": 975
+      }
+    }
+  ]
+}

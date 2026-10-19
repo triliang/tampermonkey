@@ -1,0 +1,38 @@
+{
+  "passed": 8,
+  "total": 8,
+  "cases": [
+    {
+      "name": "普通区域与嵌入区域使用同一采集机制",
+      "passed": true
+    },
+    {
+      "name": "只隐藏所选区域，未选区域保留",
+      "passed": true
+    },
+    {
+      "name": "隐藏整个页面必须检查失败",
+      "passed": true
+    },
+    {
+      "name": "隐藏共同祖先误伤其他区域必须失败",
+      "passed": true
+    },
+    {
+      "name": "容器被替换为正文必须使确认失效",
+      "passed": true
+    },
+    {
+      "name": "动态素材变化不能沿用原确认",
+      "passed": true
+    },
+    {
+      "name": "弱化目标时检查非目标区域误伤",
+      "passed": true
+    },
+    {
+      "name": "结构清单分页且明确未覆盖范围",
+      "passed": true
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "node": "v24.14.1",
+  "relocated": true,
+  "globalNodeRequired": false,
+  "ipc": true,
+  "pairing": true,
+  "noPageAccess": true,
+  "revocation": true,
+  "mcpStdioTools": 7,
+  "harnessRuntime": true,
+  "realChromeRegistration": false
+}

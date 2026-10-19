@@ -1,0 +1,9 @@
+{
+  "status": "five_confirmed_scopes_verified_across_iteration_builds",
+  "tests": 538,
+  "files": {
+    "src/content/annotations/registry.ts": "838248b8391b04094b0f1e66fd10c5b537591eb94cc4b70c2e6f204963692e86",
+    "src/sidepanel/v4/HarnessChat.tsx": "184196d5b96d705846b3bdfc87b6e71562e887a2da62807aa89e6dce6473d66f",
+    "harness/src/runtime.ts": "97d8c6b8269d35d10f521ce25457f75a648d96903b5ba7ef5c9ac3a912eaf28f"
+  }
+}

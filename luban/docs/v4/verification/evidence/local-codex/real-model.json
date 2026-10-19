@@ -1,0 +1,37 @@
+{
+  "time": "2026-10-19T02:14:01.142Z",
+  "status": {
+    "installed": true,
+    "compatible": true,
+    "restrictionsApplied": true,
+    "version": "0.163.0-alpha.10.2",
+    "executor": "codex",
+    "historyMode": "latest-baseline-new-thread"
+  },
+  "checks": [
+    {
+      "name": "plain-chat-no-tools",
+      "passed": true,
+      "text": "可以先明确需求。"
+    },
+    {
+      "name": "analysis-tool-loop-no-authorization-bypass",
+      "passed": true,
+      "text": "已将候选 7（右侧辅助区域，文字为“临时提示区域”）列为建议目标，待你确认。此结论仅依据合成证据，不代表真实页面；未生成或执行。"
+    },
+    {
+      "name": "unapproved-generation-rejected",
+      "passed": true
+    },
+    {
+      "name": "approved-structured-candidate",
+      "passed": true,
+      "code": "(() => {\n  'use strict';\n  const id = 'luban-hide-region-one';\n  if (document.getElementById(id)) return;\n  const parent = document.head || document.documentElement;\n  if (!parent) return;\n  const style = document.createElement('style');\n  style.id = id;\n  style.textContent = '#region-one { display: none !important; }';\n  parent.appendChild(style);\n})();",
+      "grants": []
+    }
+  ],
+  "passed": true,
+  "syntheticOnly": true,
+  "browserExecuted": false,
+  "scriptSaved": false
+}
