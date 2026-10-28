@@ -35,3 +35,5 @@ describe('整页采集与选择器隔离', () => {
     expect(isElementPickerActive()).toBe(false);
   });
 });
+
+it('explicit remote cancellation resolves the original picker once without selecting anything',()=>{const picked=vi.fn(),cancelled=vi.fn();const session=createPickerSession();session.start(picked,cancelled);session.cancel(true);session.cancel(true);expect(cancelled).toHaveBeenCalledOnce();expect(picked).not.toHaveBeenCalled();expect(session.getActive()).toBeNull();expect(isElementPickerActive()).toBe(false);});

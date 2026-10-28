@@ -23,6 +23,7 @@ export interface GenerationEnvelope {
 }
 export type P2Message = { requestId: string } & (
   | { type: 'GET_CURRENT_SITE' }
+  | { type: 'GET_PAGE_RESOURCES' }
   | { type: 'GET_SCRIPT_RECORD'; scriptId: string }
   | { type: 'PREPARE_GENERATION'; workspaceId: string; expectedDraftRevision: number; selectors?: string[];repairAllowed?:boolean }
   | { type: 'GENERATE_WORKSPACE'; workspaceId: string; envelopeId: string }

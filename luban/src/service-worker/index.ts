@@ -1,9 +1,11 @@
+import {thinkingParameters} from '../shared/thinking';
 import {harnessModelConfig,requireHarnessConfiguration} from './services/harness-model-config';
 import {harnessHistory} from './services/harness-history';
-import {HarnessGateway} from './services/harness-gateway';
+import {completeBareAction,resolveActionChoice} from '../../contracts/conversation-intent.mjs';
+import {HarnessGateway,classifyHarnessMessage} from './services/harness-gateway';
 import {workspaceAvailableToPanel} from './repositories/workspace-store';
 import {panelTabId,executorKey,PANEL_PATH} from '../shared/panel-tab';
-import {initializeTabPanels,openTabPanel,configureTabPanel,forgetTabPanel} from './services/tab-panel';
+import {initializeTabPanels,openTabPanel,openToolbarPanel,configureTabPanel,forgetTabPanel} from './services/tab-panel';
 import {CodePreviewService} from './services/code-preview';
 import {handleBridgeMessage, isBridgeMessage,bridgeConnection} from './services/bridge-connection';
 import {PageGrants} from './services/page-grants';
@@ -19,7 +21,7 @@ import { VersionService } from './services/version-service';
 import { executeTrial } from './services/trial-runner';
 import { WorkspaceGeneration } from './services/workspace-generation';
 import {AgentTransport} from './services/agent-transport';
-import { acceptCapture, captureCurrentPage, captureBoundPage,currentSite } from './services/page-capture';
+import { acceptCapture, captureCurrentPage, captureBoundPage,currentSite,capturePageResources } from './services/page-capture';
 import { DataError } from './repositories/database';
 import { assertExtensionPage, handleWorkspaceCommand, isWorkspaceCommand } from './repositories/workspace-router';
 // Service Worker 入口：顶层同步注册所有监听（MV3 强制），消息按 type 路由到 handler。
@@ -54,6 +56,7 @@ let browserSession:Promise<string>|undefined;
 function getBrowserSession():Promise<string>{return browserSession??=(async()=>{const key='luban:v3:browser-session';const existing=(await chrome.storage.session.get(key))[key];if(typeof existing==='string')return existing;const session=crypto.randomUUID();await chrome.storage.session.set({[key]:session});return session;})();}
 const pageGrants=new PageGrants(getScriptStore(),bridgeConnection,getBrowserSession,captureCurrentPage,captureBoundPage);
 bridgeConnection.setInvalidationHandler(()=>pageGrants.invalidateAll());
+bridgeConnection.setEvidenceHandler(c=>new HarnessGateway(getScriptStore(),pageGrants,(m,p)=>bridgeConnection.rpc(m,p),captureCurrentPage).fulfillEvidence(c));
 chrome.tabs.onRemoved?.addListener(tabId=>{void pageGrants.invalidateTab(tabId).catch(()=>{});});
 chrome.tabs.onUpdated?.addListener((tabId,change)=>{if(change.url||change.status==='loading')void pageGrants.invalidateTab(tabId).catch(()=>{});});
 type Handler = (
@@ -87,7 +90,7 @@ const pageAnalysis = new PageAnalysis(capture, async()=>{
   if(!key)throw ErrorFactory.keyInvalid();
   return toProviderConfig(settings,key);
 },()=>new AiClient(),(id,content,truncated)=>{void chrome.runtime.sendMessage({type:'ANALYSIS_REASONING',requestId:id,content,truncated,attempt:1}).catch(()=>{});});
-const versions = new VersionService(getScriptStore(), capture, executeTrial, autoRuntime.coordinate,undefined,(id,version)=>new HarnessGateway(getScriptStore(),pageGrants,(m,p)=>bridgeConnection.rpc(m,p),capture).verifyTrial(id,version));
+const versions = new VersionService(getScriptStore(), capture, executeTrial, autoRuntime.coordinate,undefined,(id,version)=>new HarnessGateway(getScriptStore(),pageGrants,(m,p)=>bridgeConnection.rpc(m,p),capture).verifyTrial(id,version),(id,version)=>new HarnessGateway(getScriptStore(),pageGrants,(m,p)=>bridgeConnection.rpc(m,p),capture).verifySave(id,version));
 const savedRunner=new SavedRunner(getScriptStore(),capture,executeTrial);
 return {workspaceGeneration,pageAnalysis,versions,savedRunner,capture};
 }
@@ -124,7 +127,8 @@ chrome.runtime.onInstalled.addListener(() => {
 void initializeTabPanels().catch(e=>console.error('[luban] panel initialization',e));
 chrome.tabs.onCreated?.addListener(tab=>{if(typeof tab.id==='number')void configureTabPanel(tab.id).catch(e=>console.error('[luban] configure tab panel',e));});
 chrome.tabs.onReplaced?.addListener((added,removed)=>{forgetTabPanel(removed);void configureTabPanel(added).catch(e=>console.error('[luban] configure replacement panel',e));});
-// Toolbar popup provides activeTab and calls open directly from its button gesture.
+// Explicit action invocation grants activeTab; built-in panel toggling does not.
+chrome.action?.onClicked?.addListener(tab=>{if(typeof tab.id==='number')void openToolbarPanel(tab.id).catch(e=>console.error('[luban] toolbar panel',e));});
 
 // 消息路由：始终返回 true 表示异步应答。
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
@@ -132,24 +136,28 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     void(async()=>{try{
       if(!isPanelSender(sender)||sourceTab(sender)===undefined)throw new DataError('FORBIDDEN_SOURCE','对话只允许从绑定标签页的侧栏访问。');
       const params=msg.params??{};const method=msg.method;
-      if(!['status','configure','open','get','message','decide','resume','generate','cancel','scan','manual','show','clear','locate','submit','forget','check'].includes(method))throw new DataError('INVALID_MESSAGE','V4 操作无效。');
+      if(!['status','configure','open','get','advance','message','analyze','decide','resume','generate','cancel','scan','manual','show','clear','locate','submit','forget','check','cancelManual'].includes(method))throw new DataError('INVALID_MESSAGE','V4 操作无效。');
       const gateway=new HarnessGateway(getScriptStore(),pageGrants,(m,p)=>bridgeConnection.rpc(m,p),servicesFor(sender).capture);
       async function snapshot(value:unknown){const c=value as import('../shared/v4-types').V4Conversation;let stale=false;if(c.page)try{await pageGrants.require(c.page.pageRef);}catch{stale=true;}const submitted=c.artifact?!!await getScriptStore().db.get('meta','v4:submitted:'+c.artifact.operationId):false;const additions=c.messages.slice(c.historyCount??0).filter(m=>m.id&&m.createdAt!==undefined).map(m=>({agentMessageId:c.id+':'+m.id,role:m.role,text:m.text,createdAt:m.createdAt!}));const workspaceMessages=await getScriptStore().workspaces.appendAgentMessages(c.workspaceId,additions);const effect=await getScriptStore().db.get<{revision:number;operationId:string|null;report:import('../shared/v4-types').V4EffectCheck}>('meta','v4:effect:'+c.id);return {...c,stale,submitted,workspaceMessages,effectCheck:!stale&&effect?.report.checkerVersion==='generic-v1'&&effect.revision===c.revision&&effect.operationId===(c.operation?.id??null)?effect.report:undefined};}
       let data:unknown;
       if(method==='status')data=await bridgeConnection.rpc('harness.status');
-      else if(method==='configure'){await bridgeConnection.run('connect');const c=await gateway.conversation(params.conversationId);await assertWorkspaceScope(sender,c.workspaceId);const tabId=sourceTab(sender)!;const choice=(await chrome.storage.session.get(executorKey(tabId)))[executorKey(tabId)]??(await chrome.storage.local.get('luban:v3:executor'))['luban:v3:executor'];requireHarnessConfiguration(await bridgeConnection.rpc('harness.status'),choice);const config=await harnessModelConfig(choice,async()=>{const settings=await getSettings();const key=await getApiKey(!!settings.customEndpoint);if(!key)throw ErrorFactory.keyInvalid();const provider=toProviderConfig(settings,key);return {baseUrl:provider.baseUrl,model:provider.model,apiKey:key};});data=await bridgeConnection.rpc('harness.configure',{conversationId:c.id,...config});}
+      else if(method==='configure'){await bridgeConnection.run('connect');const c=await gateway.conversation(params.conversationId);await assertWorkspaceScope(sender,c.workspaceId);const tabId=sourceTab(sender)!;const choice=(await chrome.storage.session.get(executorKey(tabId)))[executorKey(tabId)]??(await chrome.storage.local.get('luban:v3:executor'))['luban:v3:executor'];const harnessStatus=await bridgeConnection.rpc('harness.status');requireHarnessConfiguration(harnessStatus,choice,43);const config=await harnessModelConfig(choice,async()=>{const settings=await getSettings();const key=await getApiKey(!!settings.customEndpoint);if(!key)throw ErrorFactory.keyInvalid();const provider=toProviderConfig(settings,key);return {baseUrl:provider.baseUrl,model:provider.model,apiKey:key,...thinkingParameters(provider,settings.thinkingEnabled!==false)};});if(config.backend==='api'&&config.thinking&&harnessStatus.thinkingConfiguration!==1)throw new DataError('HARNESS_BRIDGE_UPGRADE_REQUIRED','请更新并重启本机 Bridge，以应用 Thinking 设置。');data=await bridgeConnection.rpc('harness.configure',{conversationId:c.id,...config});}
       else if(method==='open'){await bridgeConnection.run('connect');await assertWorkspaceScope(sender,params.workspaceId);if(typeof params.workspaceId!=='string')throw new DataError('WORKSPACE_MISSING','请先创建工作区。');const old=await getScriptStore().workspaces.conversation(params.workspaceId);const history=harnessHistory(old);data=await bridgeConnection.rpc('harness.open',{workspaceId:params.workspaceId,history});}
       else{const c=await gateway.conversation(params.conversationId);await assertWorkspaceScope(sender,c.workspaceId);
         if(method==='scan'||method==='manual')data=await gateway.bind(c.id,params.requestKey,method==='manual',Number(params.offset??0));
         else if(method==='show'||method==='clear')data=await gateway.show(c,method,params.color??'green');
         else if(method==='locate'){if(!c.page||!c.targets.some(t=>t.id===params.targetId))throw new DataError('TARGET_STALE','目标不存在。');const grant=await pageGrants.require(c.page.pageRef,'draft.submit');data=await chrome.tabs.sendMessage(grant.binding.tabId,{type:'V4_TARGETS',action:'locate',ids:[params.targetId]},{documentId:grant.binding.documentId});}
+        else if(method==='cancelManual')data=await gateway.cancelManual(c);
         else if(method==='check')data=await gateway.check(c);
+        else if(method==='decide'&&params.action==='confirmTargets'){await gateway.review(c);data=await gateway.advanceGeneration(await bridgeConnection.rpc('harness.decide',params) as unknown as import('../shared/v4-types').V4Conversation);}
         else if(method==='generate')data=await gateway.generate(c,params.requestKey);
         else if(method==='submit')data=await gateway.submit(c);
         else if(method==='forget'){await gateway.show(c,'clear').catch(()=>undefined);data=await bridgeConnection.rpc('harness.forget',{conversationId:c.id});}
-        else if(method==='message'&&typeof params.text==='string'&&/^(请)?(?:按|按照)(?:这个|当前|刚才确认的)方案生成(?:脚本|脚本草稿)[。！!]?$/u.test(params.text.trim())&&c.plan&&c.confirmed&&!c.pending){const approved=await bridgeConnection.rpc('harness.decide',{conversationId:c.id,requestKey:params.requestKey+':decision',expectedRevision:c.revision,action:'approve',sourceMessage:params.text.trim()});data=await gateway.generate(approved as unknown as import('../shared/v4-types').V4Conversation,params.requestKey);}
         else if(method==='get')data=c;
-        else if(method==='message'){const ws=await getScriptStore().workspaces.get(c.workspaceId);const saved=ws?.scriptId?await getScriptStore().record(ws.scriptId):null;const baseline=ws?.draft??saved?.current;let effectCheck:unknown;if(c.page&&/检查|check|还在|隐藏不|效果|复核/i.test(params.text??'')){try{effectCheck=(await gateway.check(c)).effectCheck;}catch{effectCheck={error:'页面复核不可用，请重新授权识别后检查'};}}let context=JSON.stringify({...(baseline?{code:baseline.code.slice(0,48000),truncated:baseline.code.length>48000,grants:baseline.grants,explanation:baseline.explanation.slice(0,4000),reference:ws?.codeReference?.text.slice(0,8000)??null}:{}),...(effectCheck?{effectCheck}:{}),pageBound:!!c.page});if(context&&context.length>64000)context=context.slice(0,63000)+'\n[上下文超限，已截断]';data=await bridgeConnection.rpc('harness.message',{conversationId:c.id,requestKey:params.requestKey,expectedRevision:params.expectedRevision,text:params.text,...(context?{context}:{})});}
+        else if(method==='advance')data=await gateway.advanceGeneration(c);
+        else if(method==='analyze'){const effect=await getScriptStore().db.get<{revision:number;operationId:string|null;report:unknown}>('meta','v4:effect:'+c.id);const context=effect&&effect.revision===c.revision&&effect.operationId===(c.operation?.id??null)?JSON.stringify({effectCheck:effect.report}):undefined;data=await bridgeConnection.rpc('harness.analyze',{conversationId:c.id,requestKey:params.requestKey,expectedRevision:c.revision,...(context?{context}:{})});}
+        else if(method==='message'&&await (async()=>{const advanced=await gateway.advanceDecision(c,String(params.text??''),params.requestKey);if(!advanced)return false;data=advanced;return true;})()){}
+        else if(method==='message'){const naturalContinue=c.intent==='identify'&&!!c.page&&c.outcome==='incomplete'&&/^(?:请)?继续(?:核实|分析)?[。！!]?$/u.test(String(params.text??'').trim());const continuing=params.continueEvidence===true||naturalContinue;const resolvedChoice=resolveActionChoice(String(params.text??''),c.pendingChoice);const resolvedText=resolvedChoice??completeBareAction(String(params.text??''),c.pendingAction);const route=continuing?{path:'page' as const,intent:c.intent==='modify'?'modify' as const:'identify' as const,effect:false}:classifyHarnessMessage(resolvedText??String(params.text??''),!!c.page,c.selected.length>0);if(route.path==='page'){let current=c;let same=false;if(current.page){try{const grant=await pageGrants.require(current.page.pageRef,'draft.submit');same=grant.binding.documentId===current.page.documentId&&grant.navigationEpoch===current.page.navigationEpoch;}catch{same=false;}}if(!same)current=await gateway.bind(current.id,crypto.randomUUID()) as unknown as typeof c;data=await bridgeConnection.rpc('harness.analyze',{conversationId:current.id,requestKey:params.requestKey,expectedRevision:current.revision,text:params.text,...(resolvedText?{resolvedText}:{}),intent:route.intent,continueEvidence:continuing,reportOnly:route.intent==='identify'&&(params.reportOnly===true||naturalContinue&&!!c.reportIssue)});}else{const ws=await getScriptStore().workspaces.get(c.workspaceId);const saved=ws?.scriptId?await getScriptStore().record(ws.scriptId):null;const baseline=ws?.draft??saved?.current;let effectCheck:unknown;if(route.effect&&c.page){try{effectCheck=(await gateway.check(c)).effectCheck;}catch{effectCheck={error:'页面复核不可用，请重新授权识别后检查'};}}let context=JSON.stringify({...(baseline?{code:baseline.code.slice(0,48000),truncated:baseline.code.length>48000,grants:baseline.grants,explanation:baseline.explanation.slice(0,4000),reference:ws?.codeReference?.text.slice(0,8000)??null}:{}),...(effectCheck?{effectCheck}:{})});if(context==='{}')context='';if(context&&context.length>64000)context=context.slice(0,63000)+'\n[上下文超限，已截断]';data=await bridgeConnection.rpc('harness.message',{conversationId:c.id,requestKey:params.requestKey,expectedRevision:params.expectedRevision,text:params.text,...(resolvedText?{resolvedText}:{}),...(context?{context}:{})});}}
         else data=await bridgeConnection.rpc('harness.'+method,method==='forget'?{conversationId:c.id}:params);
       }if(data&&typeof data==='object'&&'messages' in data&&'workspaceId' in data)data=await snapshot(data);sendResponse({ok:true,data});
     }catch(e){sendResponse({ok:false,error:e instanceof Error?e.message:'对话请求失败。'});}})();return true;
@@ -262,10 +270,11 @@ async function route(msg: LubanMessage, sender: chrome.runtime.MessageSender, re
     catch (e) { respond(errorResponse(toLubanError(e))); }
     return;
   }
-  if (['GET_CURRENT_SITE', 'GET_SCRIPT_RECORD', 'PREPARE_GENERATION', 'CANCEL_WORKSPACE_GENERATION'].includes(msg.type)) {
+  if (['GET_CURRENT_SITE', 'GET_PAGE_RESOURCES', 'GET_SCRIPT_RECORD', 'PREPARE_GENERATION', 'CANCEL_WORKSPACE_GENERATION'].includes(msg.type)) {
     try {
       assertExtensionPage(sender);
       if (msg.type === 'GET_CURRENT_SITE') respond({ ok: true, data: await currentSite(sourceTab(sender)) });
+      else if (msg.type === 'GET_PAGE_RESOURCES') respond({ok:true,data:await capturePageResources(sourceTab(sender))});
       else if (msg.type === 'GET_SCRIPT_RECORD') respond({ ok: true, data: await getScriptStore().record(msg.scriptId) });
       else if (msg.type === 'PREPARE_GENERATION') respond({ ok: true, data: await servicesFor(sender).workspaceGeneration.prepare(msg.workspaceId, msg.expectedDraftRevision, msg.selectors,msg.repairAllowed) });
       else if (msg.type === 'CANCEL_WORKSPACE_GENERATION') { await servicesFor(sender).workspaceGeneration.cancel(msg.workspaceId); respond({ ok: true, data: undefined }); }

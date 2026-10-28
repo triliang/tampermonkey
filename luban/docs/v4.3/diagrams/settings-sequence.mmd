@@ -1,0 +1,17 @@
+sequenceDiagram
+  actor U as 用户
+  participant UI as 设置详情
+  participant S as 配置服务
+  participant M as 模型或连接适配
+  U->>UI: 测试当前填写配置
+  UI->>S: testId / formRevision / configFingerprint
+  S->>M: 临时测试配置与必要能力探测
+  U->>UI: 测试中修改字段
+  UI->>UI: 推进formRevision并标旧结果过期
+  M-->>S: 该次测试结果
+  S-->>UI: 原testId和配置指纹
+  UI->>UI: 不用旧结果标记新表单可用
+  U->>UI: 保存当前有效配置
+  UI->>S: 独立保存请求
+  S-->>UI: savedConfigRevision
+  Note over S,M: 当前活动任务固定原配置，新任务使用保存后的配置

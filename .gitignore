@@ -1,1 +1,4 @@
 .DS_Store
+
+# Local Langfuse credentials
+/luban/docs/v4.3/local-langfuse-access.md

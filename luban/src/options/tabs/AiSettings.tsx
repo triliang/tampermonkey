@@ -1,7 +1,7 @@
 // AI 设置 Tab（P3-T4）：计费方式切换、集群选择、Key 输入（混淆存 local）、
 // 前缀校验、测试连接、模型选择、超时配置。保存/回显均走 settings-store.ts。
 
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import {
   clearApiKey,
   getApiKey,
@@ -28,6 +28,7 @@ const CLUSTER_OPTIONS: { value: 'tokenPlanCn' | 'tokenPlanSgp' | 'tokenPlanAms';
 type TestState = { status: 'idle' | 'testing' | 'ok' | 'fail'; latencyMs?: number; message?: string };
 
 export function AiSettings() {
+  const formRevision=useRef(0);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [showKey,setShowKey]=useState(false);
   const [apiKey, setApiKey] = useState('');
@@ -49,6 +50,7 @@ export function AiSettings() {
   const current: Settings = settings; // 供闭包内使用的非空快照，闭包无法沿用 if-guard 的窄化
 
   function update(patch: Partial<Settings>): void {
+    formRevision.current++;setTest({status:'idle'});setSavedTick(0);
     setSettings((prev) => (prev ? { ...prev, ...patch } : prev));
   }
 
@@ -89,13 +91,16 @@ export function AiSettings() {
       return;
     }
     setKeyError(undefined);
+    const testedRevision=formRevision.current;
     try {if(current.customEndpoint&&!await chrome.permissions.request({origins:[customOrigin(current.customBaseUrl!)]})){setKeyError('未授权自定义端点，未发送请求。');return;}}catch{setKeyError('端点授权失败，请重新加载扩展后重试。');return;}
+    if(testedRevision!==formRevision.current)return;
     setTest({ status: 'testing' });
     const res = await sendToSW<{ latencyMs: number }>({
       type: 'TEST_CONNECTION',
       requestId: makeRequestId(),
       config: toProviderConfig(current, apiKey),
     });
+    if(testedRevision!==formRevision.current)return;
     if (res.ok) setTest({ status: 'ok', latencyMs: res.data.latencyMs });
     else setTest({ status: 'fail', message: res.error.message });
   }
@@ -103,11 +108,13 @@ export function AiSettings() {
   const isTokenPlan = settings.billing === 'tokenPlan';
 
   return (
-    <div class="ai-settings"><fieldset disabled={saving||test.status==='testing'} style={{border:0,padding:0,minWidth:0}}>
+    <div class="ai-settings"><section class="service-overview"><h2>模型与服务</h2><p>当前方式：{settings.customEndpoint?'自定义 API 服务':'MiMo API 服务'} · {settings.customEndpoint?settings.customModel:settings.defaultModel}</p><p class="hint">配置已保存不等于模型可用；测试使用当前填写内容，不会自动保存。</p></section><fieldset disabled={saving||test.status==='testing'} style={{border:0,padding:0,minWidth:0}}>
+      <details class="settings-advanced"><summary>分析与推理偏好</summary>
       <section><h3>推理模式</h3><label><input type="checkbox" aria-label="启用推理模式" checked={settings.thinkingEnabled!==false} onChange={e=>update({thinkingEnabled:e.currentTarget.checked})}/>启用推理模式（默认开启）</label><p class="hint">用于生成、修复和页面分析，可关闭以减少等待。仅展示处理状态，不展示内部逐字推理；是否支持由模型决定。</p></section>
       <section><h3>可选增强</h3><label><input type="checkbox" checked={!!settings.pageAnalysisEnabled} onChange={e=>update({pageAnalysisEnabled:e.currentTarget.checked})}/>启用「分析此页」</label><p class="hint">启用后仍需在侧栏主动点击并确认发送，不会在页面加载时调用模型。</p></section>
-      <section><h3>模型接入</h3><label><input type="checkbox" checked={!!settings.customEndpoint} onChange={e=>{const custom=e.currentTarget.checked;update({customEndpoint:custom});void getApiKey(custom).then(setApiKey);setKeyError(undefined);setSavedTick(0);setTest({status:'idle'});}}/>启用自定义 OpenAI 兼容端点</label><p class="hint">只在点击保存或测试连接时请求该端点主机授权（Chrome 授权覆盖该主机路径和端口）。关闭后使用原 MiMo 配置及独立保存的 Key。</p></section>
-      {settings.customEndpoint?<section><label>Base URL<input value={settings.customBaseUrl??''} placeholder="https://example.com/v1" onInput={e=>update({customBaseUrl:e.currentTarget.value})}/></label><label>模型名称<input value={settings.customModel??''} onInput={e=>update({customModel:e.currentTarget.value})}/></label><label>推理参数协议<select aria-label="推理参数协议" value={settings.customThinkingProtocol??'auto'} onChange={e=>update({customThinkingProtocol:e.currentTarget.value as Settings['customThinkingProtocol']})}><option value="auto">自动识别 MiMo / DeepSeek</option><option value="thinking">thinking.type（兼容服务商或代理）</option><option value="none">不发送参数，使用服务端默认</option></select></label><p class="hint">未知端点在自动模式下不发送推理参数；如支持 thinking.type，请手动选择。服务端默认模式无法保证关闭推理。协议不匹配时不会自动重试或降级。</p><p class="hint">使用 Chat Completions 协议；模型名按服务商要求填写。API Key 不限制 MiMo 前缀。</p></section>:null}
+      </details>
+      <section><h3>模型接入</h3><label><input type="checkbox" checked={!!settings.customEndpoint} onChange={e=>{const custom=e.currentTarget.checked;update({customEndpoint:custom});const revision=formRevision.current;void getApiKey(custom).then(key=>{if(revision===formRevision.current)setApiKey(key);});setKeyError(undefined);setSavedTick(0);setTest({status:'idle'});}}/>启用自定义 OpenAI 兼容端点</label><p class="hint">只在点击保存或测试连接时请求该端点主机授权（Chrome 授权覆盖该主机路径和端口）。关闭后使用原 MiMo 配置及独立保存的 Key。</p></section>
+      {settings.customEndpoint?<section><label>Base URL<input value={settings.customBaseUrl??''} placeholder="https://example.com/v1" onInput={e=>update({customBaseUrl:e.currentTarget.value})}/></label><label>模型名称<input value={settings.customModel??''} onInput={e=>update({customModel:e.currentTarget.value})}/></label><details class="settings-advanced"><summary>协议与高级参数</summary><label>推理参数协议<select aria-label="推理参数协议" value={settings.customThinkingProtocol??'auto'} onChange={e=>update({customThinkingProtocol:e.currentTarget.value as Settings['customThinkingProtocol']})}><option value="auto">自动识别 MiMo / DeepSeek</option><option value="thinking">thinking.type（兼容服务商或代理）</option><option value="none">不发送参数，使用服务端默认</option></select></label><p class="hint">未知端点在自动模式下不发送推理参数；如支持 thinking.type，请手动选择。服务端默认模式无法保证关闭推理。协议不匹配时不会自动重试或降级。</p><p class="hint">使用 Chat Completions 协议；模型名按服务商要求填写。API Key 不限制 MiMo 前缀。</p></details></section>:null}
       {!settings.customEndpoint?<section>
         <h3>计费方式</h3>
         <div class="radio-row">
@@ -152,7 +159,7 @@ export function AiSettings() {
 
       <section>
         <h3>{STRINGS.options.apiKey}</h3>
-        {showKey?<input type="text" aria-label="API Key" value={apiKey} placeholder={settings.customEndpoint?'服务商 API Key':isTokenPlan?'tp-xxxxx 或 ttp-xxxxx':'sk-xxxxx'} onInput={e=>{setApiKey(e.currentTarget.value);setKeyError(undefined);}}/>:<input type="password" aria-label="API Key" value={apiKey} placeholder={settings.customEndpoint?'服务商 API Key':isTokenPlan?'tp-xxxxx 或 ttp-xxxxx':'sk-xxxxx'} onInput={e=>{setApiKey(e.currentTarget.value);setKeyError(undefined);}}/>}
+        {showKey?<input type="text" aria-label="API Key" value={apiKey} placeholder={settings.customEndpoint?'服务商 API Key':isTokenPlan?'tp-xxxxx 或 ttp-xxxxx':'sk-xxxxx'} onInput={e=>{formRevision.current++;setTest({status:'idle'});setSavedTick(0);setApiKey(e.currentTarget.value);setKeyError(undefined);}}/>:<input type="password" aria-label="API Key" value={apiKey} placeholder={settings.customEndpoint?'服务商 API Key':isTokenPlan?'tp-xxxxx 或 ttp-xxxxx':'sk-xxxxx'} onInput={e=>{formRevision.current++;setTest({status:'idle'});setSavedTick(0);setApiKey(e.currentTarget.value);setKeyError(undefined);}}/>}
         <button type="button" onClick={()=>setShowKey(!showKey)}>{showKey?'隐藏 Key':'显示 Key'}</button>
         {keyError && <p class="hint error">{keyError}</p>}
         <button type="button" class="link" onClick={() => void onClearKey()}>
@@ -168,7 +175,7 @@ export function AiSettings() {
         </select>
       </section>:null}
 
-      <section>
+      <details class="settings-advanced"><summary>请求超时</summary><section>
         <h3>超时（毫秒）</h3>
         <input
           type="number"
@@ -179,6 +186,7 @@ export function AiSettings() {
         />
       </section>
 
+      </details>
       <section class="actions">
         <button type="button" onClick={() => void onSave()}>
           {STRINGS.options.save}

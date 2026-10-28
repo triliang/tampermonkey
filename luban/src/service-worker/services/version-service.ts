@@ -1,3 +1,4 @@
+import {parseUserscript} from '../../../contracts/script-plan.mjs';
 import {withWorkspaceLock,assertWorkspaceOwner,type WorkspaceOwner} from './workspace-lock';
 import type {TrialOperation} from '../repositories/trial-operation';
 import {getWorkflow} from './workspace-workflow';
@@ -13,7 +14,7 @@ type Executor=(binding:PageBinding,v:ScriptVersion,namespace:string,hash:string,
 const samePage=(a:PageBinding,b:PageBinding)=>a.tabId===b.tabId&&a.documentId===b.documentId&&a.url===b.url&&a.host===b.host;
 export class VersionService {
   private running=new Set<string>();
-  constructor(private store:ScriptStore,private capture:(selectors?:string[])=>Promise<CapturedPage>,private execute:Executor,private coordinate?: (id:string,revision:number,candidate:ScriptVersion,opId:string,commit:()=>Promise<ScriptRecord>)=>Promise<ScriptRecord>,private verifyLive?:()=>Promise<void>,private verifyTarget?:(id:string,version:ScriptVersion)=>Promise<void>){}
+  constructor(private store:ScriptStore,private capture:(selectors?:string[])=>Promise<CapturedPage>,private execute:Executor,private coordinate?: (id:string,revision:number,candidate:ScriptVersion,opId:string,commit:()=>Promise<ScriptRecord>)=>Promise<ScriptRecord>,private verifyLive?:()=>Promise<void>,private verifyTarget?:(id:string,version:ScriptVersion)=>Promise<void>,private verifySave?:(id:string,version:ScriptVersion)=>Promise<void>){}
   private async workspace(id:string,revision:number){
     const ws=await this.store.workspaces.get(id);
     if(!ws||ws.draftRevision!==revision)throw new DataError('REVISION_CONFLICT','草稿已变化，请重新打开。');
@@ -33,7 +34,7 @@ export class VersionService {
         const unresolved=await request<TrialOperation[]>(tx.objectStore('approvals').getAll());if(unresolved.some(op=>op.workspaceId===id&&['executing','unknown'].includes(op.state)))throw new DataError('RECOVERY_REQUIRED','上次试运行结果未知，请先在连接设置中核对并处理。');
         for(const receipt of await request<TrialReceipt[]>(tx.objectStore('receipts').getAll()))if(receipt.workspaceId===id)await request(tx.objectStore('receipts').delete(receipt.id));
       });
-    validateTrial(ws.draft);const hash=await draftHash(ws.draft);
+    validateTrial(ws.draft);if(ws.draft.code.startsWith('// ==UserScript==')&&JSON.stringify(parseUserscript(ws.draft.code).metadata.matches)!==JSON.stringify(['*://'+ws.host+'/*']))throw new DataError('METADATA_POLICY_MISMATCH','脚本适用范围与工作区不一致。');const hash=await draftHash(ws.draft);
       const workflow=await getWorkflow(this.store,id);
       const page=await this.capture();if(workflow.targetFingerprint){const targetPage=await this.capture(workflow.selectors);if(workflow.binding&&!samePage(workflow.binding,targetPage.binding))throw new DataError('TARGET_STALE','页面已变化，请重新点选。');if(targetPage.context.target?.targetContext?.candidates[0]?.fingerprint!==workflow.targetFingerprint)throw new DataError('TARGET_STALE','目标已变化，请重新点选。');}
       if(!ws.host||page.binding.host!==ws.host)throw new DataError('WRONG_PAGE','请切回工具适用网站。');
@@ -86,6 +87,7 @@ export class VersionService {
     name=this.validName(name);const fingerprint=JSON.stringify(['commit',id,revision,receiptId,name]);
     const replay=await this.replay(opId,fingerprint);if(replay)return replay;
     const ws=await this.workspace(id,revision);if(!ws.draft)throw new DataError('DRAFT_MISSING','没有待保存草稿。');
+    await this.verifySave?.(id,ws.draft);
       const workflow=await getWorkflow(this.store,id);
     if((workflow.outcome||workflow.revision>0)&&!effectAcknowledged)throw new DataError('EFFECT_CONFIRM_REQUIRED','请确认效果符合预期后再保存。');
     if(workflow.targetFingerprint){

@@ -1,0 +1,11 @@
+{
+  "kind": "production-function-test-jsdom",
+  "elapsedMs": 1807.969875,
+  "blocks": 132,
+  "scanned": 800,
+  "truncated": true,
+  "coverage": "主文档 1216 个匹配节点中分布采样 800 个，保留 132 个观察块；这是跨文档位置的有界采样，不是整页覆盖。层级摘要最多四层祖先、两个相邻块、四个子块，摘要不提供可执行引用。名称由 DOM 属性和标签推导，不是完整可访问性树。未读取输入值、iframe/Shadow DOM 内部。",
+  "modelCalls": 0,
+  "extensionCalls": 0,
+  "layout": "mocked rectangles; not browser visibility proof"
+}

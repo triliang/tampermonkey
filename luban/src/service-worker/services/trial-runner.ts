@@ -1,3 +1,4 @@
+import {parseUserscript} from '../../../contracts/script-plan.mjs';
 import { inspectCode } from './code-quality';
 import type { ScriptVersion } from '../../shared/v2-types';
 import type { PageBinding } from '../../shared/p2-types';
@@ -9,6 +10,7 @@ export async function draftHash(v: ScriptVersion): Promise<string> {
   return Array.from(new Uint8Array(bytes), b=>b.toString(16).padStart(2,'0')).join('');
 }
 export function validateTrial(v: ScriptVersion): void {
+  if(v.code.startsWith('// ==UserScript==')){const parsed=parseUserscript(v.code);const runAt={document_start:'document-start',document_end:'document-end',document_idle:'document-idle'}[v.runAt];if(parsed.metadata.runAt!==runAt||JSON.stringify([...parsed.metadata.grants].sort())!==JSON.stringify([...v.grants].sort()))throw new DataError('METADATA_POLICY_MISMATCH','脚本头与运行权限或时机不一致，请重新核对。');}
   const report=inspectCode(v.code,v.grants);if(!report.passed){const d=report.diagnostics.find(x=>x.severity==='error')!;throw new DataError(d.code,`${d.message}${d.line?`（第 ${d.line} 行）`:''}`);}
 }
 // 正文直接注入 MAIN，不用 eval/new Function 或 script 标签降级。相同内容在同一文档只执行一次。

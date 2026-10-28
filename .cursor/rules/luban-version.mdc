@@ -1,0 +1,13 @@
+---
+description: Luban 产品阶段与 Chrome 扩展版本同步规则
+globs: luban/**
+alwaysApply: false
+---
+
+# Luban 版本同步
+
+- 产品阶段 Vx.y 对应 Chrome 扩展版本 `0.x.y`：V4.3 → 0.4.3，V4.4 → 0.4.4，V5.0 → 0.5.0；用户明确指定版本时以用户要求为准。
+- 推进产品大版本/阶段时主动同步 `luban/manifest.json`、`luban/package.json`、`luban/package-lock.json` 顶层及根包版本，不再长期保留初始化版本。
+- 构建后检查 `luban/dist/manifest.json` 与源码版本一致；构建产物通过构建生成，不手改产物代替源文件。
+- Bridge/Harness 独立包版本、协议版本、数据库 schemaVersion 不随扩展展示版本机械修改，按各自兼容性要求管理。
+- 普通修复不自动推进产品阶段。交付时说明重新加载扩展后版本才会显示更新；未实际重载时不声称已生效。

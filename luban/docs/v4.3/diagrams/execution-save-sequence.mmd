@@ -1,0 +1,26 @@
+sequenceDiagram
+  actor U as 用户
+  participant UI as 制品视图
+  participant SW as VersionService
+  participant DB as 扩展持久层
+  participant P as 页面校验与执行
+  U->>UI: 授权试运行当前版本
+  UI->>SW: operationId / artifactHash / binding
+  SW->>P: 复核身份、唯一性与保留基线
+  P-->>SW: 校验通过或失效
+  SW->>DB: 锁、校验授权、记录executing
+  SW->>P: 绑定文档的一次执行请求
+  alt 收到有效执行回执
+    P-->>SW: 执行结果
+    SW->>P: 效果与保留检查
+    P-->>SW: 局部结果与coverage
+    SW->>DB: 原子写入操作结果与合格凭证
+    SW-->>UI: 回执与效果报告
+    U->>UI: 确认效果并保存当前版本
+    UI->>SW: save operationId / receiptId / artifactHash
+    SW->>DB: 核对版本、页面、凭证和保存门禁后提交
+    DB-->>UI: 保存版与回执（经SW返回）
+  else 断连、超时或回执不确定
+    SW->>DB: 标记unknown，保留操作身份
+    SW-->>UI: 先核实结果，禁止自动重发
+  end

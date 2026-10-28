@@ -1,0 +1,28 @@
+sequenceDiagram
+  actor U as 用户
+  participant G as 外层LangGraph
+  participant B as Bridge与扩展门禁
+  participant P as 真实页面
+  participant A as 诊断Deep Agent
+  G-->>U: 展示完整候选v1
+  U->>B: 授权运行v1
+  B->>B: 校验哈希、绑定与一次操作身份
+  B->>P: 执行及本次授权范围内检查
+  alt 回执和检查有效
+    P-->>B: 目标、保留与覆盖结果
+    B-->>G: 结构化报告
+    G->>A: 问题报告与固定约束
+    A-->>G: 通过摘要或修复提议
+    alt 需要修复
+      G-->>U: 修复方案，范围变化则先核对
+      U->>B: 授权新的生成操作
+      B->>G: 新generationOperationId
+      G->>G: L2生成并校验v2
+      G-->>U: 展示v2，等待独立运行授权
+    else 符合门禁且用户要保存
+      U->>B: 确认效果并保存v1
+    end
+  else 回执未知
+    B-->>G: unknown，需要对账
+    G-->>U: 结果待核实，不自动重发
+  end

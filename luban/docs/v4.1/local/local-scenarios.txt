@@ -1,0 +1,13 @@
+
+> luban@0.1.0 test:v41
+> vitest run --config vitest.v41.config.ts
+
+
+ RUN  v5.0.3 /Users/jinxiong.yang/Code/tampermonkey/luban
+
+
+ Test Files  1 passed (1)
+      Tests  20 passed (20)
+   Start at  13:40:43
+   Duration  504ms (environment 56%, tests 33%, transform 8%, import 2%)
+

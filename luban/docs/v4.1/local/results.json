@@ -1,0 +1,44 @@
+{
+  "timestamp": "2026-10-19T05:40:44.178Z",
+  "revision": "3bc7b9272c2fbd044e688c3b041185492c9daf3c",
+  "dirty": true,
+  "files": {
+    "tests/v4.1/local.test.ts": "6ac8c8169fc47c95a7331c621cb4ec0d73177ea5e2d9076b9dc09b2e3ac479d9",
+    "tests/v4.1/judge.mjs": "5e0de4feaefd704c4de561247b3ea1e3e9e70b0e73cd46dc1edab29ddc25babb",
+    "tests/v4.1/scenarios.json": "3286993721d548c2c21a1a00374344cbfe72e0fdc90e4bdbbff0670813275ea1",
+    "tests/v4.1/fixtures/article.html": "52645fe2f0910b30bcff03351423768e438912a303483d556338f8768f68da90",
+    "tests/v4.1/fixtures/cards.html": "77fdba0e2e938743c61232fe6e9934fe1ca900b22a59d944af43d3c9ce026f3b",
+    "tests/v4.1/fixtures/statistics.html": "62b80e503f119fc33d9bd7b3b159dfdf207f501e3bc655a984646640d5e22359",
+    "src/content/annotations/registry.ts": "8e062746c2f0d74b44bfe3743f138b0399b19a46c086503cf0a7d21c4e035b90",
+    "scripts/evaluate-v41.mjs": "ea1847c7e36072ec5c02f24c8f68347dbcbdc98e1663faf07b2adf649dab5cb5",
+    "scripts/evaluate-v41-existing.py": "1b11d8c14a65cb39c67b196cfa46245c535e252efa0b5e80b2c72a1dde9ca650",
+    "scripts/compare-v41.mjs": "a19e0db839001e326799884babdd76e84d453804154a1879b84dfe287e706e12",
+    "scripts/check-generic-boundary.mjs": "ad66fc470fe06c0aee60bd56d3abe30aa44c0a2118ec82e3502b11c9546cbe3f"
+  },
+  "rows": [
+    {
+      "id": "local-scenarios",
+      "passed": true,
+      "code": 0,
+      "durationMs": 779
+    },
+    {
+      "id": "boundary",
+      "passed": true,
+      "code": 0,
+      "durationMs": 26
+    },
+    {
+      "id": "runner-syntax",
+      "passed": true,
+      "code": 0,
+      "durationMs": 22
+    },
+    {
+      "id": "existing-config-syntax",
+      "passed": true,
+      "code": 0,
+      "durationMs": 27
+    }
+  ]
+}

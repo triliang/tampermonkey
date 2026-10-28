@@ -1,0 +1,28 @@
+sequenceDiagram
+  actor U as 用户
+  participant UI as 侧栏
+  participant SW as 扩展调度
+  participant B as Bridge领域层
+  participant H as Harness
+  participant P as 页面证据
+  U->>UI: 提交需求
+  UI->>SW: 发送消息（requestKey）
+  SW->>B: 建立任务与当前页面关联
+  alt 页面授权缺失或失效
+    B-->>UI: 请求页面授权事件（经扩展转发）
+    U->>UI: 授权读取当前页
+    UI->>SW: 读取授权与绑定
+    SW->>B: 同步有效页面引用
+  end
+  B->>H: 启动分析（revision / epoch / budget）
+  loop 预算内按需补证
+    H->>B: query / inspect / review 请求
+    B->>SW: 已认证绑定的只读请求（经Native转发）
+    SW->>P: 校验授权与文档，执行有界查询
+    P-->>SW: 脱敏证据、coverage、revision
+    SW-->>B: 证据结果
+    B-->>H: 校验后工具结果
+  end
+  H->>B: 提议范围与依据
+  B-->>UI: snapshot / 事件（经扩展转发）
+  UI-->>U: 结论、过程入口和当前决策

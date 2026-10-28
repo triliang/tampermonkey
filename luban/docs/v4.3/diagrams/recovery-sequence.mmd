@@ -1,0 +1,14 @@
+sequenceDiagram
+  participant UI as 侧栏
+  participant SW as 扩展调度
+  participant B as Bridge
+  participant H as 旧Worker
+  UI->>SW: 停止或重连后请求状态
+  SW->>B: 核对会话、revision及操作
+  B->>B: 取消时推进epoch并失效未消费授权
+  B-->>SW: 权威快照与领域事件游标
+  SW->>SW: 查询本地executing/unknown记录
+  H-->>B: 旧epoch的完成消息
+  B->>B: 拒绝覆盖当前领域状态
+  SW-->>UI: 对齐快照，单独显示待核实副作用
+  Note over SW,B: 丢弃旧状态覆盖，不丢弃可能已发生的执行审计事实

@@ -1,0 +1,22 @@
+sequenceDiagram
+  actor U as 用户
+  participant UI as 侧栏
+  participant SW as 扩展调度
+  participant B as Bridge领域层
+  participant H as Harness
+  participant A as 制品服务
+  U->>UI: 确认范围
+  UI->>SW: confirmScope（expectedRevision）
+  SW->>B: 身份与目标复核后提交确认
+  B-->>UI: 范围确认，等待生成授权
+  U->>UI: 授权生成当前方案
+  UI->>SW: approveGeneration（planHash）
+  SW->>B: 提交当前批准
+  B->>B: 原子消费授权并登记生成操作
+  B->>H: 自动继续当前生成请求
+  H-->>B: 固定授权内的ScriptPlanIR与诊断
+  B-->>SW: 校验过的IR及绑定的方案信息
+  SW->>A: 编译正文、静态及夹具验证、组装与哈希
+  A-->>SW: 完整制品或明确诊断
+  SW-->>UI: artifact.ready 或检查失败
+  UI-->>U: 版本化制品入口，不自动运行

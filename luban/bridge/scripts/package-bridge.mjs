@@ -7,6 +7,8 @@ for(const forbidden of ['.local','profiles.sqlite'])if(existsSync(join(target,fo
 const dest=mkdtempSync(resolve('dist/.luban-bridge-build-'));mkdirSync(join(dest,'runtime'),{recursive:true});
 cpSync(process.execPath,join(dest,'runtime/node.next'));chmodSync(join(dest,'runtime/node.next'),0o755);renameSync(join(dest,'runtime/node.next'),join(dest,'runtime/node'));
 for(const item of ['src','node_modules','package.json','package-lock.json'])cpSync(item,join(dest,item),{recursive:true});
+cpSync('../contracts',join(dest,'contracts'),{recursive:true});
+cpSync('requirements-htmlrag.lock',join(dest,'requirements-htmlrag.lock'));cpSync('scripts/prepare-htmlrag.mjs',join(dest,'prepare-htmlrag.mjs'));
 if(!existsSync('../harness/dist/worker.js'))throw Error('Build V4 harness before packaging');
 for(const item of ['dist','node_modules','package.json','package-lock.json'])cpSync(join('../harness',item),join(dest,'harness',item),{recursive:true});
 writeFileSync(join(dest,'native-host'),'#!/bin/sh\nbase=$(CDPATH= cd -- "${0%/*}" && pwd)\numask 077\nexec "$base/runtime/node" "$base/src/bridge-host.mjs" "$@"\n',{mode:0o755});chmodSync(join(dest,'native-host'),0o755);

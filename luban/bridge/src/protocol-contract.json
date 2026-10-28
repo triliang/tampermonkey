@@ -47,7 +47,10 @@
     "harness.resume",
     "harness.generate",
     "harness.cancel",
-    "harness.forget"
+    "harness.forget",
+    "harness.evidenceResult",
+    "harness.analyze",
+    "harness.evidencePull"
   ],
   "errors": [
     "INVALID_REQUEST",

@@ -9,7 +9,7 @@ export function configureTabPanel(tabId:number):Promise<void>{
  prepared.promise=chrome.sidePanel.setOptions({tabId,path:panelPath(tabId),enabled:true}).then(()=>{if(panels.get(tabId)===prepared)prepared.ready=true;}).catch(error=>{if(panels.get(tabId)===prepared)panels.delete(tabId);throw error;});
  return prepared.promise;
 }
-/** Prepare tab-specific paths; The toolbar popup grants activeTab and provides the explicit open gesture. */
+/** Keep native toggling off: it bypasses the action event that grants activeTab. */
 export async function initializeTabPanels(){
  await chrome.sidePanel.setOptions({enabled:false});
  await chrome.sidePanel.setPanelBehavior({openPanelOnActionClick:false});
@@ -18,6 +18,13 @@ export async function initializeTabPanels(){
 export function openTabPanel(tabId:number):Promise<void>{
  if(!Number.isSafeInteger(tabId)||tabId<=0)return Promise.reject(Error('无效的标签页。'));
  if(!panels.get(tabId)?.ready){void configureTabPanel(tabId).catch(()=>{});return Promise.reject(Error('标签页侧栏正在准备，请再点击一次鲁班图标。'));}
- // Content-triggered focus only; toolbar popup owns its explicit open gesture. No window-level fallback.
+ // Content-triggered focus only; toolbar clicks use Chrome panel behavior. No window-level fallback.
+ return chrome.sidePanel.open({tabId});
+}
+
+/** Called directly by action.onClicked. Browser panel options survive worker restarts. */
+export function openToolbarPanel(tabId:number):Promise<void>{
+ if(!Number.isSafeInteger(tabId)||tabId<=0)return Promise.reject(Error('无效的标签页。'));
+ // No await/query before open: retain the action's user gesture and only open its tab.
  return chrome.sidePanel.open({tabId});
 }

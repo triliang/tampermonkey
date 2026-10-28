@@ -1,0 +1,41 @@
+flowchart TB
+  subgraph Extension[Chrome 扩展]
+    UI[对话 / 范围 / 制品 / 设置]
+    Projection[事件投影与视图状态]
+    SW[Service Worker 调度与授权门禁]
+    Artifact[统一制品组装与校验]
+    Page[Content Script 增量证据与身份复核]
+    Exec[userScripts 执行器]
+    IDB[(IndexedDB)]
+  end
+  subgraph Local[本地服务]
+    Host[Native Host 薄转发]
+    Domain[Bridge 领域状态与幂等操作]
+    Ledger[Bridge 模型次数、墙钟与证据工具账本]
+    Worker[Harness Worker]
+    LoopBudget[Worker 全部工具次数与复核无进展]
+    Graph[LangGraph 外层 L1/L2/L3]
+    Agent[受限 Deep Agents]
+    SQL[(领域 SQLite)]
+    CP[(Agent Checkpoint)]
+  end
+  Model[既有 API 或本地 Codex 模型]
+  Trace[元数据回调与 OTLP 导出]
+  Langfuse[本地 Langfuse 默认关闭]
+  UI --> Projection --> SW
+  SW <--> Page
+  SW --> Artifact
+  SW --> Exec
+  SW <--> IDB
+  SW <--> Host <--> Domain
+  Domain <--> Worker
+  Worker --> Graph
+  Graph --> Agent
+  Agent --> Model
+  Domain --> Ledger
+  Worker --> LoopBudget
+  Domain <--> SQL
+  Worker <--> CP
+  Worker --> Trace
+  Domain -.终态待补.-> Trace
+  Trace --> Langfuse

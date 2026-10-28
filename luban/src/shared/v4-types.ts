@@ -1,12 +1,14 @@
 export interface V4Target {attributes?:Record<string,string>;parentId?:string;id:string;label:number;text:string;fingerprint:string;tag?:string;description?:string;bounds?:{x:number;y:number;width:number;height:number};members?:number;reason?:string;}
-export interface V4Conversation {lastError?:string;coverage?:string;nextOffset?:number|null;
- operation?:{id:string;state:string};effectCheck?:V4EffectCheck;workspaceMessages?:import('./v2-types').ConversationMessage[];submitted?:boolean;historyCount?:number;id:string;workspaceId:string;sequence?:number;revision:number;epoch:number;status:string;pending?:boolean;stale?:boolean;
+export interface V4Conversation {needsPageAnalysis?:boolean;pendingAction?:string;pendingChoice?:string;lastRetrieval?:{requested:string;engine:string;reason?:string|null;elapsedMs:number;blockCount?:number|null;contextChars?:number;htmlTruncated?:boolean}|null;events?:Array<{sequence:number;type:string;revision:number;epoch:number;time:number}>;evidenceRequests?:Array<{id:string;name:string;args:Record<string,unknown>;epoch:number}>;excluded?:string[];lastError?:string;coverage?:string;nextOffset?:number|null;
+ operation?:{id:string;state:string;epoch?:number};effectCheck?:V4EffectCheck;workspaceMessages?:import('./v2-types').ConversationMessage[];submitted?:boolean;historyCount?:number;id:string;workspaceId:string;sequence?:number;revision:number;epoch:number;status:string;pending?:boolean;stale?:boolean;
+ observationFacts?:Array<{id:string;tag:string;text:string;accessibleName:string;context:string}>;observationReadRefs?:string[];previousObservationFacts?:Array<{id:string;tag:string;text:string;accessibleName:string;context:string}>;pendingEvidenceRefs?:string[];reportIssue?:{kind:'schema'|'evidence'|'format';fields:string[];attempts:number}|null;outputIssue?:'tool_markup'|'report_invalid';observationReport?:{outcome:'answered'|'incomplete'|'needs_clarification';evidenceRefs:string[];reasons:string[];ambiguities:string[];missingEvidence:string[];nextReadIds?:string[]}|null;
+ generationRequest?:{id:string;text:string;sourceText:string;sourceMessageId:string;createdAt:number}|null;lastAutomaticGeneration?:{requestId:string;scopeHash:string;requirementRevision:number};requirementRevisionAtPlan?:number;requestGoal?:string;generationIntent?:string|null;awaitingGeneration?:boolean;requestedOperation?:'hide'|'dim'|'program';outcome?:'ready'|'answered'|'incomplete'|'needs_clarification'|'needsEvidence'|'stopped';intent?:'identify'|'modify';
  page:{pageRef:string;documentId:string;navigationEpoch:number}|null;
- requirement?:{id:string;revision:number;goal:string;constraints:string[];unresolved:string[]}|null;
+ requirement?:{id:string;revision:number;requestId?:string;goal:string;constraints:string[];unresolved:string[]}|null;
  targets:V4Target[];selected:string[];confirmed:boolean;
- plan:{revision:number;hash:string;ids:string[];action:'hide'|'dim';constraints:string[]}|null;
+ plan:{revision:number;hash:string;ids:string[];action:'hide'|'dim'|'program';constraints:string[]}|null;
  decision:{id:string;scopeHash:string;expiresAt:number}|null;
- artifact:{operationId:string;planHash:string;baselineHash:string|null;epoch:number;code:string;grants:string[];explanation:string}|null;
+ artifact:{generationKind?:'program';review?:{binding:string;code:string;scope:string;effect:string;runAuthorization:string};evidenceRefs?:string[];operationId:string;planHash:string;baselineHash:string|null;epoch:number;code:string;grants:string[];explanation:string}|null;
  messages:Array<{id?:string;role:'user'|'assistant';text:string;createdAt?:number}>;
 }
 

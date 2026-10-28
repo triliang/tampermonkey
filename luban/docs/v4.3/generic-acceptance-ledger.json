@@ -1,0 +1,3573 @@
+{
+  "schemaVersion": 1,
+  "architecture": "generic-page-program",
+  "newLane": "automatic-bound-program-draft-deployed-chrome-reloaded-real-model-partial-validation-reviewOnly",
+  "sourceCases": "47-csdn-prompt-cases-2026-10-28.md",
+  "cases": [
+    {
+      "id": "C01",
+      "scenario": "隐藏所有广告",
+      "historicalStatus": "未执行",
+      "currentStatus": "阻塞",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "本地协议制品通过；真实模型语义待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "C01",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "C02",
+      "scenario": "隐藏资讯头条里的广告，精选博客不要动",
+      "historicalStatus": "未执行",
+      "currentStatus": "阻塞",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "本地协议制品通过；真实模型语义待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "C02",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "C03",
+      "scenario": "隐藏资讯头条里带「广告」两个字的卡片",
+      "historicalStatus": "未执行",
+      "currentStatus": "阻塞",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "本地协议制品通过；真实模型语义待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "C03",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "C04",
+      "scenario": "隐藏左下角「联系我们」",
+      "historicalStatus": "失败",
+      "currentStatus": "失败",
+      "historicalDetail": "修复后 31.100 秒找到「联系我们」文本块（2 模型/5 工具），仍要求确认范围，未在一轮用户请求中生成草稿；另行授权后生成并运行，保留复核受动态按钮变化阻塞。",
+      "genericStages": {
+        "requirement": "真实模型记录完整需求",
+        "evidence": "真实确认一个候选范围；完整任务语义尚未通过",
+        "generation": "首次真实超时；独立批准重试后真实候选",
+        "review": "范围审查未通过：全页面回退搜索/未来观察",
+        "execution": "未运行，reviewOnly",
+        "preservation": "未运行，不可声明效果通过",
+        "save": "未保存"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "C04",
+        "status": "失败",
+        "input": "隐藏左下角「联系我们」",
+        "result": "分析约29秒，确认具体范围后自动进入生成。首次超时约94秒；独立界面授权重试后约43秒生成真实候选。已打开完整代码，因全页面div回退搜索及未来DOM观察未通过范围审查，未应用/运行/保存。",
+        "evidence": [
+          "C04-scope-proposal.txt",
+          "C04-generation-timeout.png",
+          "C04-real-candidate-review.png",
+          "C04-live-log.json",
+          "C04-generated.user.js"
+        ],
+        "generationCalls": 2,
+        "analysisCalls": "未单独保留计数快照，不推测",
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "C05",
+      "scenario": "删除所有广告",
+      "historicalStatus": "待实现",
+      "currentStatus": "阻塞",
+      "historicalDetail": "确定性方案编译器未覆盖本条动作；没有假装生成对应能力。",
+      "genericStages": {
+        "requirement": "真实模型重试后完整，无用户额外补充",
+        "evidence": "120秒结束，4处结构、采样截断、无可确认目标",
+        "generation": "未进入",
+        "review": "未进入",
+        "execution": "未运行",
+        "preservation": "未验证",
+        "save": "未保存"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "C05",
+        "status": "阻塞",
+        "input": "删除所有广告",
+        "result": "实机发现首次通用请求误入普通聊天，修复后又发现无根据追问动态刷新。保留原始输入反复复验后，已真实进入当前页取证；最终取证120秒达到时限，4次模型/8次工具，仅4处结构，采样截断，没有确认目标或生成候选。",
+        "evidence": [
+          "C05-before-fix.png",
+          "C05-requirement-overclarification.png",
+          "C05-requirement-timeout.png",
+          "C05-after-fix-incomplete.png",
+          "C05-after-fix-live-log.json"
+        ],
+        "pageAnalysisModelCalls": 4,
+        "pageAnalysisToolCalls": 8,
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "C06",
+      "scenario": "删除「排行榜」入口",
+      "historicalStatus": "待实现",
+      "currentStatus": "阻塞",
+      "historicalDetail": "确定性方案编译器未覆盖本条动作；没有假装生成对应能力。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "本地协议制品通过；真实模型语义待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "C06",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "C07",
+      "scenario": "删除精选博客每条下面的阅读数",
+      "historicalStatus": "待实现",
+      "currentStatus": "阻塞",
+      "historicalDetail": "确定性方案编译器未覆盖本条动作；没有假装生成对应能力。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "本地协议制品通过；真实模型语义待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "C07",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "C08",
+      "scenario": "把顶栏「会员中心」的文字替换成「账号」",
+      "historicalStatus": "待实现",
+      "currentStatus": "阻塞",
+      "historicalDetail": "确定性方案编译器未覆盖本条动作；没有假装生成对应能力。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "本地协议制品通过；真实模型语义待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "C08",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "C09",
+      "scenario": "把「排行榜」三个字替换成「稍后读」",
+      "historicalStatus": "待实现",
+      "currentStatus": "阻塞",
+      "historicalDetail": "确定性方案编译器未覆盖本条动作；没有假装生成对应能力。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "本地协议制品通过；真实模型语义待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "C09",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "C10",
+      "scenario": "把资讯头条里的广告卡片替换成一行文字「已跳过广告」",
+      "historicalStatus": "待实现",
+      "currentStatus": "阻塞",
+      "historicalDetail": "确定性方案编译器未覆盖本条动作；没有假装生成对应能力。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "本地协议制品通过；真实模型语义待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "C10",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "C11",
+      "scenario": "在每篇精选博客标题前添加「【读】」",
+      "historicalStatus": "待实现",
+      "currentStatus": "阻塞",
+      "historicalDetail": "确定性方案编译器未覆盖本条动作；没有假装生成对应能力。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "本地协议制品通过；真实模型语义待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "C11",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "C12",
+      "scenario": "在页面最顶部添加一条提示「本地改版预览」",
+      "historicalStatus": "待实现",
+      "currentStatus": "阻塞",
+      "historicalDetail": "确定性方案编译器未覆盖本条动作；没有假装生成对应能力。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "本地协议制品通过；真实模型语义待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "C12",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "C13",
+      "scenario": "在搜索框右侧添加一个文字为「清空」的按钮",
+      "historicalStatus": "待实现",
+      "currentStatus": "阻塞",
+      "historicalDetail": "确定性方案编译器未覆盖本条动作；没有假装生成对应能力。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "本地协议制品通过；真实模型语义待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "C13",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "C14",
+      "scenario": "把搜索框的占位文字改成「搜索博客或下载」",
+      "historicalStatus": "待实现",
+      "currentStatus": "阻塞",
+      "historicalDetail": "确定性方案编译器未覆盖本条动作；没有假装生成对应能力。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "本地协议制品通过；真实模型语义待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "C14",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "C15",
+      "scenario": "把精选博客标题的颜色改成蓝色",
+      "historicalStatus": "待实现",
+      "currentStatus": "阻塞",
+      "historicalDetail": "确定性方案编译器未覆盖本条动作；没有假装生成对应能力。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "本地协议制品通过；真实模型语义待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "C15",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "C16",
+      "scenario": "把顶栏「创作」的文字改成「写文章」",
+      "historicalStatus": "待实现",
+      "currentStatus": "阻塞",
+      "historicalDetail": "确定性方案编译器未覆盖本条动作；没有假装生成对应能力。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "本地协议制品通过；真实模型语义待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "C16",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "C17",
+      "scenario": "统计首页有多少个带「广告」标记的区块，并在页面顶部显示这个数量",
+      "historicalStatus": "待实现",
+      "currentStatus": "阻塞",
+      "historicalDetail": "确定性方案编译器未覆盖本条动作；没有假装生成对应能力。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "本地协议制品通过；真实模型语义待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "C17",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "C18",
+      "scenario": "统计精选博客里有多少篇文章，并把数字显示在「精选博客」标题旁",
+      "historicalStatus": "待实现",
+      "currentStatus": "阻塞",
+      "historicalDetail": "确定性方案编译器未覆盖本条动作；没有假装生成对应能力。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "本地协议制品通过；真实模型语义待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "C18",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "C19",
+      "scenario": "统计左下角「联系我们」入口自身及内部有多少个链接，并在该入口上方显示数量",
+      "historicalStatus": "待实现",
+      "currentStatus": "阻塞",
+      "historicalDetail": "确定性方案编译器未覆盖本条动作；没有假装生成对应能力。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "本地协议制品通过；真实模型语义待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "C19",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "C20",
+      "scenario": "先统计有多少个广告，再把所有广告隐藏，两个结果都要",
+      "historicalStatus": "待实现",
+      "currentStatus": "阻塞",
+      "historicalDetail": "确定性方案编译器未覆盖本条动作；没有假装生成对应能力。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "本地协议制品通过；真实模型语义待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "C20",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "C21",
+      "scenario": "隐藏所有广告，保留顶部导航和精选博客",
+      "historicalStatus": "未执行",
+      "currentStatus": "阻塞",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "本地协议制品通过；真实模型语义待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "C21",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "C22",
+      "scenario": "在搜索框右侧添加一个点击后能清空搜索框内容的「清空」按钮",
+      "historicalStatus": "待实现",
+      "currentStatus": "阻塞",
+      "historicalDetail": "添加交互按钮、统计或多动作方案未实现。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "本地协议制品通过；真实模型语义待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "C22",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "C23",
+      "scenario": "统计精选博客有多少篇文章",
+      "historicalStatus": "待实现",
+      "currentStatus": "阻塞",
+      "historicalDetail": "添加交互按钮、统计或多动作方案未实现。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "本地协议制品通过；真实模型语义待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "C23",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "C24",
+      "scenario": "隐藏资讯头条里的广告，把精选博客标题改为蓝色，保留导航和作者",
+      "historicalStatus": "待实现",
+      "currentStatus": "阻塞",
+      "historicalDetail": "添加交互按钮、统计或多动作方案未实现。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "本地协议制品通过；真实模型语义待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "C24",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "C25",
+      "scenario": "隐藏资讯头条广告，保留同区域没有广告标记的普通新闻卡片",
+      "historicalStatus": "未执行",
+      "currentStatus": "阻塞",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "本地协议制品通过；真实模型语义待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "C25",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "C26",
+      "scenario": "弱化资讯头条里的广告，其他内容不变",
+      "historicalStatus": "未执行",
+      "currentStatus": "阻塞",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "本地协议制品通过；真实模型语义待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "C26",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I01",
+      "scenario": "隐藏",
+      "historicalStatus": "通过",
+      "currentStatus": "通过",
+      "historicalDetail": "真实侧栏直接补问对应缺项；宿主模型/工具均 0，无目标、制品、运行或保存。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "61号真实Chrome侧栏操作及只读宿主日志辅助核对，未触发制品、执行或保存。",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I01",
+        "status": "通过",
+        "input": "隐藏",
+        "result": "真实侧栏追问“你想隐藏页面中的哪一块？”，未生成或执行。",
+        "evidence": [
+          "I01-result.txt",
+          "I01-result.png"
+        ],
+        "modelCalls": 0,
+        "toolCalls": 0,
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I02",
+      "scenario": "删除",
+      "historicalStatus": "通过",
+      "currentStatus": "通过",
+      "historicalDetail": "真实侧栏直接补问对应缺项；宿主模型/工具均 0，无目标、制品、运行或保存。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "62号新标签页真实Chrome侧栏追问及只读宿主日志辅助确认；无需调用模型或生成。",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I02",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      },
+      "realRound4": {
+        "id": "I02",
+        "status": "通过",
+        "input": "删除",
+        "actualReply": "你想删除页面中的哪一块？",
+        "missingSlots": [
+          "目标位置"
+        ],
+        "precondition": "new Chrome CSDN tab, empty conversation before first input; no selected targets",
+        "conversationId": "0b476e1b-bcf9-4a8f-baa8-734f36aec7b9",
+        "modelCalls": 0,
+        "harnessToolCalls": 0,
+        "artifact": null,
+        "evidence": [
+          "I02-result.txt",
+          "I02-result.png",
+          "I02-T14-live-log.json"
+        ],
+        "level": "real Chrome extension UI; deterministic host response, not a real-model semantic test"
+      }
+    },
+    {
+      "id": "I03",
+      "scenario": "替换",
+      "historicalStatus": "通过",
+      "currentStatus": "通过",
+      "historicalDetail": "真实侧栏直接补问对应缺项；宿主模型/工具均 0，无目标、制品、运行或保存。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "62号新标签页真实Chrome侧栏追问及只读宿主日志辅助确认；无需调用模型或生成。",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I03",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      },
+      "realRound4": {
+        "id": "I03",
+        "status": "通过",
+        "input": "替换",
+        "actualReply": "你想替换页面中的哪一块，替换成什么内容？",
+        "missingSlots": [
+          "目标对象",
+          "替换内容"
+        ],
+        "precondition": "new Chrome CSDN tab, empty conversation before first input; no selected targets",
+        "conversationId": "ba0e624c-9173-4972-ab0c-599f3b02f34b",
+        "modelCalls": 0,
+        "harnessToolCalls": 0,
+        "artifact": null,
+        "evidence": [
+          "I03-result.txt",
+          "I03-result.png",
+          "I03-live-log.json"
+        ],
+        "level": "real Chrome extension UI; deterministic host response, not a real-model semantic test"
+      }
+    },
+    {
+      "id": "I04",
+      "scenario": "添加",
+      "historicalStatus": "通过",
+      "currentStatus": "通过",
+      "historicalDetail": "真实侧栏直接补问对应缺项；宿主模型/工具均 0，无目标、制品、运行或保存。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I04",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I05",
+      "scenario": "修改",
+      "historicalStatus": "通过",
+      "currentStatus": "通过",
+      "historicalDetail": "真实侧栏直接补问对应缺项；宿主模型/工具均 0，无目标、制品、运行或保存。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "62号新标签页真实Chrome侧栏追问及只读宿主日志辅助确认；无需调用模型或生成。",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I05",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      },
+      "realRound4": {
+        "id": "I05",
+        "status": "通过",
+        "input": "修改",
+        "actualReply": "你想修改页面中的哪一块、哪一项，改成什么？",
+        "missingSlots": [
+          "目标对象",
+          "属性",
+          "新值"
+        ],
+        "precondition": "new Chrome CSDN tab, empty conversation before first input; no selected targets",
+        "conversationId": "2012d8ac-dd39-45cc-a65e-ec544bbecbc8",
+        "modelCalls": 0,
+        "harnessToolCalls": 0,
+        "artifact": null,
+        "evidence": [
+          "I05-result.txt",
+          "I05-result.png",
+          "I05-live-log.json"
+        ],
+        "level": "real Chrome extension UI; deterministic host response, not a real-model semantic test"
+      }
+    },
+    {
+      "id": "I06",
+      "scenario": "统计",
+      "historicalStatus": "通过",
+      "currentStatus": "通过",
+      "historicalDetail": "真实侧栏直接补问对应缺项；宿主模型/工具均 0，无目标、制品、运行或保存。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I06",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I07",
+      "scenario": "藏起来",
+      "historicalStatus": "通过",
+      "currentStatus": "通过",
+      "historicalDetail": "真实侧栏直接补问对应缺项；宿主模型/工具均 0，无目标、制品、运行或保存。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I07",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I08",
+      "scenario": "去掉",
+      "historicalStatus": "通过",
+      "currentStatus": "通过",
+      "historicalDetail": "真实侧栏直接补问对应缺项；宿主模型/工具均 0，无目标、制品、运行或保存。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I08",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I09",
+      "scenario": "广告",
+      "historicalStatus": "通过",
+      "currentStatus": "通过",
+      "historicalDetail": "1 模型/0 工具；仅追问对广告做什么，无选集、计划或脚本；回复例子提及未实现替换，作为文案缺口保留。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I09",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      },
+      "realRound5": {
+        "status": "部分验证",
+        "result": "动作追问出现，但泛问页面与用途；真实需求阶段耗时78秒。",
+        "evidence": "evidence/2026-10-28/chrome-live-round5/",
+        "report": "64-chrome-multiturn-round5-2026-10-28.md",
+        "level": "real Chrome + extension + configured MiMo; no protocol substitution"
+      },
+      "realRound7": {
+        "status": "通过",
+        "result": "独立空会话输入广告，12秒实际仅询问动作；模型1工具0，无页面绑定或制品。历史泛问页面的证据保留，不宣称稳定性已充分证明。",
+        "report": "66-unified-requirement-evidence-and-t02-2026-10-28.md",
+        "evidencePath": "evidence/2026-10-28/chrome-live-round7/T02-repair-turn1-log.json"
+      }
+    },
+    {
+      "id": "I10",
+      "scenario": "排行榜",
+      "historicalStatus": "通过",
+      "currentStatus": "通过",
+      "historicalDetail": "CSDN 独立会话追问具体动作；10 秒、1 模型/0 工具，无选集或脚本。例子仍列出未实现能力，作为文案缺口保留。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I10",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I11",
+      "scenario": "顶部搜索框",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I11",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I12",
+      "scenario": "精选博客里的文章",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I12",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I13",
+      "scenario": "会员中心",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I13",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I14",
+      "scenario": "处理一下所有广告",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I14",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I15",
+      "scenario": "优化精选博客",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I15",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I16",
+      "scenario": "弄一下首页",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I16",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I17",
+      "scenario": "隐藏那个",
+      "historicalStatus": "通过",
+      "currentStatus": "通过",
+      "historicalDetail": "修复前 2 模型/5 工具，错误推荐整条导航；修复后 1 模型/0 工具，只问具体对象，选集为空。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I17",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I18",
+      "scenario": "删除这个",
+      "historicalStatus": "通过",
+      "currentStatus": "通过",
+      "historicalDetail": "CSDN 独立会话追问具体对象；19 秒、1 模型/0 工具，无选集或脚本。回复额外索要页面地址的文案仍待优化。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I18",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I19",
+      "scenario": "把这里的东西替换掉",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I19",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I20",
+      "scenario": "统计一下有多少",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I20",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I21",
+      "scenario": "帮我改改",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I21",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I22",
+      "scenario": "处理一下",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I22",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I23",
+      "scenario": "把所有广告隐藏或者删掉",
+      "historicalStatus": "通过",
+      "currentStatus": "通过",
+      "historicalDetail": "修复前未询问动作并消耗 4 模型/6 工具；修复后不到 1 秒要求选择隐藏或删除，0 模型/0 工具，无选集。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I23",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I24",
+      "scenario": "在标题前添加",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I24",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I25",
+      "scenario": "把排行榜替换一下",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I25",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I26",
+      "scenario": "把会员中心改改",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I26",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I27",
+      "scenario": "隐藏 CSDN",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I27",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I28",
+      "scenario": "`https://www.csdn.net/`",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I28",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I29",
+      "scenario": "统计「联系我们」附近有多少个链接",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I29",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I30",
+      "scenario": "把搜索框改成蓝色",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I30",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I31",
+      "scenario": "添加一条「本地改版预览」提示",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I31",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "I32",
+      "scenario": "删除所有广告，但所有广告节点都必须保留在 DOM 中",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "I32",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "T01",
+      "scenario": "多轮补全/改写/取消（原表）",
+      "historicalStatus": "失败",
+      "currentStatus": "失败",
+      "historicalDetail": "原版第二轮错误要求绑定页面。已修复动作续接；最终精确输入复验 50.369 秒、4 模型/8 工具，仍未得到完整目标草稿，不能记通过。一次含控制字符的驱动输入已排除标准用例统计。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "T01",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "T02",
+      "scenario": "多轮补全/改写/取消（原表）",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "T02",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      },
+      "realRound5": {
+        "status": "失败",
+        "result": "修复裸动作截断后真实模型已合并删除广告，但将页面取证/选择器/预览列为需求缺项，未推进生成。",
+        "evidence": "evidence/2026-10-28/chrome-live-round5/",
+        "report": "64-chrome-multiturn-round5-2026-10-28.md",
+        "level": "real Chrome + extension + configured MiMo; no protocol substitution"
+      },
+      "realRound7": {
+        "status": "失败",
+        "requirement": "真实两轮合并与版本保持通过",
+        "evidence": "72秒4模型9工具，仅4处读回，未形成确认范围",
+        "generation": "未生成",
+        "report": "66-unified-requirement-evidence-and-t02-2026-10-28.md",
+        "conversationId": "d42d3a61-292a-41d3-8031-81fec7b3e648",
+        "evidencePath": "evidence/2026-10-28/chrome-live-round7/"
+      }
+    },
+    {
+      "id": "T03",
+      "scenario": "多轮补全/改写/取消（原表）",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "T03",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "T04",
+      "scenario": "多轮补全/改写/取消（原表）",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "T04",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "T05",
+      "scenario": "多轮补全/改写/取消（原表）",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "T05",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "T06",
+      "scenario": "多轮补全/改写/取消（原表）",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "T06",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "T07",
+      "scenario": "多轮补全/改写/取消（原表）",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "T07",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "T08",
+      "scenario": "动作冲突后选择隐藏",
+      "historicalStatus": "失败",
+      "currentStatus": "失败",
+      "historicalDetail": "冲突追问通过，选择隐藏后进入 hide 分析；46 秒后范围未确认、未生成草稿，未满足本用例的完整期望。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "T08",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "T09",
+      "scenario": "多轮补全/改写/取消（原表）",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "T09",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "T10",
+      "scenario": "多轮补全/改写/取消（原表）",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "T10",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "T11",
+      "scenario": "多轮补全/改写/取消（原表）",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "T11",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "T12",
+      "scenario": "多轮补全/改写/取消（原表）",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "T12",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "T13",
+      "scenario": "多轮补全/改写/取消（原表）",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "T13",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "T14",
+      "scenario": "多轮补全/改写/取消（原表）",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "T14",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      },
+      "realRound4": {
+        "id": "T14",
+        "status": "部分验证",
+        "executedTurns": [
+          "删除",
+          "你好"
+        ],
+        "actualReplies": [
+          "你想删除页面中的哪一块？",
+          "你好，有什么我可以帮你？"
+        ],
+        "pendingActionAfterGreeting": "删除",
+        "unexecutedTurns": [
+          "资讯头条里的广告"
+        ],
+        "modelCalls": 0,
+        "harnessToolCalls": 0,
+        "artifact": null,
+        "evidence": [
+          "T14-greeting-keeps-pending.txt",
+          "T14-greeting-keeps-pending.png",
+          "I02-T14-live-log.json"
+        ],
+        "limitation": "Only first two turns; no claim that final merge/generation succeeds"
+      }
+    },
+    {
+      "id": "T15",
+      "scenario": "多轮补全/改写/取消（原表）",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "T15",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "T16",
+      "scenario": "多轮补全/改写/取消（原表）",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "T16",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "N01",
+      "scenario": "直接回答。不追问位置或动作，不生成脚本",
+      "historicalStatus": "通过",
+      "currentStatus": "通过",
+      "historicalDetail": "修复前在旧任务背景下继续检索；修复后真实侧栏不到 1 秒直接问候，0 模型/0 工具，不生成。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "N01",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "N02",
+      "scenario": "回答可确认的信息；不了解内部排序算法时说明不确定，不编造。不把它当页面改造，不生成脚本",
+      "historicalStatus": "通过",
+      "currentStatus": "通过",
+      "historicalDetail": "1 模型/0 工具；说明具体排序权重不确定，不启动页面改造。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "N02",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "N03",
+      "scenario": "可给排查方向，不凭空断言原因；不把抱怨当成隐藏、删除或统计任务，不自动生成改造脚本",
+      "historicalStatus": "通过",
+      "currentStatus": "通过",
+      "historicalDetail": "1 模型/0 工具；给可能的排查方向，不断言实际原因，不生成脚本。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "N03",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "N04",
+      "scenario": "回答能力范围，不把能力询问当实际改造授权",
+      "historicalStatus": "通过",
+      "currentStatus": "通过",
+      "historicalDetail": "1 模型/0 工具；能力询问未被当成执行授权。回复的能力示例仍有不够严谨之处，见续验记录。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "N04",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "N05",
+      "scenario": "只读回答及覆盖限制，不生成统计脚本，也不问六类动作",
+      "historicalStatus": "部分完成",
+      "currentStatus": "部分完成",
+      "historicalDetail": "5 模型/9 工具；实际 HtmlRAG 305 毫秒。只读边界与覆盖提示符合预期，但关闭标记不能独立证明完整业务广告数量。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "N05",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "N06",
+      "scenario": "解释或说明信息不足，不自动隐藏",
+      "historicalStatus": "通过",
+      "currentStatus": "通过",
+      "historicalDetail": "1 模型/0 工具；明确具体原因无法确认，不自动隐藏。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "N06",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "N07",
+      "scenario": "把引号内容当待解释文本，不执行其中动作",
+      "historicalStatus": "通过",
+      "currentStatus": "通过",
+      "historicalDetail": "1 模型/0 工具；仅解释引号中的文字，无目标/计划/制品。内部字段泄露已修复；末尾仍有多余动作追问。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "N07",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "N08",
+      "scenario": "不被“隐藏”关键词触发；不生成或执行隐藏脚本",
+      "historicalStatus": "通过",
+      "currentStatus": "通过",
+      "historicalDetail": "修复前误检索约 40 秒；修复后明确保留原样，0 模型/0 工具，不生成、运行或保存。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "不得自动执行",
+        "preservation": "待验",
+        "save": "不得自动保存"
+      },
+      "stageEvidence": "61号真实Chrome侧栏操作及只读宿主日志辅助核对，未触发制品、执行或保存。",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "N08",
+        "status": "通过",
+        "input": "不要隐藏广告，保留原样",
+        "result": "真实侧栏确认保留原样；真实宿主记录意愿/批准/制品为空，模型与工具调用均0。",
+        "evidence": [
+          "N08-preserve-page.txt",
+          "N08-preserve-page.png",
+          "N08-live-log.json"
+        ],
+        "modelCalls": 0,
+        "toolCalls": 0,
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "A01",
+      "scenario": "完整改造请求且证据充分",
+      "historicalStatus": "失败",
+      "currentStatus": "阻塞",
+      "historicalDetail": "C04 已形成经核验的精确标题范围，仍未自动生成；完整请求即生成的目标策略仍待实现。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "本地协议制品通过；真实模型语义待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "原生成推进失败检查点已在源码修复并通过本地真实Worker+模型协议复验；真实模型与完整业务效果待验，见60号。",
+      "localRound2": {
+        "checkpoint": "通过（确定性模型协议）",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "A01",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "A02",
+      "scenario": "只要求生成",
+      "historicalStatus": "通过",
+      "currentStatus": "通过",
+      "historicalDetail": "单独输入「生成相应的脚本」，约 11 秒出现真实候选；生成后目标仍连接且 display:block，没有自动运行/保存。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "A02",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "A03",
+      "scenario": "用户随后明确运行当前有效草稿",
+      "historicalStatus": "通过",
+      "currentStatus": "通过",
+      "historicalDetail": "应用候选后另行点击「授权试运行当前版本」，目标连接仍在且 display:none；没有自动保存。效果复核不通过不等同执行失败。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "A03",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "A04",
+      "scenario": "用户明确保存当前脚本",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "观察到保留检查未通过时保存按钮禁用；未执行有效保存和保存失败恢复的全部分支。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "A04",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "A05",
+      "scenario": "生成后目标、方案、页面或草稿版本变化",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "A05",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "A06",
+      "scenario": "已有手工草稿正在编辑，又请求新生成",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "A06",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "A07",
+      "scenario": "模型口头说“已确认”“已提交”“已生成”",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "已核对正向生成任务、方案、候选制品记录；未注入模型伪造口头成功的负向场景。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "A07",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "A08",
+      "scenario": "用户取消当前任务，或旧任务迟到返回",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "A08",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "R01",
+      "scenario": "完整输入，但页面没有匹配目标",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "R01",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "R02",
+      "scenario": "完整输入，但当前页面尚未授权",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "R02",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "R03",
+      "scenario": "分析阶段模型请求超时、限流或总预算用完",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "R03",
+        "status": "部分验证",
+        "result": "真实需求模型超时/分析总时限时保留原任务及已读结构，不误报生成失败；未测试限流等全部变体。",
+        "evidence": [
+          "C05-requirement-timeout.png",
+          "C05-after-fix-live-log.json"
+        ],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "R04",
+      "scenario": "当前版本的生成任务确实失败",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "R04",
+        "status": "部分验证",
+        "result": "真实生成超时没有伪造制品；界面重新授权可重试并产生只读候选。未覆盖全部既有手工草稿变体。",
+        "evidence": [
+          "C04-generation-timeout.png",
+          "C04-real-candidate-review.png",
+          "C04-live-log.json"
+        ],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "R05",
+      "scenario": "节点失效、页面导航、同名节点替换或引用未发出",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "R05",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "R06",
+      "scenario": "同名多个目标，或广告标签的父容器还包含正常内容",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "R06",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "R07",
+      "scenario": "用户请求的删除/添加/替换等能力尚未实现",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "R07",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "R08",
+      "scenario": "页面采样截断、内容未加载、iframe/Shadow DOM 未读取",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "R08",
+        "status": "部分验证",
+        "result": "真实采样截断、证据不足明确未完成，没有声称所有广告已定位。未读取iframe/Shadow DOM内部。",
+        "evidence": [
+          "C05-after-fix-incomplete.txt",
+          "C05-after-fix-live-log.json"
+        ],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "R09",
+      "scenario": "HtmlRAG 未就绪、不可用或剪枝超时",
+      "historicalStatus": "通过",
+      "currentStatus": "通过",
+      "historicalDetail": "实机观察 HtmlRAG 不可用后明确回退 BM25，界面标出回退；C04 回退结果仍经真实目标核验。仅代表本次不可用变体。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "R09",
+        "status": "部分验证",
+        "result": "真实HtmlRAG超时，回退BM25，侧栏明确显示已回退；整体验证目标仍未完成。",
+        "evidence": [
+          "C05-after-fix-incomplete.txt",
+          "C05-after-fix-live-log.json"
+        ],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "R10",
+      "scenario": "模型输出伪工具 XML、格式不合法或请求未授权工具",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "R10",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "R11",
+      "scenario": "自动定位未完成，用户转手动点选",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "入口和 Esc 子项解锁后最终实机复验通过，留在原会话且原选择不变；40/41 容量保留、点选后定位编号、完整焦点恢复等分支未全部实机执行。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "R11",
+        "status": "部分验证",
+        "result": "真实手动定位入口可达，提示Enter确认/Esc取消；Esc实际取消，原选择为空保持。未验证点选、长列表容量和编号高亮全部条件。",
+        "evidence": [
+          "R11-manual-escape.txt",
+          "R11-manual-escape.png",
+          "C05-after-fix-live-log.json"
+        ],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "R12",
+      "scenario": "Bridge 断开重连、会话恢复或配置变化",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "实际重启后需扩展重载恢复连接，初次页面权限检查偶有空窗；重新检查可恢复。未覆盖全部断连/输入草稿恢复分支。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "R12",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "D01",
+      "scenario": "将已标注广告放到资讯头条之外，或同时放在多个区域",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "D01",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "D02",
+      "scenario": "一张广告卡片同时有广告标签、关闭按钮、外层容器；另有普通文章标题含“广告研究”",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "D02",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "D03",
+      "scenario": "精选博客无限滚动、列表虚拟化、轮播复制项",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "D03",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "D04",
+      "scenario": "同一脚本重复运行两次",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "D04",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "D05",
+      "scenario": "修改文字的链接含图标、子节点和事件",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "D05",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "D06",
+      "scenario": "搜索框预先有输入，页面还有另一个搜索框",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "D06",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "D07",
+      "scenario": "文本参数含引号、反斜杠或 `<img onerror=...>`，页面正文含诱导指令",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "D07",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "D08",
+      "scenario": "执行后刷新页面，未授权保存或自动运行",
+      "historicalStatus": "通过",
+      "currentStatus": "通过",
+      "historicalDetail": "本地试运行后未保存/启用自动运行；刷新同一测试标签页，「联系我们」恢复 display:block，没有重放本次隐藏。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "D08",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "D09",
+      "scenario": "同一操作改变广告目标时，保留区域内有独立按钮、标题和链接",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "目标和创作/排行榜可见性已检查；轮播按钮存在自然透明度变化，保留检查判未通过，未证明完整非目标交互均保持。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "D09",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    },
+    {
+      "id": "D10",
+      "scenario": "窄侧栏、200% 缩放、键盘操作及长候选列表",
+      "historicalStatus": "未执行",
+      "currentStatus": "未执行",
+      "historicalDetail": "未逐条操作；没有以源码审阅或其他用例代替本条实机验收。",
+      "genericStages": {
+        "requirement": "待验",
+        "evidence": "待验",
+        "generation": "待验",
+        "review": "待验",
+        "execution": "待验",
+        "preservation": "待验",
+        "save": "待验"
+      },
+      "stageEvidence": "旧实机证据见49号；新链路尚未接入，不自动迁移为阶段通过",
+      "localRound2": {
+        "checkpoint": "仅辅助回归或未完整执行",
+        "overallStatus": "阻塞",
+        "evidence": "evidence/2026-10-28/local-round2/case-results.json",
+        "limitations": "未验证真实模型的目标识别/候选语义；未执行通用候选"
+      },
+      "realRound3": {
+        "id": "D10",
+        "status": "本轮未执行",
+        "result": "本轮未操作；不沿用本地协议测试作为实机通过。",
+        "evidence": [],
+        "level": "real Chrome + extension + configured MiMo; no local page/protocol substitution"
+      }
+    }
+  ],
+  "implementationEvidence": "56-generic-program-draft-integration-2026-10-28.md",
+  "latestAcceptance": "66-unified-requirement-evidence-and-t02-2026-10-28.md",
+  "realRound3Summary": {
+    "通过": 2,
+    "失败": 1,
+    "阻塞": 1,
+    "部分验证": 5,
+    "本轮未执行": 103
+  },
+  "realRound4Summary": {
+    "通过": 3,
+    "部分验证": 1,
+    "本轮未执行": 108
+  },
+  "latestRealCumulativeSummary": {
+    "通过": 6,
+    "失败": 2,
+    "阻塞": 1,
+    "部分验证": 6,
+    "尚未实机执行": 97
+  },
+  "realRound5Summary": {
+    "部分验证": 1,
+    "失败": 1,
+    "本轮未执行": 110
+  },
+  "realRound6Diagnostic": {
+    "status": "补充诊断未完成；非新增原始用例通过",
+    "report": "65-chrome-requirement-routing-round6-2026-10-28.md",
+    "input": "删除当前页面的广告",
+    "durationSeconds": 55,
+    "modelCalls": 4,
+    "toolCalls": 6,
+    "readBlocks": 4,
+    "limitations": "直接分析入口，未实机验证本轮requirementOnly提示修改；未生成或运行"
+  },
+  "realRound7Summary": {
+    "I09": "本次通过；历史不稳定证据保留",
+    "T02": "整组失败；需求合并/核验与阶段保持通过，取证无确认范围或草稿"
+  }
+}

@@ -1,5 +1,5 @@
 import {afterEach,expect,it,vi} from 'vitest';
-import {initializeTabPanels,openTabPanel,configureTabPanel,forgetTabPanel} from './tab-panel';
+import {initializeTabPanels,openTabPanel,openToolbarPanel,configureTabPanel,forgetTabPanel} from './tab-panel';
 import {panelTabId,executorKey} from '../../shared/panel-tab';
 afterEach(()=>{for(const id of [11,22,33,44])forgetTabPanel(id);vi.unstubAllGlobals();});
 it('default disabled, only clicked tab is enabled and opened; failed configuration never opens a global panel',async()=>{
@@ -19,3 +19,5 @@ it('open invokes Chrome synchronously inside the gesture; an unprepared tab neve
  await expect(openTabPanel(44)).rejects.toThrow('正在准备');expect(open).not.toHaveBeenCalled();await configureTabPanel(44);
  const result=openTabPanel(44);expect(open).toHaveBeenCalledWith({tabId:44});await result;
 });
+
+it('toolbar action opens synchronously without relying on worker memory or switching tabs',async()=>{const open=vi.fn(async()=>{});vi.stubGlobal('chrome',{sidePanel:{open}});const task=openToolbarPanel(55);expect(open).toHaveBeenCalledWith({tabId:55});await task;await expect(openToolbarPanel(-1)).rejects.toThrow('无效');expect(open).toHaveBeenCalledTimes(1);});

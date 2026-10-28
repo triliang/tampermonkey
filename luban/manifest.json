@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "鲁班 Luban",
-  "version": "0.1.0",
+  "version": "0.4.3",
   "description": "AI 网页自动化——说出意图，工具即成",
   "permissions": [
     "storage",
@@ -31,8 +31,7 @@
       "32": "src/assets/icon32.png",
       "48": "src/assets/icon48.png",
       "128": "src/assets/icon128.png"
-    },
-    "default_popup": "src/launcher/index.html"
+    }
   },
   "icons": {
     "16": "src/assets/icon16.png",

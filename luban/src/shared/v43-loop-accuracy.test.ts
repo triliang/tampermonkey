@@ -1,0 +1,12 @@
+// @vitest-environment jsdom
+import {it,expect} from 'vitest';
+import {compilePlan,serializeUserscript,parseUserscript} from '../../contracts/script-plan.mjs';
+const layouts=[
+ '<nav id="keep">导航</nav><div id="chosen">区域</div><main>正文</main>',
+ '<section><div id="chosen">区域</div><p id="keep">相邻正文</p></section>',
+ '<div style="display:grid"><aside id="chosen">区域</aside><article id="keep">保留</article></div>',
+ '<div><section id="keep">正常模块</section><section id="chosen"><div>嵌套内容</div></section></div>'
+];
+it.each(layouts)('IR compiler confines hide effects across independent layouts: %s',html=>{document.body.innerHTML=html;const envelope={planHash:'p',action:'hide' as const,targets:[{id:'t',selector:'#chosen'}]};const result=compilePlan({planHash:'p',action:'hide',targetIds:['t']},envelope);const css=JSON.parse(result.code.match(/const css = (.*);/)![1]);const style=document.createElement('style');style.textContent=css;document.head.append(style);try{expect(getComputedStyle(document.querySelector('#chosen')!).display).toBe('none');expect(getComputedStyle(document.querySelector('#keep')!).display).not.toBe('none');expect(result.grants).toEqual([]);}finally{style.remove();document.body.replaceChildren();}});
+it('complete artifact round trips without changing copied bytes; metadata injection is rejected',()=>{const meta={name:'工具',namespace:'https://luban.local/userscripts',version:'4.3.1',description:'确认范围',matches:['*://example.com/*'],runAt:'document-end' as const,grants:[]};const content=serializeUserscript('console.log("ok");',meta);const parsed=parseUserscript(content);expect(serializeUserscript(parsed.body,parsed.metadata)).toBe(content);expect(()=>parseUserscript(content.replace('// @grant        none','// @grant        GM_xmlhttpRequest'))).toThrow();});
+it('trusted IR compiler output is idempotent in an isolated fixture without executing model code',()=>{document.body.innerHTML='<div id="chosen">区域</div><p id="keep">正文</p>';const code=compilePlan({planHash:'idempotent',action:'dim',targetIds:['t']},{planHash:'idempotent',action:'dim',targets:[{id:'t',selector:'#chosen'}]}).code;try{const execute=new Function(code);execute();execute();expect(document.querySelectorAll('#luban-plan-idempotent')).toHaveLength(1);expect(getComputedStyle(document.querySelector('#chosen')!).opacity).toBe('0.25');expect(getComputedStyle(document.querySelector('#keep')!).opacity).not.toBe('0.25');}finally{document.querySelector('#luban-plan-idempotent')?.remove();document.body.replaceChildren();}});

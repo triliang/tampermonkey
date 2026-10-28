@@ -11,7 +11,7 @@ it('正式工作区通过真实服务完成生成/检查/试运行/人工效果�
  try{
  await act(async()=>render(h(App,{initialView:'home' as const,embedded:false,initialMode:'v3' as const}),root));
  await vi.waitFor(()=>expect(root.textContent).toContain('shop.example.com'));
- const thinking=root.querySelector<HTMLInputElement>('input[aria-label="推理模式"]')!;expect(thinking.checked).toBe(true);await act(async()=>thinking.click());await vi.waitFor(()=>expect(thinking.disabled).toBe(false));expect(thinking.checked).toBe(false);
+ const thinking=root.querySelector<HTMLButtonElement>('button[role="switch"][aria-label="Thinking 模式"]')!;expect(thinking.getAttribute('aria-checked')).toBe('true');await act(async()=>thinking.click());await vi.waitFor(()=>expect(thinking.disabled).toBe(false));expect(thinking.getAttribute('aria-checked')).toBe('false');
  await act(async()=>{const input=root.querySelector('#intent') as HTMLTextAreaElement;input.value='调整字号并保留原功能';input.dispatchEvent(new Event('input',{bubbles:true}));});
  await act(async()=>{(root.querySelector('button[aria-label="发送"]') as HTMLButtonElement).click();});
  expect(root.textContent).not.toContain('确认本次发送范围');
@@ -82,7 +82,7 @@ it('固定tab侧栏忽略其他标签激活/导航，输入与执行方只写入
  try{await act(async()=>render(h(App,{initialView:'home',embedded:false,initialMode:'v3' as const}),root));await vi.waitFor(()=>expect(root.textContent).toContain('shop.example.com'));
  await act(async()=>{const area=root.querySelector<HTMLTextAreaElement>('#intent')!;area.value='仅属于标签A';area.dispatchEvent(new Event('input',{bubbles:true}));});
  const reads=harness.siteReads;await act(async()=>{harness.activateOtherTab();harness.navigateTab(2);});expect(harness.siteReads).toBe(reads);expect(root.querySelector<HTMLTextAreaElement>('#intent')!.value).toBe('仅属于标签A');
- await act(async()=>{const select=root.querySelector<HTMLSelectElement>('select[aria-label="执行方"]')!;select.value='codex';select.dispatchEvent(new Event('change',{bubbles:true}));});
+ await act(async()=>root.querySelector<HTMLButtonElement>('button[aria-label="执行方"]')!.click());await act(async()=>root.querySelector<HTMLButtonElement>('[role="menuitemradio"][aria-label="本地 Codex"]')!.click());
  expect(harness.sessionValues()).toEqual({'luban:v3:executor:tab:1':'codex'});
  await act(async()=>harness.navigateTab(1));await vi.waitFor(()=>expect(harness.siteReads).toBe(reads+1));
  }finally{render(null,root);root.remove();await harness.close();vi.unstubAllGlobals();window.history.replaceState(null,'',previous);}

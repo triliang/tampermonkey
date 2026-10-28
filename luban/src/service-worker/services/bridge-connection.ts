@@ -15,13 +15,15 @@ export class BridgeConnection {
   private queue: Promise<unknown> = Promise.resolve();
   private onInvalidated:()=>Promise<void>=async()=>undefined;
   private pollTimer?:ReturnType<typeof setInterval>;
-  private pollBusy=false;
+  private pollBusy=false;private evidenceBusy=false;private evidenceHandler:((c:import('../../shared/v4-types').V4Conversation)=>Promise<unknown>)|null=null;
+  setEvidenceHandler(handler:(c:import('../../shared/v4-types').V4Conversation)=>Promise<unknown>){this.evidenceHandler=handler;}
+  private pollEvidence(){if(!this.evidenceHandler||this.evidenceBusy)return;this.evidenceBusy=true;void this.rpc('harness.evidencePull').then(async data=>{if(Array.isArray(data.conversations))for(const c of data.conversations)await this.evidenceHandler!(c);}).catch(()=>{}).finally(()=>{this.evidenceBusy=false;});}
   private onTask:(command:ExternalCommand)=>Promise<void>=async()=>undefined;
   private onCancel:(taskId:string,epoch:number)=>Promise<void>=async()=>undefined;
   private onConnected:()=>Promise<void>=async()=>undefined;
   setTaskHandlers(task:(command:ExternalCommand)=>Promise<void>,cancel:(taskId:string,epoch:number)=>Promise<void>,connected:()=>Promise<void>){this.onTask=task;this.onCancel=cancel;this.onConnected=connected;}
   rpc(method:string,params:Record<string,unknown>={}):Promise<Record<string,unknown>>{const next=this.queue.then(()=>this.call(method,params));this.queue=next.catch(()=>undefined);return next;}
-  private startPolling(){clearInterval(this.pollTimer);this.pollTimer=setInterval(()=>{if(this.pollBusy||this.snapshot.status!=='connected')return;this.pollBusy=true;void this.rpc('tasks.pull').then(data=>{if(Array.isArray(data.cancellations))for(const entry of data.cancellations as Array<{taskId:string;epoch:number}>)void this.onCancel(entry.taskId,entry.epoch).catch(()=>{});if(Array.isArray(data.commands))for(const command of data.commands as ExternalCommand[])void this.onTask(command).catch(()=>{});}).catch(()=>{}).finally(()=>{this.pollBusy=false;});},1000);}
+  private startPolling(){clearInterval(this.pollTimer);this.pollTimer=setInterval(()=>{if(this.pollBusy||this.snapshot.status!=='connected')return;this.pollBusy=true;this.pollEvidence();void this.rpc('tasks.pull').then(data=>{if(Array.isArray(data.cancellations))for(const entry of data.cancellations as Array<{taskId:string;epoch:number}>)void this.onCancel(entry.taskId,entry.epoch).catch(()=>{});if(Array.isArray(data.commands))for(const command of data.commands as ExternalCommand[])void this.onTask(command).catch(()=>{});}).catch(()=>{}).finally(()=>{this.pollBusy=false;});},1000);}
   setInvalidationHandler(handler:()=>Promise<void>):void{this.onInvalidated=handler;}
   syncPages(grants:PageGrant[]):Promise<void>{const next=this.queue.then(async()=>{if(this.snapshot.status!=='connected')throw new Error('请先连接 Bridge。');const pages=grants.filter(g=>g.profileId===this.snapshot.profileId).map(g=>({pageRef:g.id,browserSession:g.browserSession,documentId:g.binding.documentId,navigationEpoch:g.navigationEpoch,title:g.title,url:g.binding.url,...(g.workspaceId?{workspaceId:g.workspaceId}:{}),capabilities:g.capabilities??['context.read']}));await this.call('pages.sync',{pages});this.snapshot.pageCount=pages.length;});this.queue=next.catch(()=>undefined);return next;}
 
@@ -62,7 +64,7 @@ export class BridgeConnection {
 
   private async call(method: string, params?: Record<string, unknown>): Promise<Record<string, unknown>> {
     const reply = await this.request(method, params);
-    if (!reply.ok) throw Object.assign(new Error(reply.error?.code === 'PAIRING_REQUIRED' ? '配对已失效，请重新连接。' : reply.error?.code === 'INVALID_REQUEST' ? '本机 Bridge 未接受当前请求，请检查扩展与 Bridge 是否已更新并重启。' : reply.error?.code ?? 'Bridge 请求失败。'), {code: reply.error?.code});
+    if (!reply.ok) throw Object.assign(new Error(reply.error?.code === 'PAIRING_REQUIRED' ? '配对已失效，请重新连接。' : reply.error?.code === 'INVALID_REQUEST' ? '请求参数未通过本机 Bridge 校验，本次操作未执行。' : reply.error?.code ?? 'Bridge 请求失败。'), {code: reply.error?.code});
     return reply.data ?? {};
   }
 

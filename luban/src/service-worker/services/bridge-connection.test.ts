@@ -36,4 +36,4 @@ describe('S1 extension native connection',()=>{
  });
 });
 
-it('invalid requests keep diagnostic code while showing an actionable update message',async()=>{await service.run('connect');await expect(service.rpc('harness.configure',{backend:'codex'})).rejects.toMatchObject({code:'INVALID_REQUEST',message:'本机 Bridge 未接受当前请求，请检查扩展与 Bridge 是否已更新并重启。'});expect(stored['luban:v3:bridge-pairing']).toBeDefined();});
+it('invalid requests keep diagnostic code while showing an actionable update message',async()=>{await service.run('connect');await expect(service.rpc('harness.configure',{backend:'codex'})).rejects.toMatchObject({code:'INVALID_REQUEST',message:'请求参数未通过本机 Bridge 校验，本次操作未执行。'});expect(stored['luban:v3:bridge-pairing']).toBeDefined();});

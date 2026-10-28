@@ -29,14 +29,23 @@ function boot(): void {
 
   chrome.runtime.onMessage.addListener((msg: LubanMessage, _sender, sendResponse) => {
     if((msg as {type:string}).type==='V4_TARGETS'){
-      try {const raw=msg as unknown as {action:string;ids?:string[];excluded?:string[];color?:string;offset?:number};
-        if(raw.action==='scan')sendResponse({ok:true,data:targets.scan(raw.offset)});
+      try {const raw=msg as unknown as {action:string;ids?:string[];excluded?:string[];color?:string;offset?:number;args?:{cursor?:string;region?:string;tag?:string;limit?:number;blockIds?:string[];blockId?:string;query?:string;resourceId?:string;offset?:number;length?:number}};
+        if(raw.action==='searchResources')sendResponse({ok:true,data:targets.searchResources(raw.args?.query??'',raw.args?.limit)});
+        else if(raw.action==='readResource')sendResponse({ok:true,data:targets.readResource(raw.args?.resourceId??'',raw.args?.offset,raw.args?.length)});
+        else if(raw.action==='observe')sendResponse({ok:true,data:targets.observe(raw.args?.query)});
+        else if(raw.action==='readBlocks')sendResponse({ok:true,data:targets.readBlocks(raw.args?.blockIds??[])});
+        else if(raw.action==='readBlock')sendResponse({ok:true,data:targets.readBlock(raw.args?.blockId??'')});
+        else if(raw.action==='query')sendResponse({ok:true,data:targets.query(raw.args)});
+        else if(raw.action==='inspect')sendResponse({ok:true,data:targets.inspect(raw.ids?.[0]??'')});
+        else if(raw.action==='review')sendResponse({ok:true,data:targets.review(raw.ids??[])});
+        else if(raw.action==='scan')sendResponse({ok:true,data:targets.scan(raw.offset)});
         else if(raw.action==='show')sendResponse({ok:true,data:targets.show(raw.ids??[],raw.excluded??[],raw.color)});
         else if(raw.action==='check')sendResponse({ok:true,data:targets.check(raw.ids??[],raw.color??'hide')});
         else if(raw.action==='prepare')sendResponse({ok:true,data:targets.prepare(raw.ids??[])});
         else if(raw.action==='resolve')sendResponse({ok:true,data:targets.resolve(raw.ids??[])});
         else if(raw.action==='clear'){targets.clear();sendResponse({ok:true});}
         else if(raw.action==='locate'){targets.locate(raw.ids?.[0]??'');sendResponse({ok:true});}
+        else if(raw.action==='cancelManual'){pickerSession.cancel(true);sendResponse({ok:true,data:{cancelled:true}});}
         else if(raw.action==='manual'){pickerSession.cancel();pickerSession.start(el=>{try{sendResponse({ok:true,data:targets.manual(el,raw.ids??[])});}catch(e){sendResponse({ok:false,error:String(e)});}},()=>sendResponse({ok:false,error:'已取消点选'}));return true;}
         else sendResponse({ok:false,error:'INVALID_TARGET_ACTION'});
       }catch(e){sendResponse({ok:false,error:String(e)});}return;

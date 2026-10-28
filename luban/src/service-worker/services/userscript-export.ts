@@ -1,3 +1,4 @@
+import {parseUserscript} from '../../../contracts/script-plan.mjs';
 import { parse } from 'acorn';
 import type { ScriptStore } from '../script-store';
 import type { ScriptRecord } from '../../shared/v2-types';
@@ -53,10 +54,12 @@ export async function buildUserscript(record:ScriptRecord,hasDraft=false):Promis
   const version=record.current,hash=await draftHash(version);
   if(hash!==version.hash)throw new DataError('VERSION_HASH_MISMATCH','保存版校验失败，未导出。');
   const grants=exportGrants(version.code,version.grants),name=safeName(record.name);
+  const existing=version.code.startsWith('// ==UserScript==')?parseUserscript(version.code):null;
+  if(existing&&(JSON.stringify(existing.metadata.matches)!==JSON.stringify(record.matches)||existing.metadata.runAt!==({document_start:'document-start',document_end:'document-end',document_idle:'document-idle'}[version.runAt])||JSON.stringify([...existing.metadata.grants].sort())!==JSON.stringify(grants)))blocked('脚本头与结构化权限或适用范围不一致。');
   const filename=(name.replace(/[\\/:*?"<>|]/g,'_').replace(/^[. ]+|[. ]+$/g,'').slice(0,80)||'luban-tool')+'.user.js';
   const runAt={document_start:'document-start',document_end:'document-end',document_idle:'document-idle'}[version.runAt];
   const head=['// ==UserScript==',`// @name         ${name}`,'// @namespace    https://luban.local/userscripts',`// @version      ${Math.floor(version.createdAt)}.${record.recordRevision}`,`// @match        ${record.matches[0]}`,`// @run-at       ${runAt}`,...(grants.length?grants:['none']).map(g=>'// @grant        '+g),'// ==/UserScript=='];
-  return{filename,content:head.join('\n')+'\n\n'+version.code+'\n',versionId:version.versionId,hash,hasDraft,grants};
+  return{filename,content:existing?version.code:head.join('\n')+'\n\n'+version.code+'\n',versionId:version.versionId,hash,hasDraft,grants};
 }
 export async function exportCurrent(store:ScriptStore,id:string):Promise<ExportArtifact>{
   const record=await store.record(id);if(!record)throw new DataError('SCRIPT_MISSING','工具不存在。');

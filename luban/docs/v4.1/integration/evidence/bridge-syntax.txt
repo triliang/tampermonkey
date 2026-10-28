@@ -1,0 +1,5 @@
+
+> @luban/bridge-spike@0.0.1 check
+> node scripts/check.mjs
+
+All JS syntax checks passed

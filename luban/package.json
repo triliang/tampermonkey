@@ -1,18 +1,23 @@
 {
   "name": "luban",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.4.3",
   "description": "鲁班 Luban · AI 网页自动化 Chrome 扩展（MV3）",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test": "vitest run",
+    "test": "vitest run --exclude 'tests/v4.1/**'",
+    "test:v41": "vitest run --config vitest.v41.config.ts",
     "test:watch": "vitest",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "zip": "npm run build && cd dist && zip -rq ../luban.zip ."
+    "verify:v41": "node scripts/verify-v41.mjs",
+    "eval:v41": "node scripts/evaluate-v41.mjs",
+    "zip": "npm run build && cd dist && zip -rq ../luban.zip .",
+    "test:local-page": "vitest run --config tests/local-page/vitest.config.ts",
+    "preview:local-page": "node tests/local-page/serve.mjs"
   },
   "dependencies": {
     "acorn": "8.19.0",

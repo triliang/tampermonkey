@@ -7,4 +7,4 @@ export function thinkingProtocol(config:ProviderConfig):'thinking'|'none'{
  const host=new URL(config.baseUrl).hostname;
  return (host==='xiaomimimo.com'||host.endsWith('.xiaomimimo.com')||host==='api.deepseek.com')?'thinking':'none';
 }
-export function thinkingParameters(config:ProviderConfig,enabled:boolean){return thinkingProtocol(config)==='thinking'?{thinking:{type:enabled?'enabled':'disabled'}}:{};}
+export function thinkingParameters(config:ProviderConfig,enabled:boolean):{thinking?:{type:'enabled'|'disabled'}}{return thinkingProtocol(config)==='thinking'?{thinking:{type:enabled?'enabled':'disabled'}}:{};}
